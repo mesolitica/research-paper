@@ -1,0 +1,52 @@
+\documentclass{article}
+\usepackage{amsmath, amssymb, amsthm}
+\usepackage{graphicx}
+
+% Add any additional packages you may need
+
+\title{Large Malaysian Language Model Based on Mistral for Enhanced Local Language Understanding}
+\author{
+  Husein Zolkepli\thanks{husein@mesolitica.com} \and 
+  Aisyah Razak\thanks{aisyahrazak171@gmail.com} \and
+  Kamarul Adha\thanks{kamarul.adha360@gmail.com} \and
+  Ariff Nazhan\thanks{ariffnzhn@gmail.com}
+}
+\date{\today}
+
+\begin{document}
+
+\maketitle
+
+\begin{abstract}
+    In this paper, we present significant advancements in the pretraining of Mistral 7B, a large-scale language model, using a dataset of 32.6 GB, equivalent to 1.1 billion tokens. We explore the impact of extending the context length, releasing models with context lengths of 4096 and 32768 tokens, and further refining performance with a specialized 16k context length instruction-tuned model, we called it Malaysian Mistral.
+
+    Our experiments demonstrate the efficacy of prolonged pretraining and the influence of extended context lengths on Mistral 7B's language understanding capabilities. Additionally, we release a model specifically tuned with a 16k context length instruction, showcasing its potential for capturing nuanced language intricacies.
+
+    Furthermore, our research contributes to the benchmarking of Mistral 7B against prominent language models, including ChatGPT3.5 and Claude 2.1. We present compelling results indicating Mistral 7B's superior performance on tatabahasa test sets, particularly when fine-tuned with instructions. These findings underscore the model's capacity to outperform existing state-of-the-art language models in tasks requiring intricate understanding of linguistic structures and conventions.
+\end{abstract}
+
+\section{Introduction}
+The evolution of artificial intelligence (AI) has witnessed transformative breakthroughs, from the introduction of "Attention is All You Need" with the Transformer architecture, to subsequent advancements like GPT-2, and the revolutionary ChatGPT. These models have sparked immense interest and curiosity in the AI landscape, pushing the boundaries of natural language understanding and generation.
+
+In response to this dynamic landscape, Mistral AI emerged, unveiling its initial model, Mistral 7B. Notably, Mistral 7B showcased superior performance, surpassing benchmarks set by Llama 2 13B across various tasks and even outperforming Llama 1 34B on numerous benchmarks. Impressively, it approached the performance of CodeLlama 7B on code-related tasks while maintaining proficiency in English language tasks. However, an identified gap in its capabilities was the limited understanding of Malaysian context.
+
+\begin{itemize}
+    \item \textbf{Fine-tuning Mistral 7B:} Utilizing the computational power of 8x A100 GPUs on a Standard\_ND96asr\_v4 Azure instance, we conducted extensive fine-tuning on Mistral 7B. The process involved training the model using context lengths of 4096 and 32768 on a substantial 32.6 GB Malaysian context dataset.
+
+    \item \textbf{Multi-turn Instruction-Tuned Model:} Crafting local context multiturn chat dataset using ChatGPT3.5, ChatGPT4, and Llama2 70B, we employed Meural Machine Translation to translate the dataset. This approach enhances Malaysian Mistral's proficiency in multi-turn conversations, contributing to its adaptability across a wide range of local context tasks and coding.
+\end{itemize}
+
+\section{Main Body}
+Your main content goes here. Use sections and subsections as needed.
+
+\subsection{Example Subsection}
+An example subsection.
+
+\section{Conclusion}
+Your conclusion text.
+
+% Add your bibliography here (if needed)
+% \bibliographystyle{plain}
+% \bibliography{your_bib_file}
+
+\end{document}

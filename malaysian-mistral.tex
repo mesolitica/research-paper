@@ -1,7 +1,20 @@
 \documentclass{article}
 \usepackage{amsmath, amssymb, amsthm}
 \usepackage{graphicx}
+\usepackage{hyperref}
+\usepackage{geometry}
+\hypersetup{
+    pdftitle={Large Malaysian Language Model Based on Mistral for Enhanced Local Language Understanding},
+    pdfauthor={Husein Zolkepli, Aisyah Razak, Kamarul Adha, Ariff Nazhan},
+    pdfsubject={Natural Language Processing, Large Language Models, Machine Learning},
+    pdfkeywords={language models, malay natural language processing, deep learning},
+    colorlinks=true,
+    linkcolor=blue,
+    citecolor=blue,
+    urlcolor=blue
+}
 
+\geometry{margin=1.1in}
 % Add any additional packages you may need
 
 \title{Large Malaysian Language Model Based on Mistral for Enhanced Local Language Understanding}
@@ -18,11 +31,13 @@
 \maketitle
 
 \begin{abstract}
-    In this paper, we present significant advancements in the pretraining of Mistral 7B, a large-scale language model, using a dataset of 32.6 GB, equivalent to 1.1 billion tokens. We explore the impact of extending the context length, releasing models with context lengths of 4096 and 32768 tokens, and further refining performance with a specialized 16k context length instruction-tuned model, we called it Malaysian Mistral.
+  In this paper, we present significant advancements in the pretraining of Mistral 7B, a large-scale language model, using a dataset of 32.6 GB, equivalent to 1.1 billion tokens. We explore the impact of extending the context length, releasing models with context lengths of 4096 and 32768 tokens, and further refining performance with a specialized 16384 context length instruction-tuned model, we called it Malaysian Mistral.
 
-    Our experiments demonstrate the efficacy of prolonged pretraining and the influence of extended context lengths on Mistral 7B's language understanding capabilities. Additionally, we release a model specifically tuned with a 16k context length instruction, showcasing its potential for capturing nuanced language intricacies.
+  Our experiments demonstrate the efficacy of continue pretraining and the influence of extended context lengths on Mistral 7B's language understanding capabilities. Additionally, we release a model specifically tuned with a 16384 context length instruction, showcasing its potential for capturing nuanced language intricacies.
 
-    Furthermore, our research contributes to the benchmarking of Mistral 7B against prominent language models, including ChatGPT3.5 and Claude 2.1. We present compelling results indicating Mistral 7B's superior performance on tatabahasa test sets, particularly when fine-tuned with instructions. These findings underscore the model's capacity to outperform existing state-of-the-art language models in tasks requiring intricate understanding of linguistic structures and conventions.
+  Furthermore, our research contributes to the benchmarking of Malaysian Mistral against prominent language models, including ChatGPT3.5 and Claude 2.1. We present compelling results indicating Malaysian Mistral's superior performance on Tatabahasa (Malay grammar) test set, particularly when fine-tuned with instructions.
+
+  All models released at \href{https://huggingface.co/collections/mesolitica/malaysian-mistral-7b-6528f2ec825f4bba46c1700c}{HuggingFace Mesolitica Malaysian Mistral 7B Collection}.
 \end{abstract}
 
 \section{Introduction}
@@ -31,22 +46,137 @@ The evolution of artificial intelligence (AI) has witnessed transformative break
 In response to this dynamic landscape, Mistral AI emerged, unveiling its initial model, Mistral 7B. Notably, Mistral 7B showcased superior performance, surpassing benchmarks set by Llama 2 13B across various tasks and even outperforming Llama 1 34B on numerous benchmarks. Impressively, it approached the performance of CodeLlama 7B on code-related tasks while maintaining proficiency in English language tasks. However, an identified gap in its capabilities was the limited understanding of Malaysian context.
 
 \begin{itemize}
-    \item \textbf{Fine-tuning Mistral 7B:} Utilizing the computational power of 8x A100 GPUs on a Standard\_ND96asr\_v4 Azure instance, we conducted extensive fine-tuning on Mistral 7B. The process involved training the model using context lengths of 4096 and 32768 on a substantial 32.6 GB Malaysian context dataset.
+  \item \textbf{Fine-tuning Mistral 7B:} Utilizing the computational power of 8x A100 GPUs on a Standard\_ND96asr\_v4 Azure instance, we conducted extensive fine-tuning on Mistral 7B. The process involved training the model using context lengths of 4096 and 32768 on a substantial 32.6 GB Malaysian context dataset.
 
-    \item \textbf{Multi-turn Instruction-Tuned Model:} Crafting local context multiturn chat dataset using ChatGPT3.5, ChatGPT4, and Llama2 70B, we employed Meural Machine Translation to translate the dataset. This approach enhances Malaysian Mistral's proficiency in multi-turn conversations, contributing to its adaptability across a wide range of local context tasks and coding.
+  \item \textbf{Multi-turn Instruction-Tuned Model:} Crafting local context multiturn chat dataset using ChatGPT3.5, ChatGPT4, and Llama2 70B, we employed Meural Machine Translation to translate the dataset. This approach enhances Malaysian Mistral's proficiency in multi-turn conversations, contributing to its adaptability across a wide range of local context tasks and coding.
 \end{itemize}
 
-\section{Main Body}
-Your main content goes here. Use sections and subsections as needed.
+\section{Related Work}
 
-\subsection{Example Subsection}
-An example subsection.
+\subsection{English-Centric Bias in Large Language Models}
+
+The majority of open-source Large Language Models (LLMs) exhibit a significant bias towards the English language, with minimal representation and training on Malay datasets. An analysis of the widely utilized Common Crawl dataset reveals a mere 0.0742\% contribution from the Malay language based on CC-MAIN-2023-50 index \cite{CommonCrawl}. This English-centric bias poses a substantial challenge for applications requiring robust language understanding in Malay, prompting the need for dedicated research and development in this domain.
+
+\subsection{Existing Malay Language Models}
+
+While the Malay natural language processing (NLP) landscape lacks a dedicated Large Language Model, notable efforts have been made by Mesolitica in the development of specific Malay language models. Notable among these are the Malay Causal Language Model, Malay T5, and Malay Masked Language Model. These models, while contributing significantly to the Malay NLP toolkit \cite{Malaya}, are distinct from comprehensive Large Language Models and have limitations in capturing extensive context and nuances.
+
+\subsection{Absence of a Malay Large Language Model}
+
+Despite the existence of specialized models for Malay, a notable gap remains in the absence of a dedicated Malay Large Language Model. The current state of affairs hinders the progress of research and applications requiring a deeper understanding of the Malay language. A comprehensive Large Language Model for Malay is essential to bridge this gap, enabling advancements in various natural language processing tasks and fostering the inclusive representation of Malay in the AI landscape.
+
+\section{Pre-Training Procedure}
+
+\subsection{Public Data}
+
+\subsubsection{MS Wikipedia}
+
+\subsubsection{Malay Language study articles}
+
+\subsubsection{Malaysia Government public documents}
+
+\subsubsection{Malaysia online articles}
+
+\subsection{Deduplicating Data}
+
+https://github.com/malaysia-ai/dedup-text-dataset?tab=readme-ov-file#text-dedup
+
+\subsection{Postprocessing Data}
+
+https://github.com/malaysia-ai/dedup-text-dataset?tab=readme-ov-file#postprocessing
+
+\subsection{Tokenizing Data}
+
+https://github.com/malaysia-ai/dedup-text-dataset/tree/main/mistral
+
+\subsection{Pre-Training phase}
+
+\subsubsection{4096 context length}
+
+DeepSpeed Zero3, batch size 20 and bfloat16, constant learning rate 2e-5.
+
+https://github.com/mesolitica/malaya/tree/5.1/session/mistral#7b-4096-context-length
+
+\subsubsection{32768 context length}
+
+We use the latest checkpoint from 4096 context length and trained on random 10\% from the dataset.
+
+DeepSpeed Zero3, batch size 3 and bfloat16, constant learning rate 2e-5.
+
+https://github.com/mesolitica/malaya/tree/5.1/session/mistral#7b-32768-context-length
+
+\section{Supervised Instruction Fine-tuning Procedure}
+
+\subsection{Generating Instruction Dataset}
+
+\subsubsection{OpenQA MS Wikipedia}
+
+include some data.
+
+\subsubsection{OpenQA Malaysia Articles}
+
+include some data.
+
+\subsubsection{Malay Instruction with Malaysian context}
+
+include some data.
+
+\subsubsection{Malay UltraChat}
+
+include some data.
+
+\subsubsection{Synthetic Malay CommonSense}
+
+include some data.
+
+\subsubsection{Coding Dataset}
+
+include some data.
+
+\subsection{Finetuning Phase}
+
+Use Mistral chat template, mention the chat template below,
+
+DeepSpeed Zero3, batch size 4 with gradient accumulation 9, 16384 context length, constant learning rate 2e-5.
+
+https://github.com/mesolitica/malaya/tree/5.1/session/mistral#instructions-7b-16384-context-length
+
+\subsection{Result Finetuning}
+
+\subsubsection{Multiturn Malaysian context QA}
+
+\subsubsection{Multiturn Coding QA}
+
+\subsubsection{Translation low language}
+
+\subsubsection{Malay instruction}
+
+\section{Evaluation}
+
+We use Tatabahasa dataset, gathered from https://tatabahasabm.tripod.com/latih/latih.htm, contain 349 questions.
+
+We published at https://huggingface.co/spaces/mesolitica/malay-llm-leaderboard
+
+\section{Acknowledgement}
+
+Special thanks to Malaysia-AI volunteers.
 
 \section{Conclusion}
-Your conclusion text.
 
-% Add your bibliography here (if needed)
-% \bibliographystyle{plain}
-% \bibliography{your_bib_file}
+able to reduce research gap.
+
+\begin{thebibliography}{1}
+
+  \bibitem{CommonCrawl}
+  Common Crawl. (2023).
+  \newblock CC-MAIN-2023-50 Index.
+  \newblock Retrieved from \url{https://commoncrawl.github.io/cc-crawl-statistics/plots/languages}
+
+  \bibitem{Malaya}
+  Husein, Zolkepli. (2018).
+  \newblock \emph{Malaya: Natural-Language-Toolkit library for Bahasa Malaysia, powered by Deep Learning PyTorch}.
+  \newblock GitHub repository. Retrieved from \url{https://github.com/mesolitica/malaya}
+
+\end{thebibliography}
 
 \end{document}

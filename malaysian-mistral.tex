@@ -525,13 +525,32 @@ Based on the figure above, we can exchange the positions of 7 and 8 to introduce
 
 All synthetic dataset and implementation published at \href{https://huggingface.co/datasets/mesolitica/kesalahan-tatabahasa-choice}{mesolitica/kesalahan-tatabahasa-choice}.
 
-\subsection{Finetuning Phase}
+\subsection{Fine-tuning Phase}
 
-Use Mistral chat template, mention the chat template below,
+\subsubsection{Mistral Chat Template}
+During the fine-tuning phase, we implemented full parameter tuning using the Mistral chat template. This process involved an extensive adjustment of all model parameters to optimize the chat interaction performance for malaysian contexts. Figure below shows the example of formatted chat template:
 
-DeepSpeed Zero3, batch size 6, packing, 16384 context length, constant learning rate 2e-5.
+\begin{lstlisting}[breaklines=true]
+"<s>[INST] Bagaimana cara saya menghasilkan teks tebal dalam Bash? Saya mempunyai skrip Bash yang mencetak beberapa teks ke skrin menggunakan perintah `echo "Beberapa Teks"`. Adakah cara untuk memformat teks tersebut supaya ia menjadi tebal? [/INST] Anda boleh menggunakan perintah `echo -e` untuk memformat teks supaya ia menjadi tebal. Contohnya, `echo -e "033[1mTeks Tebal033[0m"`. Dalam contoh ini, `033[1m` akan menjadikan teks tebal, manakala `033[0m` digunakan untuk menetapkan semula format teks. Semoga ia membantu!</s> [INST] Bagaimana pula dengan format teks lain? Adakah terdapat cara untuk menjadikannya condong atau bergaris bawah dalam skrip Bash? [/INST]"
+\end{lstlisting}
 
-% https://github.com/mesolitica/malaya/tree/5.1/session/mistral#instructions-7b-16384-context-length
+\subsubsection{Hyperparameters}
+
+For 16384 context length, we fine-tune the model with instruction datasets to make it better understand and align with Malaysian context. Below are the hyperparameters we use during the fine-tuning process:
+
+\begin{table}[h]
+  \centering
+  \begin{tabular}{lccl}
+    \hline
+    \textbf{Hyperparameter} & \textbf{Value} \\
+    \hline
+    DeepSpeed               & ZeRO-3 Offload \\
+    Batch Size              & 6             \\
+    Learning Rate           & constant 2e-5  \\
+
+    \hline
+  \end{tabular}
+\end{table}
 
 \subsection{Result Finetuning}
 

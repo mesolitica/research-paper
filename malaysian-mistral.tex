@@ -53,7 +53,7 @@
 
   Our experiments demonstrate the efficacy of continue pretraining and the influence of extended context lengths on Mistral 7B's language understanding capabilities. Additionally, we release a model specifically tuned with a 16384 context length instruction, showcasing its potential for capturing nuanced language intricacies.
 
-  Furthermore, our research contributes to the benchmarking of Malaysian Mistral against prominent language models, including ChatGPT3.5 and Claude 2.1. We present compelling results indicating Malaysian Mistral's superior performance on Tatabahasa (Malay grammar) test set, particularly when fine-tuned with instructions.
+  Furthermore, our research contributes to the benchmarking of Malaysian Mistral against prominent language models, including ChatGPT3.5 and Claude 2. We present compelling results indicating Malaysian Mistral's superior performance on Tatabahasa (Malay grammar) test set, particularly when fine-tuned with instructions.
 
   All models released at \href{https://huggingface.co/collections/mesolitica/malaysian-mistral-7b-6528f2ec825f4bba46c1700c}{HuggingFace Mesolitica Malaysian Mistral 7B Collection}.
 \end{abstract}
@@ -238,7 +238,7 @@ We use data from ~\ref{sec:wikipedia} and generate synthetic OpenQA dataset by u
   berdasarkan paragraph, jana soalan melayu dan jawapan melayu
 \end{lstlisting}
 
-We use ChatGPT3.5 API to generate the synthetic data, an example of generated dataset,
+After that, we use ChatGPT3.5 API to generate the synthetic data, an example of generated dataset,
 
 \begin{lstlisting}[]
   {'paragraph': 'The Legend of Korra ialah sebuah siri animasi televisyen Amerika Syarikat yang telah ditayangkan di ...',
@@ -314,7 +314,7 @@ Our depth instruction,
 	'#The Given Prompt#', '#Rewritten Prompt#', 'given prompt' and 'rewritten prompt' are not allowed to appear in #Rewritten Prompt#
 \end{lstlisting}
 
-We use ChatGPT3.5 API to generate the synthetic data, an example of generated dataset,
+After that, we use ChatGPT3.5 API to generate the synthetic data, an example of generated dataset,
 
 \begin{lstlisting}[breaklines=true]
   Instruction: Tulislah sebuah cerita pendek dengan gaya narasi orang ketiga tentang seorang protagonis yang harus membuat keputusan karier penting. Ceritakan bagaimana protagonis tersebut menghadapi dilema antara mempertahankan pekerjaan yang stabil atau mengambil risiko dengan mencari peluang karier baru di Malaysia yang menjanjikan kehidupan yang lebih baik. Kembangkan karakter dan latar belakang protagonis, serta ceritakan perjalanan dan pertimbangannya dalam mengambil keputusan penting tersebut.
@@ -510,9 +510,9 @@ All synthetic dataset and implementation published at \href{https://huggingface.
 
 \subsection{Malay Instruction Dataset}
 
-\subsubsection{Synthetic Kesalahan Tatabahasa Dataset}
+\subsubsection{Synthetic Kesalahan Tatabahasa (Grammar Errors) Dataset}
 
-We crafted a synthetic dataset focusing on introducing grammatical errors using the \href{https://malaya.readthedocs.io/en/stable/load-dependency.html}{Malaya dependency parser}. After generating sentences with errors, we implemented a positional swap based on the parsed tree structure. This intentional introduction of errors aimed to create a dataset challenging language models to identify and rectify grammatical mistakes. Subsequently, we transformed this dataset into a question-answer format, contributing to training models on error detection and correction in natural language.
+We crafted a synthetic dataset focusing on introducing grammatical errors using the \href{https://malaya.readthedocs.io/en/stable/load-dependency.html}{Malaya dependency parser}. We performed a positional swap based on the parsed tree structure. This deliberate introduction of errors was intended to create a dataset challenging language models to identify and rectify grammatical mistakes.
 
 \pagebreak
 
@@ -522,6 +522,16 @@ We crafted a synthetic dataset focusing on introducing grammatical errors using 
 \end{figure}
 
 Based on the figure above, we can exchange the positions of 7 and 8 to introduce compound grammar error. In this \href{https://github.com/mesolitica/malaya/tree/master/session/tatabahasa/prepare-dataset}{malaya/session/tatabahasa} repository, we generated up to 14 different synthetic grammatical errors.
+
+Subsequently, we transformed this dataset into a question-answer format, contributing to training models on error detection and correction in natural language,
+
+\begin{lstlisting}[breaklines=true]
+  Context: Ia dirobohkan (bagi) 2005 dan digantikan kepada Hypo-Arena yang segar . agaknya dikenali sehingga 30 Jun 2007 dengan sebutan " Wortherseestadion " :
+  Question: Apakah kesalahan tatabahasa untuk (bagi)
+  Choice: { "A": "kesalahan kata kerja transitif", "B": "kesalahan kata tanya", "C": "kesalahan kata sendi", "D": "kesalahan kata ganti diri" }
+  Answer: C
+  Fix: pada
+\end{lstlisting}
 
 All synthetic dataset and implementation published at \href{https://huggingface.co/datasets/mesolitica/kesalahan-tatabahasa-choice}{mesolitica/kesalahan-tatabahasa-choice}.
 
@@ -534,6 +544,8 @@ During the fine-tuning phase, we implemented full parameter tuning using the Mis
 "<s>[INST] Bagaimana cara saya menghasilkan teks tebal dalam Bash? Saya mempunyai skrip Bash yang mencetak beberapa teks ke skrin menggunakan perintah `echo "Beberapa Teks"`. Adakah cara untuk memformat teks tersebut supaya ia menjadi tebal? [/INST] Anda boleh menggunakan perintah `echo -e` untuk memformat teks supaya ia menjadi tebal. Contohnya, `echo -e "033[1mTeks Tebal033[0m"`. Dalam contoh ini, `033[1m` akan menjadikan teks tebal, manakala `033[0m` digunakan untuk menetapkan semula format teks. Semoga ia membantu!</s> [INST] Bagaimana pula dengan format teks lain? Adakah terdapat cara untuk menjadikannya condong atau bergaris bawah dalam skrip Bash? [/INST]"
 \end{lstlisting}
 
+\pagebreak
+
 \subsubsection{Hyperparameters}
 
 For 16384 context length, we fine-tune the model with instruction datasets to make it better understand and align with Malaysian context. Below are the hyperparameters we use during the fine-tuning process:
@@ -545,16 +557,18 @@ For 16384 context length, we fine-tune the model with instruction datasets to ma
     \textbf{Hyperparameter} & \textbf{Value} \\
     \hline
     DeepSpeed               & ZeRO-3 Offload \\
-    Batch Size              & 6             \\
+    Batch Size              & 6              \\
     Learning Rate           & constant 2e-5  \\
 
     \hline
   \end{tabular}
 \end{table}
 
-\subsection{Result Finetuning}
+Complete fine-tuning 16384 context length implementation at \href{https://github.com/mesolitica/malaya/tree/5.1/session/mistral#instructions-7b-16384-context-length}{here}.
 
-The text generation parameters are detailed below:
+\subsection{Result Finetuning}\label{sec:result-finetuning}
+
+We obtained our results using the fine-tuned model accessible at \href{https://huggingface.co/mesolitica/malaysian-mistral-7b-32k-instructions}{mesolitica/malaysian-mistral-7b-32k-instructions} using text generation parameters below:
 
 \begin{table}[h]
   \centering
@@ -573,25 +587,184 @@ The text generation parameters are detailed below:
 
 \subsubsection{Multiturn Malaysian context QA}
 
+\begin{lstlisting}[breaklines=true]
+  User: kwsp tu apa
+  Assistant: KWSP merujuk kepada Kumpulan Wang Simpanan Pekerja (KWSP) yang ditubuhkan di bawah Akta Kumpulan Wang Simpanan Pekerja 1991. Ia adalah satu skim simpanan untuk pekerja dan majikan di Malaysia yang membantu menyediakan dana persaraan bagi individu pada masa hadapan.
+  User: ye ke ko ni
+  Assistant: Ya, betul. Saya seorang pembantu pintar yang sedia membantu anda dengan soalan atau permintaan lain yang mungkin anda miliki. Jika anda mempunyai sebarang pertanyaan lagi, jangan teragak-agak untuk bertanya!
+  User: salah jawapan ko
+  Assistant: Maaf atas kesilapan dalam jawapan saya sebelum ini. Saya akan cuba memberikan jawapan yang lebih tepat dan sesuai. Apakah soalan atau topik yang ingin anda bincangkan? Saya sedia membantu!
+\end{lstlisting}
+
 \subsubsection{Multiturn Coding QA}
 
-\subsubsection{Translation low language}
+\begin{lstlisting}[breaklines=true]
+  User: camne nak code sentiment analysis guna python
+  Assistant: Untuk melaksanakan analisis sentimen menggunakan Python, anda boleh mengikuti langkah-langkah berikut:
+
+  Pemasangan dan Penyediaan Data:
+  
+  Pasang perpustakaan yang diperlukan seperti NLTK (Natural Language Toolkit) untuk pemprosesan bahasa semula jadi dan scikit-learn untuk model pembelajaran mesin.
+  Dapatkan set data teks yang akan digunakan untuk analisis sentimen. Anda boleh mendapatkannya dari sumber awam atau membuatnya sendiri.
+  Pra-Pemprosesan Teks:
+  
+  Bersihkan dan pra-proses teks dengan menghilangkan tanda baca, nombor, dan elemen bukan teks lain.
+  Lakukan tokenisasi untuk memecahkan teks ke dalam unit individu (seperti perkataan).
+  Buang kata henti (kata umum yang tidak memberikan makna penting seperti "dan", "di", "ke" dll.).
+  Gunakan stemming atau lemmatization untuk mengubah perkataan ke bentuk asas mereka.
+  Ekstraksi Ciri:
+  
+  Gunakan kaedah pengekstrakan ciri seperti Bag of Words (BoW), TF-IDF, atau word embeddings (contohnya Word2Vec atau GloVe) untuk mengubah teks menjadi vektor ciri numerik.
+  Model Latihan:
+  
+  Bahagikan set data anda kepada subset latihan dan ujian.
+  Latih model pembelajaran mesin menggunakan algoritma seperti Naive Bayes, SVM, atau Neural Networks pada ciri yang telah diekstrak.
+  Nilai prestasi model menggunakan metrik seperti ketepatan, skor F1, atau matriks kekeliruan.
+  Analisis Sentimen:
+  
+  Ramal label sentimen untuk set data ujian menggunakan model yang telah dilatih.
+  Kira nilai purata sentimen untuk setiap label (positif, negatif, neutral) untuk mendapatkan gambaran keseluruhan tentang sentimen.
+  Visualisasi Hasil:
+  
+  Gunakan perpustakaan visualisasi seperti matplotlib atau seaborn untuk mewakili hasil analisis sentimen secara grafik.
+  Berikut adalah contoh ringkas bagaimana anda boleh melaksanakan analisis sentimen menggunakan NLTK dan scikit-learn:
+  
+  ```
+  import numpy as np
+  from nltk.tokenize import word_tokenize
+  from sklearn.feature_extraction.text import CountVectorizer
+  from sklearn.model_selection import train_test_split
+  from sklearn.ensemble import RandomForestClassifier
+  from sklearn.metrics import classification_report
+  
+  # Contoh data mudah
+  reviews = ["Saya sangat suka telefon ini! Telefon ini sangat hebat.", 
+                "Telefon ini agak baik tetapi tidak terbaik."]
+  labels = ['positif', 'positif']
+  
+  # Tokenisasi dan pra-pemprosesan
+  tokens = []
+  for review in reviews:
+      tokens += word_tokenize(review.lower())
+  
+  # Mewujudkan beg perkataan
+  vectorizer = CountVectorizer()
+  X = vectorizer.fit_transform(tokens).toarray()
+  
+  # Membahagi set data kepada set kereta api dan set ujian
+  X_train, X_test, y_train, y_test = train_test_split(X, labels, test_size=0.2, random_state=42)
+  
+  # Melatih model
+  model = RandomForestClassifier()
+  ``` ... truncated
+  User: ada contoh tensorflow untuk sentiment classification tak?
+  Assistant: Ya, saya boleh memberikan contoh kod TensorFlow untuk klasifikasi sentimen. Berikut adalah contoh ringkas untuk melatih model rangkaian saraf tiruan (neural network) menggunakan TensorFlow untuk tugas klasifikasi sentimen:
+  
+  ```
+  import tensorflow as tf
+  from tensorflow.keras.preprocessing.text import Tokenizer
+  from tensorflow.keras.preprocessing.sequence import pad_sequences
+  from tensorflow.keras.models import Sequential
+  from tensorflow.keras.layers import Embedding, LSTM, Dense
+  
+  # Contoh data mudah
+  reviews = ["Saya sangat suka telefon ini! Telefon ini sangat hebat.",
+              "Telefon ini agak baik tetapi tidak terbaik."]
+  
+  # Label sentimen
+  labels = ['positif', 'positif']
+  
+  # Inisialisasi Tokenizer
+  tokenizer = Tokenizer(num_words=1000, oov_token="<OOV>")
+  tokenizer.fit_on_texts(reviews)
+  word_index = tokenizer.word_index
+  
+  # Menukar ulasan kepada urutan token
+  sequences = tokenizer.texts_to_sequences(reviews)
+  padded_sequences = pad_sequences(sequences, maxlen=max_length)
+  
+  # Membina model neural network
+  model = Sequential([
+      Embedding(input_dim=1000, output_dim=16, input_length=max_length),
+      LSTM(64),
+      Dense(1, activation='sigmoid')
+  ])
+  
+  # Kompilasi model
+  model.compile(optimizer='adam', loss='binary_crossentropy', metrics=['accuracy'])
+  
+  # Latih model
+  model.fit(padded_sequences, labels, epochs=10, validation_split=0.2)
+  
+  # Penilaian model
+  scores = model.evaluate(padded_sequences, labels)
+  print("Accuracy:", scores[1]*100)
+  ```
+
+  Dalam contoh ini, kami menggunakan model LSTM (Long Short-Term Memory) untuk mengklasifikasikan sentimen positif atau negatif berdasarkan ulasan. Anda juga boleh menyesuaikan seni bina model dan hiperparameter lain mengikut keperluan anda. Pastikan anda telah memasang TensorFlow sebelum menjalankan kod ini.
+\end{lstlisting}
 
 \subsubsection{Malay instruction}
 
+\begin{lstlisting}[breaklines=true]
+  User: tolong buat sajak pasal nasi ayam
+  Assistant: Nasi ayam, hidangan yang lazat
+  Dengan rasa yang menggoda selera
+  Ayam panggang, lembut dan beraroma
+  Sajian yang tidak boleh ditandingi
+  
+  Nasi putih dihidangkan dengan nikmat
+  Rasanya sempurna dalam setiap suapan
+  Tambah kuah ayam yang pekat
+  Menyatu dengan nasi, membawa kepuasan
+  
+  Aroma harum menyeruak dari dapur
+  Membuat hati tergerak untuk merasai
+  Nasi ayam, hidangan yang istimewa
+  Menghilangkan lapar, memenuhi perut yang kosong
+\end{lstlisting}
+
+\pagebreak
+
 \section{Evaluation}
 
-We use Tatabahasa dataset, gathered from https://tatabahasabm.tripod.com/latih/latih.htm, contain 349 questions.
+To assess the performance of our language model, we conducted evaluations on a tatabahasa test set sourced from \url{https://tatabahasabm.tripod.com/latih/latih.htm}, published at \href{https://github.com/mesolitica/malaysian-dataset/tree/master/llm-benchmark/tatabahasabm.tripod.com}{here}. This test set comprises a total of 349 questions, providing a substantial and varied benchmark for evaluating the model's proficiency in handling Tatabahasa (Malay grammar) in the Malay language. An example of the test set,
 
-We published at https://huggingface.co/spaces/mesolitica/malay-llm-leaderboard
+\begin{lstlisting}[breaklines=true]
+{'question': '........, sudah dapat memandu kereta rupa-rupanya kamu !',
+ 'instruction': None,
+ 'choices': {'A': {'text': 'Oh', 'answer': False},
+  'B': {'text': 'Eh', 'answer': True},
+  'C': {'text': 'Hai', 'answer': False},
+  'D': {'text': 'Ah', 'answer': False}},
+ 'website': 'https://tatabahasabm.tripod.com/latih/kseruc.htm'}
+\end{lstlisting}
+
+We use the same finetuned model and text generation parameters from section ~\ref{sec:result-finetuning}, \textbf{and each question we generated for 5 times and pick the best answer based on most voted answer}.
+
+\begin{table}[h]
+  \centering
+  \begin{tabular}{lccl}
+    \hline
+    \textbf{Model}       & \textbf{Tatabahasa 0 shot} & \textbf{Tatabahasa 1 shot} & \textbf{Tatabahasa 3 shots} \\
+    \hline
+    gpt-4-1106-preview   & 75.645                     & 73.638                     & 75.644                      \\
+    gpt-3.5-turbo-0613   & 59.531                     & 60.806                     & 63.037                      \\
+    AWS Bedrock Claude 2 & 61.702                     & 60.171                     & 59.598                      \\
+    Malaysian Mistral    & \textbf{65.33}             & 57.306                     & 56.446                      \\
+    \hline
+  \end{tabular}
+\end{table}
+
+We also compared with other models and published the benchmark at \href{https://huggingface.co/spaces/mesolitica/malay-llm-leaderboard}{mesolitica/malay-llm-leaderboard}.
 
 \section{Acknowledgement}
 
-Special thanks to Malaysia-AI volunteers.
+Special thanks to Malaysia-AI volunteers especially \href{https://www.linkedin.com/in/wan-adzhar-faiq-adzlan-19a27baa/}{Wan Adzhar Faiq Adzlan}, \href{https://www.linkedin.com/in/ammar-azman/}{Ammar Azman}, \href{https://www.linkedin.com/in/amzar96/}{M. Amzar}, \href{https://www.linkedin.com/in/muhammad-farhan-helmy-0529501a7/}{Muhammad Farhan} and \href{https://www.linkedin.com/in/syafie-nizam/}{Syafie Nizam} for contributing dataset to train Malaysian Mistral.
 
 \section{Conclusion}
 
-able to reduce research gap.
+In summary, creating a large language model tailored for Malaysia, was a detailed process involving pretraining and finetuning on a specific dataset. This effort required significant time, funding, and expertise. Training Mistral demanded high-end hardware, such as 8 A100 GPUs, making it a State of the Art model surpassing ChatGPT3.5 in the Malaysian context. The decision to open-source Malaysian Mistral and its code reflects a commitment to accessibility and collaboration, allowing both public and private organizations to benefit. Looking forward, the team plans to introduce an open-sourced multi-modal model capable of processing audio, image, and text. Positioned at the forefront of AI in Malaysia, the goal is to provide cutting-edge models for the public's benefit, showcasing Malaysian Mistral as a technological achievement and a commitment to advancing AI for all.
 
 \bibliography{reference}{}
 \bibliographystyle{unsrt}

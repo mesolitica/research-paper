@@ -167,7 +167,14 @@ We adopted a packing technique for tokenization, wherein the dataset was segment
 
 Complete tokenizing data implementation at \href{https://github.com/malaysia-ai/dedup-text-dataset/tree/main/mistral}{here}.
 
-\subsubsection{4096 context length}\label{sec:4096-pretrained}
+\subsubsection{4096 context length pre-training}\label{sec:4096-pretrained}
+
+In our pre-training, we chose the causal language model approach. This method trains the model to predict the next word in a sequence from the previous context. The
+objective during this phase is to maximize the likelihood of the entire sequence,
+
+\[
+  P(x_1, x_2, \ldots, x_T) = \prod_{t=1}^{T} P(x_t | x_1, x_2, \ldots, x_{t-1})
+\]
 
 We utilized Standard\_ND96asr\_v4 Azure instance which contains 8x A100 80 GB GPUs (NVLink 3.0). The pre-training hyperparameters are detailed below:
 
@@ -187,7 +194,7 @@ We utilized Standard\_ND96asr\_v4 Azure instance which contains 8x A100 80 GB GP
 
 Complete pre-training 4096 context length implementation at \href{https://github.com/mesolitica/malaya/tree/5.1/session/mistral#7b-4096-context-length}{here}.
 
-\subsubsection{32768 context length}\label{sec:32768-pretrained}
+\subsubsection{32768 context length pre-training}\label{sec:32768-pretrained}
 
 For 32768 context length, we only trained on 10\% of the total dataset and use latest checkpoint from 4096 context length pretrained model from section ~\ref{sec:4096-pretrained}. We utilized Standard\_ND96asr\_v4 Azure instance which contains 8x A100 80 GB GPUs (NVLink 3.0). The pre-training hyperparameters are detailed below:
 

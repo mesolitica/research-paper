@@ -9,7 +9,6 @@
 
 \lstset{
     breaklines=true,
-    language=Python,
     basicstyle=\ttfamily\small,
     commentstyle=\color{green!40!black},
     keywordstyle=\color{blue},
@@ -24,7 +23,7 @@
 }
 \hypersetup{
     pdftitle={Large Malaysian Language Model Based on Mistral for Enhanced Local Language Understanding},
-    pdfauthor={Husein Zolkepli, Aisyah Razak, Kamarul Adha},
+    pdfauthor={Husein Zolkepli, Aisyah Razak, Kamarul Adha, Ariff Nazhan},
     pdfsubject={Natural Language Processing, Large Language Models, Machine Learning},
     pdfkeywords={language models, malay natural language processing, deep learning},
     colorlinks=true,
@@ -40,7 +39,8 @@
 \author{
   Husein Zolkepli\thanks{husein@mesolitica.com} \and 
   Aisyah Razak\thanks{aisyahrazak171@gmail.com} \and
-  Kamarul Adha\thanks{kamarul.adha360@gmail.com}
+  Kamarul Adha\thanks{kamarul.adha360@gmail.com} \and
+  Ariff Nazhan\thanks{ariffnzhn@gmail.com}
 }
 \date{\today}
 
@@ -196,7 +196,7 @@ Complete pre-training 4096 context length implementation at \href{https://github
 
 \subsubsection{32768 context length pre-training}\label{sec:32768-pretrained}
 
-For 32768 context length, we only trained on 10\% of the total dataset and use latest checkpoint from 4096 context length pretrained model from section ~\ref{sec:4096-pretrained}. We utilized Standard\_ND96asr\_v4 Azure instance which contains 8x A100 80 GB GPUs (NVLink 3.0). The pre-training hyperparameters are detailed below:
+For 32768 context length, we only trained on 10\% of the total dataset and use latest checkpoint from 4096 context length pretrained model from section ~\ref{sec:4096-pretrained}. We use the same Standard\_ND96asr\_v4 Azure instance which contains 8x A100 80 GB GPUs (NVLink 3.0). The pre-training hyperparameters are detailed below:
 
 \begin{table}[h]
   \centering
@@ -218,7 +218,7 @@ Complete pre-training 32768 context length implementation at \href{https://githu
 
 \section{Supervised Instruction Fine-tuning Procedure}
 
-\subsection{Generating Instruction Dataset}
+\subsection{Generating Instruction Dataset}\label{sec:generating-instruction-dataset}
 
 In our synthetic instruction dataset creation process, we employed ChatGPT3.5 and ChatGPT4 to generate diverse sets of instructions tailored to specific domains. ChatGPT3.5 was utilized to generate instructions with a focus on Malaysian context, contributing to a dataset enriched with localized language nuances. Additionally, ChatGPT3.5 was employed to generate pseudo Retrieval-Augmented Generation Multi-Turn instructions on Malaysian context, further diversifying the content pool.
 
@@ -231,15 +231,11 @@ A notable aspect of this generation process was the tendency of these models to 
 We use data from ~\ref{sec:wikipedia} and generate synthetic OpenQA dataset by using prompt below,
 
 \begin{lstlisting}[]
-  # l['paragraph'] is wikipedia paragraph
-  s = f"""
   paragraph ```
-  {l['paragraph']}
+  {}
   ```
   
   berdasarkan paragraph, jana soalan melayu dan jawapan melayu
-  """
-  # pass `s` to ChatGPT3.5 API
 \end{lstlisting}
 
 We use ChatGPT3.5 API to generate the synthetic data, an example of generated dataset,
@@ -271,51 +267,51 @@ We follow evolution instruction from \cite{xu2023wizardlm} with slightly changes
 Original breadth instruction,
 
 \begin{lstlisting}[]
-  base_instruction = "I want you act as a Prompt Creator.\r\n\
-  Your goal is to draw inspiration from the #Given Prompt# to create a brand new prompt.\r\n\
-  This new prompt should belong to the same domain as the #Given Prompt# but be even more rare.\r\n\
-  The LENGTH and complexity of the #Created Prompt# should be similar to that of the #Given Prompt#.\r\n\
-  The #Created Prompt# must be reasonable and must be understood and responded by humans.\r\n\
-  '#Given Prompt#', '#Created Prompt#', 'given prompt' and 'created prompt' are not allowed to appear in #Created Prompt#\r\n"
+  I want you act as a Prompt Creator.
+  Your goal is to draw inspiration from the #Given Prompt# to create a brand new prompt.
+  This new prompt should belong to the same domain as the #Given Prompt# but be even more rare.
+  The LENGTH and complexity of the #Created Prompt# should be similar to that of the #Given Prompt#.
+  The #Created Prompt# must be reasonable and must be understood and responded by humans.
+  '#Given Prompt#', '#Created Prompt#', 'given prompt' and 'created prompt' are not allowed to appear in #Created Prompt#
 \end{lstlisting}
 
 Our breadth instruction,
 
 \begin{lstlisting}[]
-  base_instruction = "I want you act as a Malay Prompt Creator.\r\n\
-  Your goal is to draw inspiration from the #Given Prompt# to create a brand new prompt in malay language and malaysia related if possible.\r\n\
-  This new prompt should belong to the same domain as the #Given Prompt# but be even more rare.\r\n\
-  The LENGTH and complexity of the #Created Prompt# should be similar to that of the #Given Prompt#.\r\n\
-  The #Created Prompt# must be reasonable and must be understood and responded by humans.\r\n\
-  '#Given Prompt#', '#Created Prompt#', 'given prompt' and 'created prompt' are not allowed to appear in #Created Prompt#\r\n"
+  I want you act as a Malay Prompt Creator.
+  Your goal is to draw inspiration from the #Given Prompt# to create a brand new prompt in malay language and malaysia related if possible.
+  This new prompt should belong to the same domain as the #Given Prompt# but be even more rare.
+  The LENGTH and complexity of the #Created Prompt# should be similar to that of the #Given Prompt#.
+  The #Created Prompt# must be reasonable and must be understood and responded by humans.
+  '#Given Prompt#', '#Created Prompt#', 'given prompt' and 'created prompt' are not allowed to appear in #Created Prompt#
 \end{lstlisting}
 
 
 Original depth instruction,
 
-\begin{lstlisting}[language=Python]
-  base_instruction = "I want you act as a Prompt Rewriter.\r\n \
-  Your objective is to rewrite a given prompt into a more complex version to make those famous AI systems (e.g., chatgpt and GPT4) a bit harder to handle.\r\n \
-  But the rewritten prompt must be reasonable and must be understood and responded by humans.\r\n \
-  Your rewriting cannot omit the non-text parts such as the table and code in #The Given Prompt#:. Also, please do not omit the input in #The Given Prompt#. \r\n \
-  You SHOULD complicate the given prompt using the following method: \r\n\
-  {} \r\n\
-  You should try your best not to make the #Rewritten Prompt# become verbose, #Rewritten Prompt# can only add 10 to 20 words into #The Given Prompt#. \r\n\
-  '#The Given Prompt#', '#Rewritten Prompt#', 'given prompt' and 'rewritten prompt' are not allowed to appear in #Rewritten Prompt#\r\n"
+\begin{lstlisting}[]
+  I want you act as a Prompt Rewriter.
+   Your objective is to rewrite a given prompt into a more complex version to make those famous AI systems (e.g., chatgpt and GPT4) a bit harder to handle.
+   But the rewritten prompt must be reasonable and must be understood and responded by humans.
+   Your rewriting cannot omit the non-text parts such as the table and code in #The Given Prompt#:. Also, please do not omit the input in #The Given Prompt#. 
+   You SHOULD complicate the given prompt using the following method: 
+  {} 
+  You should try your best not to make the #Rewritten Prompt# become verbose, #Rewritten Prompt# can only add 10 to 20 words into #The Given Prompt#. 
+  '#The Given Prompt#', '#Rewritten Prompt#', 'given prompt' and 'rewritten prompt' are not allowed to appear in #Rewritten Prompt#
 \end{lstlisting}
 
 \pagebreak
 Our depth instruction,
 
 \begin{lstlisting}[]
-  base_instruction = "I want you act as a Malay Prompt Rewriter.\r\n \
-  Your objective is to rewrite a given prompt into malay language, a more complex version and malaysia related if possible to make those famous AI systems (e.g., chatgpt and GPT4) a bit harder to handle.\r\n \
-  But the rewritten prompt must be reasonable and must be understood and responded by humans.\r\n \
-  Your rewriting cannot omit the non-text parts such as the table and code in #The Given Prompt#:. Also, please do not omit the input in #The Given Prompt#. \r\n \
-  You SHOULD complicate the given prompt using the following method: \r\n\
-  {} \r\n\
-  You should try your best not to make the #Rewritten Prompt# become verbose, #Rewritten Prompt# can only add 10 to 20 words into #The Given Prompt#. \r\n\
-	'#The Given Prompt#', '#Rewritten Prompt#', 'given prompt' and 'rewritten prompt' are not allowed to appear in #Rewritten Prompt#\r\n"
+  I want you act as a Malay Prompt Rewriter.
+   Your objective is to rewrite a given prompt into malay language, a more complex version and malaysia related if possible to make those famous AI systems (e.g., chatgpt and GPT4) a bit harder to handle.
+   But the rewritten prompt must be reasonable and must be understood and responded by humans.
+   Your rewriting cannot omit the non-text parts such as the table and code in #The Given Prompt#:. Also, please do not omit the input in #The Given Prompt#. 
+   You SHOULD complicate the given prompt using the following method: 
+  {} 
+  You should try your best not to make the #Rewritten Prompt# become verbose, #Rewritten Prompt# can only add 10 to 20 words into #The Given Prompt#. 
+	'#The Given Prompt#', '#Rewritten Prompt#', 'given prompt' and 'rewritten prompt' are not allowed to appear in #Rewritten Prompt#
 \end{lstlisting}
 
 We use ChatGPT3.5 API to generate the synthetic data, an example of generated dataset,
@@ -329,7 +325,7 @@ All synthetic dataset and implementation published at \href{https://huggingface.
 
 \subsubsection{Malay UltraChat}
 
-We extended our efforts to generate a multiturn dataset. Acknowledging the efficacy of multiturn conversations in training language models to understand context and coherence, we sought inspiration from Ultrachat \cite{ding2023enhancing}. Ultrachat served as a valuable reference, guiding us in crafting a dataset that incorporates multifaceted interactions and conversations.
+We extended our efforts to generate a multiturn dataset. Acknowledging the efficacy of multiturn conversations in training language models to understand context and coherence, we sought inspiration from Ultrachat \cite{ding2023enhancing}. Ultrachat served as a valuable reference, guiding us in crafting a dataset that incorporates multifaceted interactions and conversations. An example of generated dataset,
 
 \begin{lstlisting}[breaklines=true]
   [{'role': 'context',
@@ -378,33 +374,156 @@ We extended our efforts to generate a multiturn dataset. Acknowledging the effic
   'indon': False}]
 \end{lstlisting}
 
-All synthetic dataset and implementation published at \href{https://huggingface.co/datasets/mesolitica/malaysian-ultrachat}{mesolitica/malaysian-ultrachat}.
+We also generated multi-turn coding instruction, an example as below,
+
+\begin{lstlisting}[breaklines=true]
+  [{'role': 'user',
+  'content': 'Bagaimana cara saya menghasilkan teks tebal dalam Bash? Saya mempunyai skrip Bash yang mencetak beberapa teks ke skrin menggunakan perintah `echo "Beberapa Teks"`. Adakah cara untuk memformat teks tersebut supaya ia menjadi tebal?',
+  'content_ms': None,
+  'indon': False},
+ {'role': 'assistant',
+  'content': 'Anda boleh menggunakan perintah `echo -e` untuk memformat teks tersebut supaya menjadi tebal. Contohnya, `echo -e "\\033[1mTeks Tebal\\033[0m"`. Dalam contoh ini, `\\033[1m` akan membuat teks menjadi tebal, manakala `\\033[0m` digunakan untuk menetapkan semula pemformatan teks. Semoga membantu!',
+  'content_ms': 'Anda boleh menggunakan perintah `echo -e` untuk memformat teks supaya ia menjadi tebal. Contohnya, `echo -e "033[1mTeks Tebal033[0m"`. Dalam contoh ini, `033[1m` akan menjadikan teks tebal, manakala `033[0m` digunakan untuk menetapkan semula format teks. Semoga ia membantu!',
+  'indon': False},
+ {'role': 'user',
+  'content': 'Bagaimana dengan pemformatan teks yang lain? Adakah terdapat cara untuk menjadikannya miring atau bergaris bawah dalam skrip Bash?',
+  'content_ms': 'Bagaimana pula dengan format teks lain? Adakah terdapat cara untuk menjadikannya condong atau bergaris bawah dalam skrip Bash?',
+  'indon': False},
+ {'role': 'assistant',
+  'content': 'Tentu! Anda juga boleh memformat teks agar menjadi miring atau bergaris bawah dalam skrip Bash. Untuk menjadikannya miring, anda boleh menggunakan perintah `echo -e "\\033[3mTeks Miring\\033[0m"`. Manakala, untuk menjadikannya bergaris bawah, gunakan perintah `echo -e "\\033[4mTeks Bergaris Bawah\\033[0m"`. Sekali lagi, `\\033[0m` digunakan untuk menetapkan semula pemformatan teks. Semoga ini membantu anda!',
+  'content_ms': 'Sudah tentu! Anda juga boleh memformat teks untuk menjadi miring atau bergaris bawah dalam skrip Bash. Untuk menjadikannya miring, anda boleh menggunakan perintah `echo -e "033[3mTeks Miring033[0m"`. Manakala, untuk menjadikannya bergaris bawah, gunakan perintah `echo -e "033[4mTeks Bergaris Bawah033[0m"`. Sekali lagi, `033[0m` digunakan untuk menetapkan semula format teks. Semoga ini membantu anda!',
+  'indon': False},
+ {'role': 'user',
+  'content': 'Wah, sangat menarik! Adakah terdapat juga cara untuk menyertakan warna dalam pemformatan teks dalam skrip Bash?',
+  'content_ms': 'Wah, sangat menarik! Adakah terdapat juga cara untuk memasukkan warna dalam format teks dalam skrip Bash?',
+  'indon': False},
+ {'role': 'assistant',
+  'content': 'Ya, anda juga boleh menyertakan warna dalam pemformatan teks dalam skrip Bash. Terdapat beberapa kod warna yang boleh anda gunakan. Sebagai contoh, untuk meletakkan teks dalam warna merah, anda boleh menggunakan perintah `echo -e "\\033[31mTeks Merah\\033[0m"`. Di sini, `\\033[31m` akan mengatur warna menjadi merah dan `\\033[0m` digunakan untuk menetapkan semula pemformatan teks.\n\nBerikut adalah beberapa kod warna yang boleh digunakan:\n- Merah: `\\033[31m`\n- Hijau: `\\033[32m`\n- Kuning: `\\033[33m`\n- Biru: `\\033[34m`\n- Ungu: `\\033[35m`\n- Cyan: `\\033[36m`\n\nAnda juga boleh menggabungkan pemformatan, sebagai contoh, `echo -e "\\033[1;31mTeks Merah Tebal\\033[0m"` akan menghasilkan teks berwarna merah yang tebal. Selamat mencuba!',
+  'content_ms': 'Ya, anda juga boleh menyertakan warna dalam format teks dalam skrip Bash. Terdapat beberapa kod warna yang boleh anda gunakan. Sebagai contoh, untuk meletakkan teks dalam warna merah, anda boleh menggunakan perintah `echo -e "033[31mTeks Merah033[0m"`. Di sini, `033[31m` akan menetapkan warna kepada merah dan `033[0m` digunakan untuk menetapkan semula format teks.\n\nBerikut adalah beberapa kod warna yang boleh digunakan:\n- Merah: `033[31m`\n- Hijau: `033[32m`\n- Kuning: `033[33m`\n- Biru: `033[34m`\n- Ungu: `033[35m`\n- Cyan: `033[36m`\n\nAnda juga boleh menggabungkan format, sebagai contoh, `echo -e "033[1;31mTeks Merah Tebal033[0m"` akan menghasilkan teks merah tebal. Selamat mencuba!',
+  'indon': False},
+ {'role': 'user',
+  'content': 'Wah, sungguh menarik! Adakah terdapat kod warna lain yang boleh digunakan dalam pemformatan teks dalam skrip Bash? Saya ingin belajar lebih banyak tentang pemformatan teks ini.',
+  'content_ms': 'Wah, sungguh menarik! Adakah terdapat kod warna lain yang boleh digunakan dalam format teks dalam skrip Bash? Saya ingin mengetahui lebih lanjut tentang format teks ini.',
+  'indon': False},
+ {'role': 'assistant',
+  'content': 'Ya, terdapat banyak lagi kod warna yang boleh digunakan dalam pemformatan teks dalam skrip Bash. Berikut adalah beberapa kod warna tambahan untuk variasi yang lebih menarik:\n\n- Putih: `\\033[0m` atau `\\033[97m`\n- Abu-abu Terang: `\\033[37m`\n- Abu-abu Gelap: `\\033[90m`\n- Kuning Terang: `\\033[93m`\n- Merah Terang: `\\033[91m`\n- Biru Terang: `\\033[94m`\n- Hijau Terang: `\\033[92m`\n- Ungu Terang: `\\033[95m`\n- Cyan Terang: `\\033[96m`\n\nSelain itu, anda juga boleh menggabungkan beberapa pemformatan sekaligus untuk mencipta lebih banyak variasi. Misalnya, `echo -e "\\033[1;31;42mTeks Tebal Merah dengan Latar Belakang Hijau\\033[0m"` akan menghasilkan teks yang tebal, berwarna merah, dan dengan latar belakang hijau.\n\nJangan ragu untuk mencoba dan bereksperimen dengan pemformatan teks ini. Selamat mencuba, dan semoga anda menemui hasil yang menarik!',
+  'content_ms': 'Ya, terdapat banyak lagi kod warna yang boleh digunakan dalam format teks dalam skrip Bash. Berikut adalah beberapa kod warna tambahan untuk variasi yang lebih menarik:\n\n- Putih: `033[0m` atau `033[97m`\n- Abu-abu Terang: `033[37m`\n- Abu-abu Gelap: `033[90m`\n- Kuning Terang: `033[93m`\n- Merah Terang: `033[91m`\n- Biru Terang: `033[94m`\n- Hijau Terang: `033[92m`\n- Ungu Terang: `033[95m`\n- Cyan Terang: `033[96m`\n\nSelain itu, anda juga boleh menggabungkan beberapa format sekaligus untuk mencipta lebih banyak variasi. Contohnya, `echo -e "033[1;31;42mTeks Tebal Merah dengan Latar Belakang Hijau033[0m"` akan menghasilkan teks yang tebal, merah, dan dengan latar belakang hijau.\n\nJangan ragu untuk mencuba dan bereksperimen dengan format teks ini. Selamat mencuba, dan semoga anda menemui hasil yang menarik!',
+  'indon': True},
+ {'role': 'user',
+  'content': 'Sungguh menarik! Terdapat begitu banyak variasi dan pilihan dalam pemformatan teks di Bash. Saya ingin tahu apakah perbedaan antara "\\033[0m" dan "\\033[39m" dalam pemformatan warna teks? Bisakah Anda jelaskan?',
+  'content_ms': 'Sungguh menarik! Terdapat banyak variasi dan pilihan dalam format teks dalam Bash. Saya ingin tahu apakah perbezaan antara "033[0m" dan "033[39m" dalam format warna teks? Bolehkah anda menerangkannya?',
+  'indon': False},
+ {'role': 'assistant',
+  'content': 'Tentu! Perbedaan antara "\\033[0m" dan "\\033[39m" dalam pemformatan warna teks adalah sebagai berikut:\n\n- "\\033[0m" digunakan untuk menetapkan semula pemformatan teks ke default, termasuk warna teks.\n- "\\033[39m" khusus digunakan untuk menetapkan warna teks kembali ke warna default yang biasanya digunakan untuk teks normal.\n\nDalam praktiknya, kedua kode ini biasanya menghasilkan hasil yang sama, yakni mengembalikan warna teks ke default. Namun, ada beberapa sistem atau tampilan terminal yang mungkin memberikan perbedaan kecil di antara keduanya.\n\nJadi, jika anda ingin menetapkan warna teks kembali ke warna default dalam pemformatan teks Bash, anda boleh menggunakan salah satu dari kedua kode tersebut. Semoga ini membantu menjelaskan perbedaan di antara keduanya!',
+  'content_ms': 'Sudah tentu! Perbezaan antara "033[0m" dan "033[39m" dalam format warna teks adalah seperti berikut:\n\n- "033[0m" digunakan untuk menetapkan semula format teks kepada lalai, termasuk warna teks.\n- "033[39m" khusus digunakan untuk menetapkan warna teks kembali kepada warna lalai yang biasanya digunakan untuk teks biasa.\n\nDalam praktiknya, kedua-dua kod ini biasanya menghasilkan hasil yang sama, iaitu mengembalikan warna teks kepada lalai. Walau bagaimanapun, terdapat beberapa sistem atau paparan terminal yang mungkin memberikan perbezaan kecil antara kedua-duanya.\n\nJadi, jika anda ingin menetapkan warna teks kembali kepada warna lalai dalam format teks Bash, anda boleh menggunakan salah satu daripada kedua-dua kod. Semoga ini membantu menjelaskan perbezaan antara kedua-duanya!',
+  'indon': True}]
+\end{lstlisting}
+
+All synthetic dataset and implementation published at \href{https://huggingface.co/datasets/mesolitica/malaysian-ultrachat}{mesolitica/malaysian-ultrachat} and \href{https://huggingface.co/datasets/mesolitica/chatgpt-code-instruct-multiturn}{mesolitica/chatgpt-code-instruct-multiturn}.
 
 \subsubsection{Synthetic Malay CommonSense}
 
-include some data.
+We expanded our training dataset by creating a set of synthetic common sense questions and answers using ChatGPT4. Taking inspiration from CommonsenseQA \cite{talmor2019commonsenseqa}, we developed questions that explore common sense reasoning. This addition to our training data helps the language model improve its understanding of everyday situations and enhances its ability to generate commonsense responses. An example of generated dataset,
 
-Complete generating synthetic dataset implementation at \href{https://a.com}{here}.
+\begin{lstlisting}[breaklines=true]
+  Question: 1. Seseorang yang bersara mungkin perlu kembali bekerja jika mereka apa? A. mempunyai hutang B. mencari pendapatan C. meninggalkan pekerjaan D. memerlukan wang E. kehilangan kunci
+  Anwer: D
+\end{lstlisting}
+
+All synthetic dataset and implementation published at \href{https://huggingface.co/datasets/mesolitica/chatgpt4-commonsense-qa}{mesolitica/chatgpt4-commonsense-qa}.
+
+\pagebreak
 
 \subsubsection{Coding Dataset}
 
-include some data.
+We improved our coding dataset with original code samples from \url{https://huggingface.co/datasets/theblackcat102/evol-codealpaca-v1}, inspired by the WizardCoder \cite{luo2023wizardcoder}. To make the dataset more inclusive, we used ChatGPT4 to translate English coding questions into Malay and generate corresponding Malay answers. This approach expands the language model's capabilities, allowing it to understand and respond to coding queries in both English and Malay.
 
-Complete generating synthetic dataset implementation at \href{https://a.com}{here}.
+While this process exhibited proficiency, there were instances where ChatGPT4 generated responses in Indonesian. To ensure linguistic consistency, we use our own Neural Machine Translation mentioned at ~\ref{sec:generating-instruction-dataset}, seamlessly translating the Indonesian responses to Malay.
+
+Output from ChatGPT4,
+
+\begin{lstlisting}[breaklines=true]
+  Untuk mengubah skrip ini, kita Akkan menggunakan konsep pengulangan 'while' dan memastikan indeks tidak melebihi panjang senarai. Selain itu, kita harus memastikan skrip kita mengendalikan senarai kosong dengan betul.
+
+  Berikut adalah cara untuk mengubahnya:
+
+  ```python
+    # Menetapkan senarai integer
+    arr = [1, 2, 3, 4]
+
+    # Tentukan panjang senarai
+    n = len(arr)
+
+    # Pastikan senarai tidak kosong
+    if n > 0:
+      i = 0
+      # Melalui senarai dan keluarkan setiap elemen individu
+      while i < n:
+          print(arr[i])
+          i += 1
+    else:
+      print("Senarai adalah kosong.")
+  ```
+
+  Dalam skrip ini, sebelum kita mula mengulangi, kita memeriksa sama ada `n`, yang merupakan panjang senarai, lebih besar daripada 0. Jika tidak (yang bermaksud senarai kosong), kita mencetak mesej yang sesuai.
+
+  Kemudian, kita menggunakan pengulangan 'while' untuk mengulangi semasa indeks `i` kurang daripada panjang `n` senarai. Semasa setiap iterasi, kita mencetak elemen senarai dan menambahkan 1 ke indeks, supaya kita boleh bergerak ke elemen seterusnya pada iterasi seterusnya.
+
+  Ini akan mengelakkan ralat indeks, kerana kita tidak akan pernah mencuba mengakses indeks yang melebihi had senarai.
+\end{lstlisting}
+
+\pagebreak
+
+Translated using our own Neural Machine Translation,
+
+\begin{lstlisting}[breaklines=true]
+  Untuk mengubah skrip ini, kita Akkan menggunakan konsep pengulangan 'while' dan memastikan indeks tidak melebihi panjang senarai. Selain itu, kita perlu memastikan skrip kita mengawal senarai kosong dengan betul.
+
+  Berikut adalah cara untuk mengubahnya:
+
+  ```python
+    # Set up a list of integers
+    arr = [1, 2, 3, 4]
+
+    # Tentukan panjang senarai
+    n = len(arr)
+
+    # Pastikan senarai tidak kosong
+    if n > 0:
+      i = 0
+      # Melalui senarai dan keluarkan setiap elemen individu
+      while i < n:
+          print(arr[i])
+          i += 1
+    else:
+      print("Senarai adalah kosong.")
+  ```
+
+  Dalam skrip ini, sebelum kita mula mengulangi, kita memeriksa sama ada `n`, iaitu panjang senarai, lebih besar daripada 0. Jika tidak (yang bermaksud senarai kosong), kita mencetak mesej yang sesuai.
+
+  Kemudian, kita menggunakan pengulangan 'while' untuk mengulangi semasa indeks `i` kurang daripada panjang `n` senarai. Semasa setiap iterasi, kita mencetak elemen senarai dan menambahkan 1 ke indeks, supaya kita boleh bergerak ke elemen seterusnya pada iterasi seterusnya.
+
+  Ini akan mengelakkan ralat indeks, kerana kita tidak akan mencuba mengakses indeks yang melebihi had senarai.
+\end{lstlisting}
+
+All synthetic dataset and implementation published at \href{https://huggingface.co/datasets/mesolitica/chatgpt4-code-instruct}{mesolitica/chatgpt4-code-instruct}.
 
 \subsection{Malay Instruction Dataset}
 
 \subsubsection{Synthetic Kesalahan Tatabahasa Dataset}
 
-Complete generating synthetic dataset implementation at \href{https://a.com}{here}.
+We crafted a synthetic dataset focusing on introducing grammatical errors using the \href{https://malaya.readthedocs.io/en/stable/load-dependency.html}{Malaya dependency parser}. After generating sentences with errors, we implemented a positional swap based on the parsed tree structure. This intentional introduction of errors aimed to create a dataset challenging language models to identify and rectify grammatical mistakes. Subsequently, we transformed this dataset into a question-answer format, contributing to training models on error detection and correction in natural language.
 
-\subsubsection{Synthetic Noisy Stemming Dataset}
+\pagebreak
 
-Complete generating synthetic dataset implementation at \href{https://a.com}{here}.
+\begin{figure}[h]
+  \centering
+  \includegraphics[width=0.6\linewidth]{pic/dependency.png} % Replace with your image file
+\end{figure}
 
-\subsubsection{Dewan Bahasa Pustaka Definition Dataset}
+Based on the figure above, we can exchange the positions of 7 and 8 to introduce compound grammar error. In this \href{https://github.com/mesolitica/malaya/tree/master/session/tatabahasa/prepare-dataset}{malaya/session/tatabahasa} repository, we generated up to 14 different synthetic grammatical errors.
 
-Complete generating synthetic dataset implementation at \href{https://a.com}{here}.
+All synthetic dataset and implementation published at \href{https://huggingface.co/datasets/mesolitica/kesalahan-tatabahasa-choice}{mesolitica/kesalahan-tatabahasa-choice}.
 
 \subsection{Finetuning Phase}
 
@@ -415,6 +534,23 @@ DeepSpeed Zero3, batch size 6, packing, 16384 context length, constant learning 
 % https://github.com/mesolitica/malaya/tree/5.1/session/mistral#instructions-7b-16384-context-length
 
 \subsection{Result Finetuning}
+
+The text generation parameters are detailed below:
+
+\begin{table}[h]
+  \centering
+  \begin{tabular}{lccl}
+    \hline
+    \textbf{Parameter} & \textbf{Value} \\
+    \hline
+    top\_p             & 0.95           \\
+    top\_k             & 50             \\
+    do\_sample         & True           \\
+    temperature        & 0.9            \\
+    num\_beams         & 1              \\
+    \hline
+  \end{tabular}
+\end{table}
 
 \subsubsection{Multiturn Malaysian context QA}
 

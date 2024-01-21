@@ -66,7 +66,7 @@ In response to this dynamic landscape, Mistral AI emerged, unveiling its initial
 \begin{itemize}
   \item \textbf{Fine-tuning Mistral 7B:} Utilizing the computational power of 8x A100 GPUs on a Standard\_ND96amsr\_A100\_v4 Azure instance, we conducted extensive fine-tuning on Mistral 7B. The process involved training the model using context lengths of 4096 and 32768 on a substantial 32.6 GB Malaysian context dataset.
 
-  \item \textbf{Multi-turn Instruction-Tuned Model:} Crafting local context multiturn chat dataset using ChatGPT3.5 and ChatGPT4, we employed Meural Machine Translation to translate the dataset. This approach enhances Malaysian Mistral's proficiency in multi-turn conversations, contributing to its adaptability across a wide range of local context tasks and coding.
+  \item \textbf{Multi-turn Instruction-Tuned Model:} Crafting local context multiturn chat dataset using ChatGPT3.5 and ChatGPT4, we employed Neural Machine Translation to translate the dataset. This approach enhances Malaysian Mistral's proficiency in multi-turn conversations, contributing to its adaptability across a wide range of local context tasks and coding.
 \end{itemize}
 
 \section{Related Work}
@@ -217,7 +217,7 @@ In our synthetic instruction dataset creation process, we employed ChatGPT3.5 an
 
 For coding instructions and synthetic CommonQA, we leveraged the capabilities of ChatGPT4, utilizing its advanced language generation capabilities to create instructions that specifically pertain to coding tasks. This inclusion broadened the dataset's scope to encompass both language-related and technical instructions.
 
-A notable aspect of this generation process was the tendency of these models to produce instructions in Indonesian. To address this, we implemented neural machine translation, a powerful tool that seamlessly translated the instructions from Indonesian to standard Malay. This translation system demonstrated proficiency not only in translating between Indonesian and standard Malay but also in handling other languages such as English, Javanese, and Banjarese. Notably, it exhibited the ability to maintain the structural integrity of the original text, selectively translating only necessary components, such as programming code snippets, while preserving the overall text structure. We open-sourced the neural machine translation model at \href{https://huggingface.co/mesolitica/translation-t5-small-standard-bahasa-cased-code}{mesolitica/translation-t5-small-standard-bahasa-cased-code}.
+A notable aspect of this generation process was the tendency of these models to produce instructions in Indonesian. To address this, we implemented Neural Machine Translation, a powerful tool that seamlessly translated the instructions from Indonesian to standard Malay. This translation system demonstrated proficiency not only in translating between Indonesian and standard Malay but also in handling other languages such as English, Javanese, and Banjarese. Notably, it exhibited the ability to maintain the structural integrity of the original text, selectively translating only necessary components, such as programming code snippets, while preserving the overall text structure. We open-sourced the neural machine translation model at \href{https://huggingface.co/mesolitica/translation-t5-small-standard-bahasa-cased-code}{mesolitica/translation-t5-small-standard-bahasa-cased-code}.
 
 \subsubsection{OpenQA MS Wikipedia}
 

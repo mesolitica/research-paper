@@ -3,9 +3,28 @@
 \usepackage{graphicx}
 \usepackage{hyperref}
 \usepackage{geometry}
+\usepackage{cite}
+\usepackage{listings}
+\usepackage{xcolor}
+
+\lstset{
+    breaklines=true,
+    language=Python,
+    basicstyle=\ttfamily\small,
+    commentstyle=\color{green!40!black},
+    keywordstyle=\color{blue},
+    numberstyle=\tiny\color{gray},
+    numbers=left,
+    frame=single,
+    breaklines=true,
+    breakatwhitespace=true,
+    captionpos=b,
+    showstringspaces=false,
+    columns=fullflexible,
+}
 \hypersetup{
     pdftitle={Large Malaysian Language Model Based on Mistral for Enhanced Local Language Understanding},
-    pdfauthor={Husein Zolkepli, Aisyah Razak, Kamarul Adha, Ariff Nazhan},
+    pdfauthor={Husein Zolkepli, Aisyah Razak, Kamarul Adha},
     pdfsubject={Natural Language Processing, Large Language Models, Machine Learning},
     pdfkeywords={language models, malay natural language processing, deep learning},
     colorlinks=true,
@@ -21,8 +40,7 @@
 \author{
   Husein Zolkepli\thanks{husein@mesolitica.com} \and 
   Aisyah Razak\thanks{aisyahrazak171@gmail.com} \and
-  Kamarul Adha\thanks{kamarul.adha360@gmail.com} \and
-  Ariff Nazhan\thanks{ariffnzhn@gmail.com}
+  Kamarul Adha\thanks{kamarul.adha360@gmail.com}
 }
 \date{\today}
 
@@ -41,21 +59,21 @@
 \end{abstract}
 
 \section{Introduction}
-The evolution of artificial intelligence (AI) has witnessed transformative breakthroughs, from the introduction of "Attention is All You Need" with the Transformer architecture, to subsequent advancements like GPT-2, and the revolutionary ChatGPT. These models have sparked immense interest and curiosity in the AI landscape, pushing the boundaries of natural language understanding and generation.
+The evolution of artificial intelligence (AI) has witnessed transformative breakthroughs, from the introduction of "Attention is All You Need" \cite{vaswani2023attention} with the Transformer architecture, to subsequent advancements like GPT-2, and the revolutionary ChatGPT. These models have sparked immense interest and curiosity in the AI landscape, pushing the boundaries of natural language understanding and generation.
 
-In response to this dynamic landscape, Mistral AI emerged, unveiling its initial model, Mistral 7B. Notably, Mistral 7B showcased superior performance, surpassing benchmarks set by Llama 2 13B across various tasks and even outperforming Llama 1 34B on numerous benchmarks. Impressively, it approached the performance of CodeLlama 7B on code-related tasks while maintaining proficiency in English language tasks. However, an identified gap in its capabilities was the limited understanding of Malaysian context.
+In response to this dynamic landscape, Mistral AI emerged, unveiling its initial model, Mistral 7B \cite{jiang2023mistral}. Notably, Mistral 7B showcased superior performance, surpassing benchmarks set by Llama 2 13B across various tasks and even outperforming Llama 1 34B on numerous benchmarks. Impressively, it approached the performance of CodeLlama 7B on code-related tasks while maintaining proficiency in English language tasks. However, an identified gap in its capabilities was the limited understanding of Malaysian context.
 
 \begin{itemize}
-  \item \textbf{Fine-tuning Mistral 7B:} Utilizing the computational power of 8x A100 GPUs on a Standard\_ND96asr\_v4 Azure instance, we conducted extensive fine-tuning on Mistral 7B. The process involved training the model using context lengths of 4096 and 32768 on a substantial 32.6 GB Malaysian context dataset.
+  \item \textbf{Fine-tuning Mistral 7B:} Utilizing the computational power of 8x A100 GPUs on a Standard\_ND96amsr\_A100\_v4 Azure instance, we conducted extensive fine-tuning on Mistral 7B. The process involved training the model using context lengths of 4096 and 32768 on a substantial 32.6 GB Malaysian context dataset.
 
-  \item \textbf{Multi-turn Instruction-Tuned Model:} Crafting local context multiturn chat dataset using ChatGPT3.5, ChatGPT4, and Llama2 70B, we employed Meural Machine Translation to translate the dataset. This approach enhances Malaysian Mistral's proficiency in multi-turn conversations, contributing to its adaptability across a wide range of local context tasks and coding.
+  \item \textbf{Multi-turn Instruction-Tuned Model:} Crafting local context multiturn chat dataset using ChatGPT3.5 and ChatGPT4, we employed Meural Machine Translation to translate the dataset. This approach enhances Malaysian Mistral's proficiency in multi-turn conversations, contributing to its adaptability across a wide range of local context tasks and coding.
 \end{itemize}
 
 \section{Related Work}
 
 \subsection{English-Centric Bias in Large Language Models}
 
-The majority of open-source Large Language Models (LLMs) exhibit a significant bias towards the English language, with minimal representation and training on Malay datasets. An analysis of the widely utilized Common Crawl dataset reveals a mere 0.0742\% contribution from the Malay language based on CC-MAIN-2023-50 index \cite{CommonCrawl}. This English-centric bias poses a substantial challenge for applications requiring robust language understanding in Malay, prompting the need for dedicated research and development in this domain.
+The majority of open-source Large Language Models (LLMs) exhibit a significant bias towards the English language, with minimal representation and training on Malay datasets. An analysis of the widely utilized Common Crawl dataset reveals a mere 0.0742\% contribution from the Malay language based on \href{https://commoncrawl.github.io/cc-crawl-statistics/plots/languages}{CC-MAIN-2023-50} index. This English-centric bias poses a substantial challenge for applications requiring robust language understanding in Malay, prompting the need for dedicated research and development in this domain.
 
 \subsection{Existing Malay Language Models}
 
@@ -69,77 +87,325 @@ Despite the existence of specialized models for Malay, a notable gap remains in 
 
 \subsection{Public Data}
 
-\subsubsection{MS Wikipedia}
+\subsubsection{Wikipedia}\label{sec:wikipedia}
+
+We initiated the process by downloading the Malay Wikipedia dump from \url{https://dumps.wikimedia.org/}. This dump serves as a valuable resource for capturing diverse linguistic contexts in the Malay language.
+
+The pertinent information from the Malay Wikipedia dump was extracted using the \url{https://github.com/attardi/wikiextractor} tool. This tool will parsed XML files into JSON line files and removed unnecessary XML tags.
+
+We also obtained the English Wikipedia dataset from \url{https://huggingface.co/datasets/wikipedia}. Subsequently, we filtered documents containing keywords 'malay' or 'malaysia'. This targeted filtering ensures that the English dataset retains content relevant for the Malaysian context.
 
 \subsubsection{Malay Language study articles}
 
+To enrich our dataset, we incorporated the Malay dictionary, specifically the "Kamus Dewan Edisi Keempat." This authoritative source provides a comprehensive collection of Malay words, enhancing the language model's understanding of vocabulary and linguistic nuances.
+
+We also included articles from \href{https://jendeladbp.my/}{JendelaDBP}. The selected articles cover various domains, including language (bahasa), literature (sastera), society (masyarakat), culture (budaya), economy (ekonomi), and Islamic studies (islam). This inclusion ensures that the language model is exposed to a broad spectrum of content, promoting a more holistic understanding of the Malay language within different contexts.
+
 \subsubsection{Malaysia Government public documents}
+
+For a comprehensive understanding of legislative proceedings, we incorporated data from the Malaysia Hansard. This authoritative source provides official transcripts of parliamentary debates, contributing to the language model's exposure to formal and legal discourse.
+
+Legal documents from \url{https://lom.agc.gov.my} were included to provide the language model with insights into legal terminology, regulations, and official language usage within the Malaysian legal context.
+
+To enhance the language model's grasp of political discourse, we utilized parliamentary records from \url{https://parlimen.gov.my}. This inclusion ensures exposure to discussions on national policies, legislation, and political matters.
+
+To incorporate real-world data and statistics, we accessed datasets from \url{https://data.gov.my}. This enriches the language model's training data with diverse information on various aspects of Malaysian governance and public services.
+
+Articles from the Mufti Wilayah contribute to the language model's understanding of religious discourse, ethical discussions, and Islamic perspectives on various topics.
+
+To capture a broad range of government-related documents, we performed a systematic Google search for public PDFs from the 'gov.my' and 'edu.my' domains. This ensures inclusion of publicly available official documents, reports, and publications.
 
 \subsubsection{Malaysia online articles}
 
+To augment our dataset with a diverse range of Malaysian context, we employed web scraping techniques to gather public articles covering various topics. This comprehensive approach includes content related to gaming, education, blogging, politics, economy, sports, and a multitude of other subjects. The goal is to provide the language model with a broad and nuanced understanding of Malaysian perspectives, opinions, and discussions across a spectrum of domains. Complete list at \href{https://github.com/malaysia-ai/dedup-text-dataset/blob/main/mistral/combine-mistral.ipynb}{link here}.
+
 \subsection{Deduplicating Data}
 
-https://github.com/malaysia-ai/dedup-text-dataset?tab=readme-ov-file#text-dedup
+To minimize redundancy within our dataset, we implemented the MinHash algorithm utilizing the implementation available at \url{https://github.com/ChenghaoMou/text-dedup}.
+
+We configured the MinHash algorithm with the following parameters:
+
+\begin{table}[h]
+  \centering
+  \begin{tabular}{lccl}
+    \hline
+    \textbf{Parameter} & \textbf{Value} \\
+    \hline
+    num\_perm          & 256            \\
+    threshold          & 0.95           \\
+    hash\_func         & sha1           \\
+    hash\_bits         & 64             \\
+    \hline
+  \end{tabular}
+\end{table}
+
+Complete deduplicating data implementation at \href{https://github.com/malaysia-ai/dedup-text-dataset?tab=readme-ov-file#text-dedup}{here}. All deduped dataset published at \href{https://huggingface.co/datasets/malaysia-ai/dedup-text-dataset}{malaysia-ai/dedup-text-dataset}.
 
 \subsection{Postprocessing Data}
 
-https://github.com/malaysia-ai/dedup-text-dataset?tab=readme-ov-file#postprocessing
+After the initial data collection and deduplication steps, we applied postprocessing techniques to refine the dataset for optimal training. The following steps were implemented:
 
-\subsection{Tokenizing Data}
+\begin{itemize}
+  \item Removal of Texts with HTTP Errors.
 
-https://github.com/malaysia-ai/dedup-text-dataset/tree/main/mistral
+  \item Filtering Texts by Length, we removed texts less than 3 characters.
+
+  \item Normalization of Whitespace, we replaced 6 spaces or more with 6 spaces.
+
+  \item Normalization of Punctuation, we replaced 6 dots or more with 6 dots.
+\end{itemize}
+
+Complete postprocessing data implementation at \href{https://github.com/malaysia-ai/dedup-text-dataset?tab=readme-ov-file#postprocessing}{here}.
+
+% https://github.com/malaysia-ai/dedup-text-dataset?tab=readme-ov-file#postprocessing
 
 \subsection{Pre-Training phase}
 
-\subsubsection{4096 context length}
+\subsubsection{Tokenizing Data}
 
-DeepSpeed Zero3, batch size 20 and bfloat16, constant learning rate 2e-5.
+We adopted a packing technique for tokenization, wherein the dataset was segmented into sequences with context lengths of 4096 and 32768. The sequences were separated by the End-of-Sequence (EOS) token, indicating the end of one segment and the beginning of the next.
 
-https://github.com/mesolitica/malaya/tree/5.1/session/mistral#7b-4096-context-length
+Complete tokenizing data implementation at \href{https://github.com/malaysia-ai/dedup-text-dataset/tree/main/mistral}{here}.
 
-\subsubsection{32768 context length}
+\subsubsection{4096 context length}\label{sec:4096-pretrained}
 
-We use the latest checkpoint from 4096 context length and trained on random 10\% from the dataset.
+We utilized Standard\_ND96asr\_v4 Azure instance which contains 8x A100 80 GB GPUs (NVLink 3.0). The pre-training hyperparameters are detailed below:
 
-DeepSpeed Zero3, batch size 3 and bfloat16, constant learning rate 2e-5.
+\begin{table}[h]
+  \centering
+  \begin{tabular}{lccl}
+    \hline
+    \textbf{Hyperparameter} & \textbf{Value} \\
+    \hline
+    DeepSpeed               & ZeRO-3 Offload \\
+    Batch Size              & 20             \\
+    Learning Rate           & constant 2e-5  \\
+    Precision               & bfloat16       \\
+    \hline
+  \end{tabular}
+\end{table}
 
-https://github.com/mesolitica/malaya/tree/5.1/session/mistral#7b-32768-context-length
+Complete pre-training 4096 context length implementation at \href{https://github.com/mesolitica/malaya/tree/5.1/session/mistral#7b-4096-context-length}{here}.
+
+\subsubsection{32768 context length}\label{sec:32768-pretrained}
+
+For 32768 context length, we only trained on 10\% of the total dataset and use latest checkpoint from 4096 context length pretrained model from section ~\ref{sec:4096-pretrained}. We utilized Standard\_ND96asr\_v4 Azure instance which contains 8x A100 80 GB GPUs (NVLink 3.0). The pre-training hyperparameters are detailed below:
+
+\begin{table}[h]
+  \centering
+  \begin{tabular}{lccl}
+    \hline
+    \textbf{Hyperparameter} & \textbf{Value} \\
+    \hline
+    DeepSpeed               & ZeRO-3 Offload \\
+    Batch Size              & 3              \\
+    Learning Rate           & constant 2e-5  \\
+    Precision               & bfloat16       \\
+    \hline
+  \end{tabular}
+\end{table}
+
+Complete pre-training 32768 context length implementation at \href{https://github.com/mesolitica/malaya/tree/5.1/session/mistral#7b-32768-context-length}{here}.
+
+% https://github.com/mesolitica/malaya/tree/5.1/session/mistral#7b-32768-context-length
 
 \section{Supervised Instruction Fine-tuning Procedure}
 
 \subsection{Generating Instruction Dataset}
 
+In our synthetic instruction dataset creation process, we employed ChatGPT3.5 and ChatGPT4 to generate diverse sets of instructions tailored to specific domains. ChatGPT3.5 was utilized to generate instructions with a focus on Malaysian context, contributing to a dataset enriched with localized language nuances. Additionally, ChatGPT3.5 was employed to generate pseudo Retrieval-Augmented Generation Multi-Turn instructions on Malaysian context, further diversifying the content pool.
+
+For coding instructions and synthetic CommonQA, we leveraged the capabilities of ChatGPT4, utilizing its advanced language generation capabilities to create instructions that specifically pertain to coding tasks. This inclusion broadened the dataset's scope to encompass both language-related and technical instructions.
+
+A notable aspect of this generation process was the tendency of these models to produce instructions in Indonesian. To address this, we implemented neural machine translation, a powerful tool that seamlessly translated the instructions from Indonesian to standard Malay. This translation system demonstrated proficiency not only in translating between Indonesian and standard Malay but also in handling other languages such as English, Javanese, and Banjarese. Notably, it exhibited the ability to maintain the structural integrity of the original text, selectively translating only necessary components, such as programming code snippets, while preserving the overall text structure. We open-sourced the neural machine translation model at \href{https://huggingface.co/mesolitica/translation-t5-small-standard-bahasa-cased-code}{mesolitica/translation-t5-small-standard-bahasa-cased-code}.
+
 \subsubsection{OpenQA MS Wikipedia}
 
-include some data.
+We use data from ~\ref{sec:wikipedia} and generate synthetic OpenQA dataset by using prompt below,
 
-\subsubsection{OpenQA Malaysia Articles}
+\begin{lstlisting}[]
+  # l['paragraph'] is wikipedia paragraph
+  s = f"""
+  paragraph ```
+  {l['paragraph']}
+  ```
+  
+  berdasarkan paragraph, jana soalan melayu dan jawapan melayu
+  """
+  # pass `s` to ChatGPT3.5 API
+\end{lstlisting}
 
-include some data.
+We use ChatGPT3.5 API to generate the synthetic data, an example of generated dataset,
+
+\begin{lstlisting}[]
+  {'paragraph': 'The Legend of Korra ialah sebuah siri animasi televisyen Amerika Syarikat yang telah ditayangkan di ...',
+ 'url': 'https://ms.wikipedia.org/wiki?curid=823980',
+ 'qa': {'qa': [{'question': 'Apakah siri animasi yang ditayangkan di Nickelodeon sejak 2012?',
+    'answer': 'The Legend of Korra'},
+   {'question': 'Siapakah pencipta siri animasi The Legend of Korra?',
+    'answer': 'Bryan Konietzko dan Michael Dante DiMartino'},
+   {'question': "Apakah yang dimaksudkan dengan 'bending' dalam siri animasi The Legend of Korra?",
+    'answer': 'Kekuatan untuk memanipulasi elemen seperti air, bumi, api, atau udara'},
+   {'question': 'Siapakah Avatar Korra?',
+    'answer': 'Pengganti Aang dalam siri sebelumnya yang menghadapi pergolakan politik dan roh semangat dalam dunia pemodenan'},
+   {'question': 'Apakah kejayaan siri The Legend of Korra?',
+    'answer': 'Kejayaan yang kritikal dan komersial dengan jumlah penonton tertinggi bagi siri animasi di Amerika Syarikat pada tahun 2012'}]}}
+    
+\end{lstlisting}
+
+We also replicated the same technique for Malaysia Hansard and MS CommonCrawl samples. All synthetic dataset and implementation published at \href{https://huggingface.co/datasets/mesolitica/chatgpt-malaysian-open-qa}{mesolitica/chatgpt-malaysian-open-qa}.
+
+\pagebreak
 
 \subsubsection{Malay Instruction with Malaysian context}
 
-include some data.
+We follow evolution instruction from \cite{xu2023wizardlm} with slightly changes,
+
+Original breadth instruction,
+
+\begin{lstlisting}[]
+  base_instruction = "I want you act as a Prompt Creator.\r\n\
+  Your goal is to draw inspiration from the #Given Prompt# to create a brand new prompt.\r\n\
+  This new prompt should belong to the same domain as the #Given Prompt# but be even more rare.\r\n\
+  The LENGTH and complexity of the #Created Prompt# should be similar to that of the #Given Prompt#.\r\n\
+  The #Created Prompt# must be reasonable and must be understood and responded by humans.\r\n\
+  '#Given Prompt#', '#Created Prompt#', 'given prompt' and 'created prompt' are not allowed to appear in #Created Prompt#\r\n"
+\end{lstlisting}
+
+Our breadth instruction,
+
+\begin{lstlisting}[]
+  base_instruction = "I want you act as a Malay Prompt Creator.\r\n\
+  Your goal is to draw inspiration from the #Given Prompt# to create a brand new prompt in malay language and malaysia related if possible.\r\n\
+  This new prompt should belong to the same domain as the #Given Prompt# but be even more rare.\r\n\
+  The LENGTH and complexity of the #Created Prompt# should be similar to that of the #Given Prompt#.\r\n\
+  The #Created Prompt# must be reasonable and must be understood and responded by humans.\r\n\
+  '#Given Prompt#', '#Created Prompt#', 'given prompt' and 'created prompt' are not allowed to appear in #Created Prompt#\r\n"
+\end{lstlisting}
+
+
+Original depth instruction,
+
+\begin{lstlisting}[language=Python]
+  base_instruction = "I want you act as a Prompt Rewriter.\r\n \
+  Your objective is to rewrite a given prompt into a more complex version to make those famous AI systems (e.g., chatgpt and GPT4) a bit harder to handle.\r\n \
+  But the rewritten prompt must be reasonable and must be understood and responded by humans.\r\n \
+  Your rewriting cannot omit the non-text parts such as the table and code in #The Given Prompt#:. Also, please do not omit the input in #The Given Prompt#. \r\n \
+  You SHOULD complicate the given prompt using the following method: \r\n\
+  {} \r\n\
+  You should try your best not to make the #Rewritten Prompt# become verbose, #Rewritten Prompt# can only add 10 to 20 words into #The Given Prompt#. \r\n\
+  '#The Given Prompt#', '#Rewritten Prompt#', 'given prompt' and 'rewritten prompt' are not allowed to appear in #Rewritten Prompt#\r\n"
+\end{lstlisting}
+
+\pagebreak
+Our depth instruction,
+
+\begin{lstlisting}[]
+  base_instruction = "I want you act as a Malay Prompt Rewriter.\r\n \
+  Your objective is to rewrite a given prompt into malay language, a more complex version and malaysia related if possible to make those famous AI systems (e.g., chatgpt and GPT4) a bit harder to handle.\r\n \
+  But the rewritten prompt must be reasonable and must be understood and responded by humans.\r\n \
+  Your rewriting cannot omit the non-text parts such as the table and code in #The Given Prompt#:. Also, please do not omit the input in #The Given Prompt#. \r\n \
+  You SHOULD complicate the given prompt using the following method: \r\n\
+  {} \r\n\
+  You should try your best not to make the #Rewritten Prompt# become verbose, #Rewritten Prompt# can only add 10 to 20 words into #The Given Prompt#. \r\n\
+	'#The Given Prompt#', '#Rewritten Prompt#', 'given prompt' and 'rewritten prompt' are not allowed to appear in #Rewritten Prompt#\r\n"
+\end{lstlisting}
+
+We use ChatGPT3.5 API to generate the synthetic data, an example of generated dataset,
+
+\begin{lstlisting}[breaklines=true]
+  Instruction: Tulislah sebuah cerita pendek dengan gaya narasi orang ketiga tentang seorang protagonis yang harus membuat keputusan karier penting. Ceritakan bagaimana protagonis tersebut menghadapi dilema antara mempertahankan pekerjaan yang stabil atau mengambil risiko dengan mencari peluang karier baru di Malaysia yang menjanjikan kehidupan yang lebih baik. Kembangkan karakter dan latar belakang protagonis, serta ceritakan perjalanan dan pertimbangannya dalam mengambil keputusan penting tersebut.
+  Answer: Di sebuah bandar kecil di Indonesia, hiduplah seorang wanita bernama Maya. Maya adalah seorang pekerja keras yang telah bekerja di sebuah syarikat besar selama lima tahun. Dia mempunyai pekerjaan yang stabil dan gaji yang mencukupi. Namun, dalam hatinya, Maya merasakan bahawa pekerjaannya tidak memberikan kepuasan dan cabaran yang mencukupi untuknya. Maya bercita-cita untuk meningkatkan kerjaya dan mencapai kejayaan yang lebih besar. Dia sering bermimpi untuk hidup yang lebih baik, dengan pendapatan yang lebih tinggi dan peluang untuk mengembara ke seluruh dunia. Pada suatu hari, Maya mendengar berita bahawa di Malaysia terdapat peluang kerjaya yang menjanjikan. Maya menjadi tertarik dengan peluang ini. Dia mula mencipta tentang industri dan peluang pekerjaan di Malaysia. Maya tahu bahawa kerjaya di sana boleh memberikan pendapatan yang jauh lebih tinggi daripada yang dia terima sekarang. Selain itu, dia juga tahu bahawa di Malaysia terdapat persekitaran kerja yang lebih dinamik dan berbeza-beza, yang akan memberikan cabaran baru untuknya. Namun, Maya juga menyedari bahawa untuk mencari peluang kerjaya di Malaysia, dia harus meninggalkan semua yang dia telah bangunkan di Indonesia, termasuk keluarga dan rakan-rakannya. Maya berasa sedih dan terfikir, kerana dia sangat menyayangi keluarga dan tidak tahan berpisah dengan mereka. Maya menghabiskan masa berhari-hari memikirkan pilihan kerjaya ini. Dia menulis segala kelebihan dan kekurangan kedua-dua pilihan yang dia hadapi. Dia bercakap dengan keluarga dan rakan-rakannya, dan mereka menyokong keputusannya, walaupun mereka sedih dengan pemergian Maya. Akhirnya, selepas pertimbangan yang teliti, Maya memutuskan untuk mengambil risiko dan mencari peluang kerjaya baru di Malaysia. Dia merasakan bahawa ini adalah peluang yang jarang berlaku, dan dia harus mengambil langkah di luar zon selesa untuk mencapai impian dan cita-citanya. Maya menyedari bahawa hidup adalah tentang mengambil risiko dan menghadapi cabaran baru. Perjalanan Maya ke Malaysia bukanlah mudah. Dia harus melalui beberapa halangan dan penyesuaian budaya baru. Namun, dengan ketabahan dan semangat yang kuat, Maya berjaya mendapatkan pekerjaan di sebuah syarikat besar di Kuala Lumpur. Dia berasa gembira dan bangga dengan keputusannya. Selama bertahun-tahun di Malaysia, Maya mencapai kejayaan yang luar biasa. Dia menikmati kerjaya yang dia lalui dan mempunyai kehidupan yang lebih baik dan lebih selesa daripada yang pernah dia bayangkan di Indonesia. Maya juga terus menjalin hubungan dengan keluarga dan rakan-rakannya di negara ini, walaupun jarak memisahkan mereka. Dalam cerita ini, Maya adalah contoh yang memberi inspirasi kepada seseorang yang berani mengambil risiko dengan meninggalkan pekerjaan yang stabil dan mencari peluang kerjaya baru. Keputusannya membawa perubahan besar dalam hidupnya, dan ia menunjukkan kepada kita bahawa kadang-kadang kita harus berani keluar dari zon selesa untuk mencapai impian dan cita-cita kita.
+\end{lstlisting}
+
+All synthetic dataset and implementation published at \href{https://huggingface.co/datasets/mesolitica/chatgpt-malay-instructions}{mesolitica/chatgpt-malay-instructions}.
 
 \subsubsection{Malay UltraChat}
 
-include some data.
+We extended our efforts to generate a multiturn dataset. Acknowledging the efficacy of multiturn conversations in training language models to understand context and coherence, we sought inspiration from Ultrachat \cite{ding2023enhancing}. Ultrachat served as a valuable reference, guiding us in crafting a dataset that incorporates multifaceted interactions and conversations.
+
+\begin{lstlisting}[breaklines=true]
+  [{'role': 'context',
+  'content': 'LIGA\xa0Malaysia (Liga-M) terus menerima tamparan hebat apabila UiTM FC sah menarik diri daripada saingan Liga Super musim ini bagi menyusuli jejak Petaling Jaya City.\n\n\n\r\nPerkara itu disahkan sendiri oleh Presiden The Lion Troops, Profesor Dr. Sazili Shahibi, selepas dua musim beraksi di pentas Liga Super.\n\n\n\r\nSelain masalah kewangan, Dr Sazili menjelaskan ada punca lain mengapa pihak pengurusan mengibarkan bendera putih.\n\n\n \n \n\r\n"Ahli Lembaga Pengarah UiTM telah bermesyuarat dan (kami mengambil) keputusan untuk menarik diri daripada liga pada musim depan.\n\n\n\r\n"Kewangan adalah salah faktornya, tapi kami rasa daripada segi kemampuan, ia tidak sesuai buat pemain-pemain kami," katanya ketika dihubungi \nAstro Arena\n\xa0pada Rabu.\n\n\n\r\nSazili juga berhasrat memaklumkan UiTM bakal beralih ke saingan Liga M3 musim ini.\n\n\n\r\nUntuk rekod, UiTM muncul pasukan berstatus universiti pertama yang layak beraksi dalam Liga Super.\n\n\n\r\nDalam pada itu, Liga Bolasepak Malaysia (MFLhanya akan menjelaskan situasi berkenaan menerusi kenyataan rasmi bakal dalam masa terdekat selepas hanya 14 pasukan yang akan bertanding di pentas Liga Super musim ini. -\nStadium Astro',
+  'content_ms': None,
+  'indon': False},
+ {'role': 'user',
+  'content': 'What are the reasons given by UiTM FC for withdrawing from Liga Malaysia?',
+  'content_ms': 'Apakah alasan yang diberikan oleh UiTM FC kerana menarik diri daripada Liga Malaysia?',
+  'indon': False},
+ {'role': 'assistant',
+  'content': 'Menurut Presiden UiTM FC, Profesor Dr. Sazili Shahibi, mereka mengambil keputusan untuk menarik diri daripada Liga Malaysia musim ini atas beberapa sebab. Salah satu sebab utamanya adalah masalah kewangan yang dihadapi oleh pasukan. Selain itu, beliau juga menyebut bahawa kemampuan pasukan UiTM tidak sesuai untuk bersaing dalam Liga Super. Selain masalah ini, tidak ada sebab lain yang diberikan dalam laporan tersebut.',
+  'content_ms': 'Menurut Presiden UiTM FC, Profesor Dr. Sazili Shahibi, mereka membuat keputusan untuk menarik diri daripada Liga Malaysia musim ini atas beberapa sebab. Salah satu sebab utama ialah masalah kewangan yang dihadapi oleh pasukan. Selain itu, beliau juga menyatakan bahawa keupayaan pasukan UiTM tidak sesuai untuk bersaing dalam Liga Super. Selain masalah ini, tiada sebab lain diberikan dalam laporan tersebut.',
+  'indon': False},
+ {'role': 'user',
+  'content': 'Alamak, memang sedihlah tengok UiTM FC tarik diri dari Liga Malaysia. Macam mana pula dengan penonton setia yang selalu sokong pasukan tu? Harap-harap ada jalan penyelesaian untuk masalah kewangan mereka.',
+  'content_ms': 'Alamak, memang sedih tengok UiTM FC menarik diri dari Liga Malaysia. Bagaimana pula dengan penonton setia yang selalu menyokong pasukan itu? Harap-harap ada jalan penyelesaian untuk masalah kewangan mereka.',
+  'indon': False},
+ {'role': 'assistant',
+  'content': 'Ya, memang sedih melihat UiTM FC menarik diri dari Liga Malaysia. Bagi penonton setia yang sentiasa menyokong pasukan tersebut, tentu mereka juga berasa kecewa. Kami juga berharap ada jalan penyelesaian untuk masalah kewangan yang dihadapi oleh UiTM FC. Mungkin pihak pengurusan boleh mencari sponsor atau menyusun semula strategi kewangan untuk membolehkan pasukan tersebut terus beraksi dalam liga pada masa hadapan. Semoga mereka dapat menemui penyelesaian yang baik dan kembali bersaing di pentas bola sepak Malaysia.',
+  'content_ms': 'Ya, memang sedih melihat UiTM FC menarik diri dari Liga Malaysia. Bagi penonton setia yang sentiasa menyokong pasukan tersebut, tentu mereka juga berasa kecewa. Kami juga berharap ada jalan penyelesaian untuk masalah kewangan yang dihadapi oleh UiTM FC. Mungkin pihak pengurusan boleh mencari penaja atau menyusun semula strategi kewangan untuk membolehkan pasukan tersebut terus beraksi dalam liga pada masa hadapan. Semoga mereka dapat menemui penyelesaian yang baik dan kembali bersaing di pentas bola sepak Malaysia.',
+  'indon': False},
+ {'role': 'user',
+  'content': 'Ya betul tu, banyak peminat setia UiTM FC yang akan kecewa dengan keputusan mereka tarik diri dari Liga Malaysia. Harapnya pihak pengurusan dapat cari jalan penyelesaian secepat mungkin supaya pasukan tu masih dapat beraksi dalam liga. Saya pun tak sabar nak tengok prestasi UiTM FC lagi musim hadapan. Semoga ada berita baik dalam masa terdekat.',
+  'content_ms': 'Ya, betul tu. Banyak peminat setia UiTM FC yang akan kecewa dengan keputusan mereka menarik diri dari Liga Malaysia. Harapnya pihak pengurusan dapat mencari jalan penyelesaian secepat mungkin supaya pasukan itu masih dapat beraksi dalam liga. Saya pun tak sabar nak tengok prestasi UiTM FC lagi musim depan. Semoga ada berita baik dalam masa terdekat.',
+  'indon': False},
+ {'role': 'assistant',
+  'content': 'Saya juga setuju dengan anda. Semoga pihak pengurusan UiTM FC dapat mencari jalan penyelesaian secepat mungkin agar pasukan tersebut masih dapat berlaga dalam Liga Malaysia. Benar, banyak peminat yang ingin melihat prestasi UiTM FC musim hadapan. Mari kita nantikan berita baik daripada mereka dalam masa terdekat. Harapnya mereka dapat mengatasi masalah kewangan dan kembali membanggakan para penyokong. Kita terus sokong UiTM FC!',
+  'content_ms': 'Saya juga bersetuju dengan anda. Semoga pihak pengurusan UiTM FC dapat mencari jalan penyelesaian secepat mungkin supaya pasukan tersebut masih dapat bersaing dalam Liga Malaysia. Benar, ramai peminat yang ingin melihat prestasi UiTM FC musim depan. Mari kita nantikan berita baik daripada mereka dalam masa terdekat. Harapnya mereka dapat mengatasi masalah kewangan dan kembali membanggakan para penyokong. Kita terus sokong UiTM FC!',
+  'indon': False},
+ {'role': 'user',
+  'content': 'Ya lah, harapnya UiTM FC dapat dapat mencari penyelesaian yang cepat. Penyokong setia UiTM FC mesti excited nak tengok pasukan beraksi lagi musim hadapan. Semoga ada berita gembira dalam masa terdekat!',
+  'content_ms': 'Ya lah, harapnya UiTM FC dapat mencari penyelesaian yang cepat. Penyokong setia UiTM FC mesti teruja untuk melihat pasukan beraksi lagi musim depan. Semoga ada berita gembira dalam masa terdekat!',
+  'indon': False},
+ {'role': 'assistant',
+  'content': 'Betul tu, penyokong setia UiTM FC pasti sangat teruja melihat pasukan beraksi di musim hadapan. Kita harap pihak pengurusan dapat mencari penyelesaian dengan pantas supaya pasukan dapat kembali ke gelanggang. Kita tunggu berita gembira yang akan datang dan terus menyokong UiTM FC dengan penuh semangat. Biar bola sepak Malaysia sentiasa berwarna dengan kehadiran pasukan hebat seperti UiTM FC!',
+  'content_ms': 'Betul tu, penyokong setia UiTM FC pasti sangat teruja melihat pasukan beraksi pada musim depan. Kita harap pihak pengurusan dapat mencari penyelesaian dengan pantas supaya pasukan dapat kembali ke gelanggang. Kita tunggu berita gembira yang akan datang dan terus menyokong UiTM FC dengan penuh semangat. Biar bola sepak Malaysia sentiasa berwarna dengan kehadiran pasukan hebat seperti UiTM FC!',
+  'indon': False},
+ {'role': 'user',
+  'content': 'Ya betul tu, memang berharap pasukan UiTM FC dapat segera mencari jalan penyelesaian. Setiap pasukan memang perlu sokongan dan kami sebagai penyokong setia akan terus memberikan sokongan kepada pasukan kesayangan kami. Semoga ada berita gembira yang akan datang!',
+  'content_ms': 'Ya, betul tu. Memang berharap pasukan UiTM FC dapat segera mencari jalan penyelesaian. Setiap pasukan memang perlukan sokongan dan kami sebagai penyokong setia akan terus memberikan sokongan kepada pasukan kesayangan kami. Semoga ada berita gembira yang akan datang!',
+  'indon': False},
+ {'role': 'assistant',
+  'content': 'Setiap pasukan memang memerlukan sokongan daripada penyokong setia seperti anda. Anda adalah aset berharga bagi pasukan UiTM FC. Teruskan menyokong dengan penuh semangat dan harapan. Kita berdoa agar pihak pengurusan dapat mencari jalan penyelesaian dengan segera. Bersama-sama, mari kita nantikan berita gembira yang akan datang dan terus memberikan sokongan kepada pasukan kesayangan kita. UiTM FC pasti akan bangkit dan menyampaikan prestasi yang cemerlang musim hadapan!',
+  'content_ms': 'Setiap pasukan memang memerlukan sokongan daripada penyokong setia seperti anda. Anda adalah aset berharga bagi pasukan UiTM FC. Teruskan menyokong dengan penuh semangat dan harapan. Kita berdoa agar pihak pengurusan dapat mencari jalan penyelesaian dengan segera. Bersama-sama, mari kita nantikan berita gembira yang akan datang dan terus memberikan sokongan kepada pasukan kesayangan kita. UiTM FC pasti akan bangkit dan menyampaikan prestasi yang cemerlang musim depan!',
+  'indon': False}]
+\end{lstlisting}
+
+All synthetic dataset and implementation published at \href{https://huggingface.co/datasets/mesolitica/malaysian-ultrachat}{mesolitica/malaysian-ultrachat}.
 
 \subsubsection{Synthetic Malay CommonSense}
 
 include some data.
 
+Complete generating synthetic dataset implementation at \href{https://a.com}{here}.
+
 \subsubsection{Coding Dataset}
 
 include some data.
+
+Complete generating synthetic dataset implementation at \href{https://a.com}{here}.
+
+\subsection{Malay Instruction Dataset}
+
+\subsubsection{Synthetic Kesalahan Tatabahasa Dataset}
+
+Complete generating synthetic dataset implementation at \href{https://a.com}{here}.
+
+\subsubsection{Synthetic Noisy Stemming Dataset}
+
+Complete generating synthetic dataset implementation at \href{https://a.com}{here}.
+
+\subsubsection{Dewan Bahasa Pustaka Definition Dataset}
+
+Complete generating synthetic dataset implementation at \href{https://a.com}{here}.
 
 \subsection{Finetuning Phase}
 
 Use Mistral chat template, mention the chat template below,
 
-DeepSpeed Zero3, batch size 4 with gradient accumulation 9, 16384 context length, constant learning rate 2e-5.
+DeepSpeed Zero3, batch size 6, packing, 16384 context length, constant learning rate 2e-5.
 
-https://github.com/mesolitica/malaya/tree/5.1/session/mistral#instructions-7b-16384-context-length
+% https://github.com/mesolitica/malaya/tree/5.1/session/mistral#instructions-7b-16384-context-length
 
 \subsection{Result Finetuning}
 
@@ -165,18 +431,7 @@ Special thanks to Malaysia-AI volunteers.
 
 able to reduce research gap.
 
-\begin{thebibliography}{1}
-
-  \bibitem{CommonCrawl}
-  Common Crawl. (2023).
-  \newblock CC-MAIN-2023-50 Index.
-  \newblock Retrieved from \url{https://commoncrawl.github.io/cc-crawl-statistics/plots/languages}
-
-  \bibitem{Malaya}
-  Husein, Zolkepli. (2018).
-  \newblock \emph{Malaya: Natural-Language-Toolkit library for Bahasa Malaysia, powered by Deep Learning PyTorch}.
-  \newblock GitHub repository. Retrieved from \url{https://github.com/mesolitica/malaya}
-
-\end{thebibliography}
+\bibliography{reference}{}
+\bibliographystyle{unsrt}
 
 \end{document}

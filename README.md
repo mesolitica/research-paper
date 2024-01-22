@@ -1,6 +1,6 @@
 # research-paper
 
-Preprint under Mesolitica.
+Preprint under Mesolitica, we will update arXiv.org once we able to submit it.
 
 ## how-to Linux
 

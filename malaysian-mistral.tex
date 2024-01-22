@@ -537,7 +537,6 @@ All synthetic dataset and implementation published at \href{https://huggingface.
 
 \subsection{Fine-tuning Phase}
 
-\subsubsection{Mistral Chat Template}
 During the fine-tuning phase, we implemented full parameter tuning using the Mistral chat template. This process involved an extensive adjustment of all model parameters to optimize the chat interaction performance for malaysian contexts. Figure below shows the example of formatted chat template:
 
 \begin{lstlisting}[breaklines=true]
@@ -546,9 +545,7 @@ During the fine-tuning phase, we implemented full parameter tuning using the Mis
 
 \pagebreak
 
-\subsubsection{Hyperparameters}
-
-For 16384 context length, we fine-tune the model with instruction datasets to make it better understand and align with Malaysian context. Below are the hyperparameters we use during the fine-tuning process:
+To enhance the model's comprehension of question-and-answer sessions, we conducted fine-tuning using a context length of 16384 with an instruction dataset. Below are the hyperparameters we use during the fine-tuning process:
 
 \begin{table}[h]
   \centering

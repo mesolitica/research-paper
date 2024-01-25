@@ -7,7 +7,7 @@
 \usepackage{geometry}
 
 \hypersetup{
-    pdftitle={MaLLaM 🌙 Malaysia Large Language Model},
+    pdftitle={MaLLaM - Malaysia Large Language Model},
     pdfauthor={Husein Zolkepli, Aisyah Razak, Kamarul Adha, Ariff Nazhan},
     pdfsubject={Natural Language Processing, Large Language Models, Machine Learning},
     pdfkeywords={language models, malay natural language processing, deep learning},
@@ -19,7 +19,7 @@
 
 \geometry{margin=1.1in}
 
-\title{MaLLaM 🌙 Malaysia Large Language Model}
+\title{MaLLaM - Malaysia Large Language Model}
 \author{
   Husein Zolkepli\thanks{husein@mesolitica.com} \and 
   Aisyah Razak\thanks{aisyahrazak171@gmail.com} \and
@@ -35,10 +35,83 @@
 \begin{abstract}
   Addressing the gap in Large Language Model pretrained from scratch with Malaysian context, We trained models with 1.1 billion, 3 billion, and 5 billion parameters on a substantial 349GB dataset, equivalent to 90 billion tokens based on our pretrained Byte Pair Encoding (BPE) tokenizer for a single epoch. MaLLaM contributes to enhanced natural language understanding and generation tasks in the Malay language.
 
+  Although trained on a smaller dataset of 90 billion tokens, our instruction-tuned MaLLaM models perform competitively. When compared to ChatGPT3.5 and Malaysian Mistral, MaLLaM's instruction-tuned models demonstrate notable proficiency, underscoring the effectiveness of our approach in capturing and understanding the nuances of the Malaysian language.
+
   MaLLaM models mark a significant contribution to the field, providing comprehensive language representations grounded in Malaysian context. This endeavor aims to pave the way for enhanced natural language understanding and generation tasks specific to the linguistic nuances present in Malaysia. We discuss the training methodology, dataset composition, and the potential impact of MaLLaM in advancing the capabilities of large language models within the context of the Malay language.
 
-  All models released at \href{https://huggingface.co/collections/mesolitica/mallam-6577b59d1e0b436ae75f930f}{HuggingFace Mesolitica MaLLaM 🌙 Collection}.
+  All models released at \href{https://huggingface.co/collections/mesolitica/mallam-6577b59d1e0b436ae75f930f}{HuggingFace Mesolitica MaLLaM Collection}.
 
 \end{abstract}
+
+\section{Introduction}
+
+The landscape of large language models (LLMs) has predominantly been shaped by models trained on English, with subsequent adaptations and fine-tunings for languages like Tamil and Malaysian. Existing models such as Tamil-LLama \cite{balachandran2023tamilllama} and Malaysian-Mistral \cite{zolkepli2024large} have emerged as valuable assets, leveraging the foundation of English-based LLMs for further optimization in non-English languages. However, despite their commendable contributions, these models still carry traces of English nuances, presenting a unique challenge in achieving a fully language-specific representation.
+
+This introduction underscores the significance of mitigating residual English influences in language models tailored for specific linguistic contexts. While the adaptation of English-based LLMs has facilitated advancements in various languages, it falls short of capturing the intricacies and nuances unique to languages like Tamil and Malaysian. To address this gap, we embark on a novel approach by pre-training a large language model entirely from scratch, with a specific focus on the Malaysian language. This deliberate endeavor aims to establish a model that is inherently attuned to the linguistic subtleties and idiosyncrasies of Malaysian, overcoming the limitations posed by models with English-centric origins.
+
+The presence of such inherent English biases becomes particularly pertinent when envisioning the creation of a dedicated large language model for Malaysian linguistic contexts. The prevailing influence of English-centric sources, prevalent in public English news and articles, poses a potential challenge to the development of a truly indigenous language model. The need for a linguistic model devoid of these biases is underscored by the desire to accurately capture the unique nuances and intricacies of the Malaysian language.
+
+In light of these considerations, our initiative introduces MaLLaM, a large language model specifically pre-trained from scratch using a robust dataset equivalent to 90 billion tokens sourced from Malaysian contexts. The distinctiveness of MaLLaM lies in its genesis, free from the shadow of English-centric biases pervasive in existing language models. By cultivating a language model that is inherently attuned to Malaysian linguistic idiosyncrasies, we aim to address the gap left by models that, despite being fine-tuned for Malaysian languages, retain traces of English nuances. MaLLaM stands as a testament to our commitment to fostering linguistic authenticity and overcoming the challenges posed by the dominance of English-centric biases in current language modeling paradigms.
+
+\begin{itemize}
+  \item \textbf{Pre-training MaLLaM:} We utilized a powerful infrastructure consisting of 10 nodes of the Standard\_ND96amsr\_A100\_v4 Azure instance, with each node featuring 8 A100 80 GPUs. This configuration efficiently facilitated the pre-training of language models with 1.1 billion, 3 billion, and 5 billion parameters on a substantial 349GB dataset of Malaysian texts.
+
+  \item \textbf{Multi-turn Instruction-Tuned MaLLaM:} To ensure a seamless and meaningful comparison, we opted to employ the exact chat instruction dataset from Malaysian Mistral \cite{zolkepli2024large}. This approach enables us to replicate the same experimental setup, facilitating a direct and accurate comparison of our work with the existing model.
+\end{itemize}
+
+\section{Pre-Training Data}
+
+\subsection{Public Data}
+
+\textbf{Malay Wikipedia}, we incorporated the Malay Wikipedia dump, enriching the linguistic diversity by partially converting it into Jawi script. Utilizing the \href{https://www.ejawi.net/converterV2.php?go=rumi}{Ejawi converter}, we ensured that the model is not only proficient in understanding the standard Malay script but also adept at comprehending the intricacies of Jawi.
+
+\textbf{Malay Language study articles}, We enriched our dataset with content from the Malay dictionary and public articles from Dewan Bahasa Pustaka. This inclusion ensures our language model is well-versed in word meanings, usages, and various linguistic styles prevalent in Malaysian literature.
+
+\textbf{Malaysia Government public documents}, We included public government documents from the official Malaysia government website and Google searches to enrich our dataset. This ensures that our language model is exposed to formal language and communication styles used in official government contexts, enhancing its ability to understand and generate text relevant to administrative, legal, and policy domains in Malaysia.
+
+\textbf{Malaysian public articles}, We gathered a varied dataset by scraping articles from Malaysian sources. This process exposed our language model to different topics, writing styles, and language nuances found in Malaysian articles, contributing to a model well-versed in the Malaysian language across diverse domains.
+
+\textbf{Malaysian public social media}, We gathered diverse data by scraping content from specific Facebook pages, filtering tweets based on location and keywords, and extracting information from platforms like c.cari.com.my, b.cari.com.my, carigold, lowyat, and transcripts of Malaysian YouTube videos. This approach broadens our dataset to include various language styles and colloquial expressions from online Malaysian communities.
+
+\textbf{Malaysia public journals}, We added content from reputable Malaysian journals like \url{https://mjpharm.org}, \url{https://myjgeosc.com}, and \url{https://www.akademisains.gov.my} to our dataset. This ensures our language model is familiar with formal and technical language used in academic contexts, covering a variety of subjects.
+
+\textbf{Malaysian related public research papers}, We refined our dataset by filtering CrossRef using keywords like 'malaysia,' 'malay,' and 'melayu.' This targeted approach ensures that our language model is exposed to scholarly literature closely tied to Malaysia.
+
+Complete list of gathered data at \href{https://github.com/users/huseinzol05/projects/1}{Github Project - Prepare LLM dataset}.
+
+\subsection{Coding Data}
+
+Incorporating a coding dataset is a crucial component of our diverse training data. For this purpose, we utilized the original dataset available at \href{https://huggingface.co/datasets/bigcode/the-stack-dedup}{bigcode/the-stack-dedup}. To ensure relevance and efficiency, we selectively picked specific programming languages, including Python, Julia, C, C++, HTML, CSS, JavaScript, Go, Rust, Java, SQL, Markdown, R, Dockerfile, Ruby, Typescript, and YAML. To manage the dataset size, each programming language was limited to a maximum of 10GB.
+
+\subsection{Instruction-tuned Data}
+
+To augment the comprehensiveness of our training dataset, we devised a synthetic Malay instruction dataset. This encompassed diverse linguistic aspects, including the conversion between Rumi and Jawi scripts, dependency and constituency parsing, grammatical error generation (kesalahan tatabahasa), and coding instruction datasets related to various programming paradigms. Additionally, we included instructional content relevant to educational levels such as UPSR, PT3, and SPM, providing a broad coverage of language proficiency levels. The incorporation of syntactic and semantic elements, coupled with coding instructions, contributes to a well-rounded language model capable of handling a diverse array of linguistic tasks and understanding instructions across different domains.
+
+Complete list of Instruction-tuned Data at \href{https://github.com/mesolitica/malaya/wiki/MaLLaM-%F0%9F%8C%99-Malaysia-Large-Language-Model#instruction-dataset}{instruction-dataset}.
+
+\section{Deduplicating Data}
+
+\begin{table}[h]
+  \centering
+  \begin{tabular}{lccl}
+    \hline
+    \textbf{Parameter} & \textbf{Value} \\
+    \hline
+    num\_perm          & 256            \\
+    threshold          & 0.95           \\
+    hash\_func         & sha1           \\
+    hash\_bits         & 64             \\
+    \hline
+  \end{tabular}
+\end{table}
+
+Complete deduplicating data implementation at \href{https://github.com/malaysia-ai/dedup-text-dataset?tab=readme-ov-file#text-dedup}{here}. All deduped dataset published at \href{https://huggingface.co/datasets/malaysia-ai/dedup-text-dataset}{malaysia-ai/dedup-text-dataset}.
+
+\section{Pre-Training Tokenizer}
+
+Complete pre-training tokenizer implementation at \href{https://github.com/malaysia-ai/prepare-tokenizer}{here}
+
+\bibliography{mallam}{}
+\bibliographystyle{unsrt}
 
 \end{document}

@@ -61,7 +61,7 @@ In light of these considerations, our initiative introduces MaLLaM, a large lang
 
 \section{Pre-Training Data}
 
-\subsection{Public Data}
+\subsection{Public Data}\label{sec:public-data}
 
 \textbf{Malay Wikipedia}, we incorporated the Malay Wikipedia dump, enriching the linguistic diversity by partially converting it into Jawi script. Utilizing the \href{https://www.ejawi.net/converterV2.php?go=rumi}{Ejawi converter}, we ensured that the model is not only proficient in understanding the standard Malay script but also adept at comprehending the intricacies of Jawi.
 
@@ -89,7 +89,11 @@ To augment the comprehensiveness of our training dataset, we devised a synthetic
 
 Complete list of Instruction-tuned Data at \href{https://github.com/mesolitica/malaya/wiki/MaLLaM-%F0%9F%8C%99-Malaysia-Large-Language-Model#instruction-dataset}{instruction-dataset}.
 
-\section{Deduplicating Data}
+\section{Deduplicating and Postprocessing Data}
+
+We removed duplicate entries from our public data from ~\ref{sec:public-data} using the MinHash implementation from \url{https://github.com/ChenghaoMou/text-dedup}.
+
+We configured the MinHash algorithm with the following parameters:
 
 \begin{table}[h]
   \centering
@@ -107,9 +111,45 @@ Complete list of Instruction-tuned Data at \href{https://github.com/mesolitica/m
 
 Complete deduplicating data implementation at \href{https://github.com/malaysia-ai/dedup-text-dataset?tab=readme-ov-file#text-dedup}{here}. All deduped dataset published at \href{https://huggingface.co/datasets/malaysia-ai/dedup-text-dataset}{malaysia-ai/dedup-text-dataset}.
 
+After removing duplicates, we employed the postprocessing technique mentioned in Malaysian Mistral section 3.3 \cite{zolkepli2024large}.
+
 \section{Pre-Training Tokenizer}
 
+To ensure an efficient and versatile tokenizer, we conducted pretraining on a BPE (Byte Pair Encoding) tokenizer using diverse datasets, including Malay Wikipedia, synthetic Jawi, public articles, translated code instructions, Google-translated Tamil and Google-translated Punjabi. The objective was to develop a tokenizer capable of handling longer subwords for languages such as Malay, Mandarin, Tamil, Jawi, English, and Arabic. The decision to use BPE was motivated by certain limitations observed in SentencePiece, where newline characters caused issues, some Tamil and Jawi characters were missing, and the processing speed for very long texts was suboptimal. By opting for BPE, we addressed these challenges, ensuring a robust and efficient tokenizer for our language model training.
+
+The BPE tokenizer was trained on a deduplicated text dataset of 85GB, with a vocabulary size of 32,000.
+
+The decision to train our own BPE tokenizer was driven by the goal of minimizing token sizes during both input and output. To illustrate the efficiency gained, we conducted a comparison using the \href{https://huggingface.co/datasets/mesolitica/malaysian-ultrachat}{Malaysian Ultrachat AstroAwani dataset}. Our pre-trained BPE tokenizer achieved a notable reduction of up to 43\% in token size when compared to tokenizers employed by Llama2 and Mistral. This reduction in token size enhances the efficiency and resource optimization of our language model, offering advantages in terms of computational performance and memory usage during processing.
+
 Complete pre-training tokenizer implementation at \href{https://github.com/malaysia-ai/prepare-tokenizer}{here}
+
+\section{Tokenizing Data}
+
+Our dataset comprises a substantial 349GB of text in JSONL format, amounting to 90 billion tokens. The following table breaks down the distribution of token sizes within the dataset:
+
+\begin{table}[h]
+  \centering
+  \begin{tabular}{lccl}
+    \hline
+    \textbf{Distribution}                                                                                                                                                & \textbf{Tokens (B)} \\
+    \hline
+    \href{https://github.com/malaysia-ai/dedup-text-dataset/blob/main/pretrain-llm/prepare-dedup-text-dataset-4096.ipynb}{deduped text Dataset}                          & 31.7                \\
+    \href{https://github.com/malaysia-ai/dedup-text-dataset/blob/main/pretrain-llm/prepare-starcoder-4096.ipynb}{Filtered StarCoder} \cite{li2023starcoder}              & 40.98               \\
+    \href{https://github.com/malaysia-ai/dedup-text-dataset/blob/main/pretrain-llm/prepare-starcoder-4096.ipynb}{Unfiltered MS Madlad 400} \cite{kudugunta2023madlad400} & 14.98               \\
+    \href{https://github.com/malaysia-ai/dedup-text-dataset/blob/main/pretrain-llm/prepare-instructions.ipynb}{Instruction-tuned Dataset}                                & 1.58                \\
+    \href{https://github.com/malaysia-ai/dedup-text-dataset/blob/main/pretrain-llm/prepare-extra.ipynb}{Malaysia journals and research papers}                           & 1.14                \\
+    \hline
+  \end{tabular}
+\end{table}
+
+To optimize data processing efficiency, we use MosaicML Streaming library \cite{mosaicml2022streaming}, by using hashing technique. Recognizing the complexity of our dataset, we implemented data distribution processing to transform it into the MosaicML streaming format,
+
+\begin{figure}[h]
+  \centering
+  \includegraphics[width=0.6\linewidth]{pic/how-to-mosaic.png} % Replace with your image file
+\end{figure}
+
+This involves splitting the original JSONL file into smaller ones, and each of these smaller files undergoes multiprocessing for conversion into the Mosaic format. Subsequently, these smaller Mosaic files are merged into a single Mosaic file. It's worth noting that MosaicML streaming accesses one folder at a time, necessitating the consolidation of smaller files into a unified format for seamless training data access.
 
 \bibliography{mallam}{}
 \bibliographystyle{unsrt}

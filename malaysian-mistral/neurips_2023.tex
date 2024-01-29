@@ -1,11 +1,41 @@
-\documentclass{article}
-\usepackage{amsmath, amssymb, amsthm}
+\documentclass[preprint]{article}
+
+
+% if you need to pass options to natbib, use, e.g.:
+%     \PassOptionsToPackage{numbers, compress}{natbib}
+% before loading neurips_2023
+
+
+% ready for submission
+\usepackage{neurips_2023}
+
+
+% to compile a preprint version, e.g., for submission to arXiv, add add the
+% [preprint] option:
+%     \usepackage[preprint]{neurips_2023}
+
+
+% to compile a camera-ready version, add the [final] option, e.g.:
+%     \usepackage[final]{neurips_2023}
+
+
+% to avoid loading the natbib package, add option nonatbib:
+%    \usepackage[nonatbib]{neurips_2023}
+
+
+\usepackage[utf8]{inputenc} % allow utf-8 input
+\usepackage[T1]{fontenc}    % use 8-bit T1 fonts
+\usepackage{hyperref}       % hyperlinks
+\usepackage{url}            % simple URL typesetting
+\usepackage{booktabs}       % professional-quality tables
+\usepackage{amsfonts}       % blackboard math symbols
+\usepackage{nicefrac}       % compact symbols for 1/2, etc.
+\usepackage{microtype}      % microtypography
+\usepackage{xcolor}         % colors
+\usepackage{listings}
+\usepackage{cite}
 \usepackage{graphicx}
 \usepackage{hyperref}
-\usepackage{geometry}
-\usepackage{cite}
-\usepackage{listings}
-\usepackage{xcolor}
 
 \lstset{
     breaklines=true,
@@ -31,18 +61,25 @@
     citecolor=blue,
     urlcolor=blue
 }
-
-\geometry{margin=1.1in}
-% Add any additional packages you may need
-
 \title{Large Malaysian Language Model Based on Mistral for Enhanced Local Language Understanding}
+
+
+% The \author macro works with any number of authors. There are two commands
+% used to separate the names and addresses of multiple authors: \And and \AND.
+%
+% Using \And between authors leaves it to LaTeX to determine where to break the
+% lines. Using \AND forces a line break at that point. So, if LaTeX puts 3 of 4
+% authors names on the first line, and the last on the second line, try using
+% \AND instead of \And before the third author name.
+
+
 \author{
   Husein Zolkepli\thanks{husein@mesolitica.com} \and 
   Aisyah Razak\thanks{aisyahrazak171@gmail.com} \and
   Kamarul Adha\thanks{kamarul.adha360@gmail.com} \and
   Ariff Nazhan\thanks{ariffnzhn@gmail.com}
 }
-\date{\today}
+
 
 \begin{document}
 
@@ -230,14 +267,6 @@ A notable aspect of this generation process was the tendency of these models to 
 
 We use data from ~\ref{sec:wikipedia} and generate synthetic OpenQA dataset by using prompt below,
 
-\begin{lstlisting}[]
-  paragraph ```
-  {}
-  ```
-  
-  berdasarkan paragraph, jana soalan melayu dan jawapan melayu
-\end{lstlisting}
-
 After that, we use ChatGPT3.5 API to generate the synthetic data, an example of generated dataset,
 
 \begin{lstlisting}[]
@@ -258,7 +287,7 @@ After that, we use ChatGPT3.5 API to generate the synthetic data, an example of 
 
 We also replicated the same technique for Malaysia Hansard and MS CommonCrawl samples. All synthetic dataset and implementation published at \href{https://huggingface.co/datasets/mesolitica/chatgpt-malaysian-open-qa}{mesolitica/chatgpt-malaysian-open-qa}.
 
-\pagebreak
+
 
 \subsubsection{Malay Instruction with Malaysian context}
 
@@ -300,7 +329,7 @@ Original depth instruction,
   '#The Given Prompt#', '#Rewritten Prompt#', 'given prompt' and 'rewritten prompt' are not allowed to appear in #Rewritten Prompt#
 \end{lstlisting}
 
-\pagebreak
+
 Our depth instruction,
 
 \begin{lstlisting}[]
@@ -432,7 +461,7 @@ We expanded our training dataset by creating a set of synthetic common sense que
 
 All synthetic dataset and implementation published at \href{https://huggingface.co/datasets/mesolitica/chatgpt4-commonsense-qa}{mesolitica/chatgpt4-commonsense-qa}.
 
-\pagebreak
+
 
 \subsubsection{Coding Dataset}
 
@@ -472,7 +501,7 @@ Output from ChatGPT4,
   Ini akan mengelakkan ralat indeks, kerana kita tidak akan pernah mencuba mengakses indeks yang melebihi had senarai.
 \end{lstlisting}
 
-\pagebreak
+
 
 Translated using our own Neural Machine Translation,
 
@@ -514,11 +543,11 @@ All synthetic dataset and implementation published at \href{https://huggingface.
 
 We crafted a synthetic dataset focusing on introducing grammatical errors using the \href{https://malaya.readthedocs.io/en/stable/load-dependency.html}{Malaya dependency parser}. We performed a positional swap based on the parsed tree structure. This deliberate introduction of errors was intended to create a dataset challenging language models to identify and rectify grammatical mistakes.
 
-\pagebreak
+
 
 \begin{figure}[h]
   \centering
-  \includegraphics[width=0.6\linewidth]{pic/dependency.png} % Replace with your image file
+  \includegraphics[width=0.6\linewidth]{img/dependency.png} % Replace with your image file
 \end{figure}
 
 Based on the figure above, we can exchange the positions of 7 and 8 to introduce compound grammar error. In this \href{https://github.com/mesolitica/malaya/tree/master/session/tatabahasa/prepare-dataset}{malaya/session/tatabahasa} repository, we generated up to 14 different synthetic grammatical errors.
@@ -543,7 +572,7 @@ During the fine-tuning phase, we implemented full parameter tuning using the Mis
 "<s>[INST] Bagaimana cara saya menghasilkan teks tebal dalam Bash? Saya mempunyai skrip Bash yang mencetak beberapa teks ke skrin menggunakan perintah `echo "Beberapa Teks"`. Adakah cara untuk memformat teks tersebut supaya ia menjadi tebal? [/INST] Anda boleh menggunakan perintah `echo -e` untuk memformat teks supaya ia menjadi tebal. Contohnya, `echo -e "033[1mTeks Tebal033[0m"`. Dalam contoh ini, `033[1m` akan menjadikan teks tebal, manakala `033[0m` digunakan untuk menetapkan semula format teks. Semoga ia membantu!</s> [INST] Bagaimana pula dengan format teks lain? Adakah terdapat cara untuk menjadikannya condong atau bergaris bawah dalam skrip Bash? [/INST]"
 \end{lstlisting}
 
-\pagebreak
+
 
 We fine-tuned the model with a 16384-context length using an instruction dataset, aiming to improve its understanding of QA sessions, and use causal language model approach mentioned at ~\ref{sec:4096-pretrained}. Below are the hyperparameters we use during the fine-tuning process:
 
@@ -761,7 +790,7 @@ Special thanks to Malaysia-AI volunteers especially \href{https://www.linkedin.c
 
 In summary, creating a large language model tailored for Malaysia, was a detailed process involving pretraining and finetuning on a specific dataset. This effort required significant time, funding, and expertise. Training Mistral demanded high-end hardware, such as 8 A100 GPUs, making it a State of the Art model surpassing ChatGPT3.5 in the Malaysian context. The decision to open-source Malaysian Mistral and its code reflects a commitment to accessibility and collaboration, allowing both public and private organizations to benefit. Looking forward, the team plans to introduce an open-sourced multi-modal model capable of processing audio, image, and text. Positioned at the forefront of AI in Malaysia, the goal is to provide cutting-edge models for the public's benefit, showcasing Malaysian Mistral as a technological achievement and a commitment to advancing AI for all.
 
-\bibliography{malaysian-mistral}{}
+\bibliography{neurips_2023}{}
 \bibliographystyle{unsrt}
 
 \end{document}

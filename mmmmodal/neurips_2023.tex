@@ -1,0 +1,94 @@
+\documentclass[preprint]{article}
+
+
+% if you need to pass options to natbib, use, e.g.:
+%     \PassOptionsToPackage{numbers, compress}{natbib}
+% before loading neurips_2023
+
+
+% ready for submission
+\usepackage{neurips_2023}
+
+
+% to compile a preprint version, e.g., for submission to arXiv, add add the
+% [preprint] option:
+%     \usepackage[preprint]{neurips_2023}
+
+
+% to compile a camera-ready version, add the [final] option, e.g.:
+%     \usepackage[final]{neurips_2023}
+
+
+% to avoid loading the natbib package, add option nonatbib:
+%    \usepackage[nonatbib]{neurips_2023}
+
+
+\usepackage[utf8]{inputenc} % allow utf-8 input
+\usepackage[T1]{fontenc}    % use 8-bit T1 fonts
+\usepackage{hyperref}       % hyperlinks
+\usepackage{url}            % simple URL typesetting
+\usepackage{booktabs}       % professional-quality tables
+\usepackage{amsfonts}       % blackboard math symbols
+\usepackage{nicefrac}       % compact symbols for 1/2, etc.
+\usepackage{microtype}      % microtypography
+\usepackage{xcolor}         % colors
+\usepackage{listings}
+\usepackage{cite}
+\usepackage{graphicx}
+\usepackage{hyperref}
+
+
+\lstset{
+  breaklines=true,
+  basicstyle=\ttfamily\small,
+  commentstyle=\color{green!40!black},
+  keywordstyle=\color{blue},
+  numberstyle=\tiny\color{gray},
+  numbers=none,
+  frame=single,
+  breaklines=true,
+  breakatwhitespace=true,
+  captionpos=b,
+  showstringspaces=false,
+  columns=fullflexible,
+}
+
+\hypersetup{
+    pdftitle={Multi-Lingual Malaysian Embedding: Leveraging Large Language Models for Semantic Representations},
+    pdfauthor={Husein Zolkepli, Aisyah Razak, Kamarul Adha, Ariff Nazhan},
+    pdfsubject={Natural Language Processing, Large Language Models, Machine Learning},
+    pdfkeywords={language models, malay natural language processing, deep learning},
+    colorlinks=true,
+    linkcolor=blue,
+    citecolor=blue,
+    urlcolor=blue
+}
+\title{Multi-Lingual Malaysian Embedding: Leveraging Large Language Models for Semantic Representations}
+\author{
+  Husein Zolkepli\thanks{husein@mesolitica.com} \and
+  Aisyah Razak\thanks{aisyahrazak171@gmail.com} \and
+  Kamarul Adha\thanks{kamarul.adha360@gmail.com} \and
+  Ariff Nazhan\thanks{ariffnzhn@gmail.com}
+}
+
+\begin{document}
+
+\maketitle
+
+\begin{abstract}
+  In this work, we present a novel approach to multi-lingual embedding in the context of the Malaysian language. We fine-tuned the Malaysian Llama2 model specifically for embedding tasks involving both negative and positive pairs. The resulting embeddings exhibit exceptional performance, showcasing their suitability for applications related to semantic similarity and RAG (Retrieval-Augmented Generation).
+
+  Our approach demonstrates state-of-the-art results, surpassing the performance of OpenAI's text-embedding-ada-002 model on Malaysian contextual embedding and RAG tasks. The fine-tuned Malaysian Llama2 model not only sets a new benchmark but also establishes itself as a powerful tool for capturing nuanced semantic relationships in the multi-lingual Malaysian language landscape.
+
+  All models released at \href{https://huggingface.co/collections/mesolitica/malaysian-embedding-6523612bfe5881ad35f81b99}{HuggingFace Mesolitica Malaysian Embedding Collection}.
+
+\end{abstract}
+
+\section{Acknowledgement}
+
+Special thanks to Malaysia-AI volunteers especially \href{https://www.linkedin.com/in/wan-adzhar-faiq-adzlan-19a27baa/}{Wan Adzhar Faiq Adzlan}, \href{https://www.linkedin.com/in/ammar-azman/}{Ammar Azman}, \href{https://www.linkedin.com/in/amzar96/}{M. Amzar}, \href{https://www.linkedin.com/in/muhammad-farhan-helmy-0529501a7/}{Muhammad Farhan} and \href{https://www.linkedin.com/in/syafie-nizam/}{Syafie Nizam} for contributing dataset to train MaLLaM.
+
+\bibliography{neurips_2023}{}
+\bibliographystyle{unsrt}
+
+\end{document}

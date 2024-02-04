@@ -773,6 +773,8 @@ An example of generated dataset,
 
 All synthetic dataset and implementation published at \href{https://huggingface.co/datasets/mesolitica/chatgpt-code-instruct-multiturn}{mesolitica/chatgpt-code-instruct-multiturn}.
 
+\pagebreak
+
 \subsection{Malay Instruction Dataset}
 
 \subsubsection{Synthetic Kesalahan Tatabahasa (Grammar Errors) Dataset}
@@ -805,8 +807,6 @@ During the fine-tuning phase, we implemented full parameter tuning using the Mis
 \begin{lstlisting}[breaklines=true]
 "<s>[INST] Bagaimana cara saya menghasilkan teks tebal dalam Bash? Saya mempunyai skrip Bash yang mencetak beberapa teks ke skrin menggunakan perintah `echo "Beberapa Teks"`. Adakah cara untuk memformat teks tersebut supaya ia menjadi tebal? [/INST] Anda boleh menggunakan perintah `echo -e` untuk memformat teks supaya ia menjadi tebal. Contohnya, `echo -e "033[1mTeks Tebal033[0m"`. Dalam contoh ini, `033[1m` akan menjadikan teks tebal, manakala `033[0m` digunakan untuk menetapkan semula format teks. Semoga ia membantu!</s> [INST] Bagaimana pula dengan format teks lain? Adakah terdapat cara untuk menjadikannya condong atau bergaris bawah dalam skrip Bash? [/INST]"
 \end{lstlisting}
-
-
 
 We fine-tuned the model with a 16384-context length using an instruction dataset, aiming to improve its understanding of QA sessions, and use causal language model approach mentioned at ~\ref{sec:4096-pretrained}. Below are the hyperparameters we use during the fine-tuning process:
 

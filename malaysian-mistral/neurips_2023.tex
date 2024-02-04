@@ -263,33 +263,277 @@ For coding instructions and synthetic CommonQA, we leveraged the capabilities of
 
 A notable aspect of this generation process was the tendency of these models to produce instructions in Indonesian. To address this, we implemented Neural Machine Translation, a powerful tool that seamlessly translated the instructions from Indonesian to standard Malay. This translation system demonstrated proficiency not only in translating between Indonesian and standard Malay but also in handling other languages such as English, Javanese, and Banjarese. Notably, it exhibited the ability to maintain the structural integrity of the original text, selectively translating only necessary components, such as programming code snippets, while preserving the overall text structure. We open-sourced the neural machine translation model at \href{https://huggingface.co/mesolitica/translation-t5-small-standard-bahasa-cased-code}{mesolitica/translation-t5-small-standard-bahasa-cased-code}.
 
-\subsubsection{OpenQA MS Wikipedia}
+\subsubsection{Coding Dataset}
 
-We use data from ~\ref{sec:wikipedia} and generate synthetic OpenQA dataset by using prompt below,
+We improved our coding dataset with original code samples from \url{https://huggingface.co/datasets/theblackcat102/evol-codealpaca-v1}, inspired by the WizardCoder \cite{luo2023wizardcoder}. To make the dataset more inclusive, we used ChatGPT4 to translate English coding questions into Malay and generate corresponding Malay answers. This approach expands the language model's capabilities, allowing it to understand and respond to coding queries in both English and Malay. Below is the prompt to translate the dataset into Malay and provide answers in Malay,
 
-After that, we use ChatGPT3.5 API to generate the synthetic data, an example of generated dataset,
-
-\begin{lstlisting}[]
-  {'paragraph': 'The Legend of Korra ialah sebuah siri animasi televisyen Amerika Syarikat yang telah ditayangkan di ...',
- 'url': 'https://ms.wikipedia.org/wiki?curid=823980',
- 'qa': {'qa': [{'question': 'Apakah siri animasi yang ditayangkan di Nickelodeon sejak 2012?',
-    'answer': 'The Legend of Korra'},
-   {'question': 'Siapakah pencipta siri animasi The Legend of Korra?',
-    'answer': 'Bryan Konietzko dan Michael Dante DiMartino'},
-   {'question': "Apakah yang dimaksudkan dengan 'bending' dalam siri animasi The Legend of Korra?",
-    'answer': 'Kekuatan untuk memanipulasi elemen seperti air, bumi, api, atau udara'},
-   {'question': 'Siapakah Avatar Korra?',
-    'answer': 'Pengganti Aang dalam siri sebelumnya yang menghadapi pergolakan politik dan roh semangat dalam dunia pemodenan'},
-   {'question': 'Apakah kejayaan siri The Legend of Korra?',
-    'answer': 'Kejayaan yang kritikal dan komersial dengan jumlah penonton tertinggi bagi siri animasi di Amerika Syarikat pada tahun 2012'}]}}
-    
+\begin{lstlisting}[breaklines=true]
+  instruction = 'Please amend the subsequent Python script so that it includes ...'
+  ins = chatgpt4(f'terjemah ke bahasa melayu: {instruction}')
+  answer = chatgp4(ins + ', jawab dalam bahasa melayu')
 \end{lstlisting}
 
-We also replicated the same technique for Malaysia Hansard and MS CommonCrawl samples. All synthetic dataset and implementation published at \href{https://huggingface.co/datasets/mesolitica/chatgpt-malaysian-open-qa}{mesolitica/chatgpt-malaysian-open-qa}.
+While this process exhibited proficiency, there were instances where ChatGPT4 generated responses in Indonesian. To ensure linguistic consistency, we use our own Neural Machine Translation mentioned at ~\ref{sec:generating-instruction-dataset}, seamlessly translating the Indonesian responses to Malay.
 
+Output from ChatGPT4,
 
+\begin{lstlisting}[breaklines=true]
+  Untuk mengubah skrip ini, kita Akkan menggunakan konsep pengulangan 'while' dan memastikan indeks tidak melebihi panjang senarai. Selain itu, kita harus memastikan skrip kita mengendalikan senarai kosong dengan betul.
 
-\subsubsection{Malay Instruction with Malaysian context}
+  Berikut adalah cara untuk mengubahnya:
+
+  ```python
+    # Menetapkan senarai integer
+    arr = [1, 2, 3, 4]
+
+    # Tentukan panjang senarai
+    n = len(arr)
+
+    # Pastikan senarai tidak kosong
+    if n > 0:
+      i = 0
+      # Melalui senarai dan keluarkan setiap elemen individu
+      while i < n:
+          print(arr[i])
+          i += 1
+    else:
+      print("Senarai adalah kosong.")
+  ```
+
+  Dalam skrip ini, sebelum kita mula mengulangi, kita memeriksa sama ada `n`, yang merupakan panjang senarai, lebih besar daripada 0. Jika tidak (yang bermaksud senarai kosong), kita mencetak mesej yang sesuai.
+
+  Kemudian, kita menggunakan pengulangan 'while' untuk mengulangi semasa indeks `i` kurang daripada panjang `n` senarai. Semasa setiap iterasi, kita mencetak elemen senarai dan menambahkan 1 ke indeks, supaya kita boleh bergerak ke elemen seterusnya pada iterasi seterusnya.
+
+  Ini akan mengelakkan ralat indeks, kerana kita tidak akan pernah mencuba mengakses indeks yang melebihi had senarai.
+\end{lstlisting}
+
+After that we translated using our own Neural Machine Translation,
+
+\begin{lstlisting}[breaklines=true]
+  Untuk mengubah skrip ini, kita Akkan menggunakan konsep pengulangan 'while' dan memastikan indeks tidak melebihi panjang senarai. Selain itu, kita perlu memastikan skrip kita mengawal senarai kosong dengan betul.
+
+  Berikut adalah cara untuk mengubahnya:
+
+  ```python
+    # Set up a list of integers
+    arr = [1, 2, 3, 4]
+
+    # Tentukan panjang senarai
+    n = len(arr)
+
+    # Pastikan senarai tidak kosong
+    if n > 0:
+      i = 0
+      # Melalui senarai dan keluarkan setiap elemen individu
+      while i < n:
+          print(arr[i])
+          i += 1
+    else:
+      print("Senarai adalah kosong.")
+  ```
+
+  Dalam skrip ini, sebelum kita mula mengulangi, kita memeriksa sama ada `n`, iaitu panjang senarai, lebih besar daripada 0. Jika tidak (yang bermaksud senarai kosong), kita mencetak mesej yang sesuai.
+
+  Kemudian, kita menggunakan pengulangan 'while' untuk mengulangi semasa indeks `i` kurang daripada panjang `n` senarai. Semasa setiap iterasi, kita mencetak elemen senarai dan menambahkan 1 ke indeks, supaya kita boleh bergerak ke elemen seterusnya pada iterasi seterusnya.
+
+  Ini akan mengelakkan ralat indeks, kerana kita tidak akan mencuba mengakses indeks yang melebihi had senarai.
+\end{lstlisting}
+
+All synthetic dataset and implementation published at \href{https://huggingface.co/datasets/mesolitica/chatgpt4-code-instruct}{mesolitica/chatgpt4-code-instruct}.
+
+\subsubsection{Synthetic Malay CommonsenseQA}
+
+We expanded our training dataset by creating a set of synthetic common sense questions and answers using ChatGPT4. Taking inspiration from CommonsenseQA \cite{talmor2019commonsenseqa}, we developed questions that explore common sense reasoning. This addition to our training data helps the language model improve its understanding of everyday situations and enhances its ability to generate commonsense responses.
+Below is the prompt to generate the synthetic dataset,
+
+\begin{lstlisting}[breaklines=true]
+  question = 'The sanctions against the school were a punish...'
+  choices = {'label': ['A', 'B', 'C', 'D', 'E']}
+  answerKey = 'A'
+  instruction = f'Jawab soalan berikut.\n{question}\n{choices}\nJawapan: {answerKey}'
+  instruction = f'{instruction}\n\ngenerate similar malay questions included answer'
+  chatgpt4(instruction)
+\end{lstlisting}
+
+An example of generated dataset,
+
+\begin{lstlisting}[breaklines=true]
+  Question: 1. Seseorang yang bersara mungkin perlu kembali bekerja jika mereka apa? A. mempunyai hutang B. mencari pendapatan C. meninggalkan pekerjaan D. memerlukan wang E. kehilangan kunci
+  Anwer: D
+\end{lstlisting}
+
+All synthetic dataset and implementation published at \href{https://huggingface.co/datasets/mesolitica/chatgpt4-commonsense-qa}{mesolitica/chatgpt4-commonsense-qa}.
+
+\subsubsection{Synthetic Malaysian QA}\label{sec:synthetic-malaysian-qa}
+
+We generated a comprehensive set of questions and answers encompassing 58 diverse Malaysian topics, spanning various domains such as politics, socioeconomy, culture, gender, religion, sociology, social class, technology, ethnicity, infrastructure, health, education, ecology, party politics, diplomacy, history, cuisine, microeconomics, business, artificial intelligence, law, and more. The topics also include specific regions and states such as Negeri Johor, Negeri Kedah, Negeri Kelantan, and others, as well as political parties such as Parti Keadilan Rakyat and Parti Islam SeMalaysia. Additionally, the set covers cultural aspects like literature, language (Tatabahasa, Kesusasteraan Melayu), poetry forms like Pantun, Sajak, and Syair, and socio-political concepts like Constitutional Monarchy, Parliamentary Democracy, and Political Economy. This extensive set of questions and answers aims to provide a nuanced and comprehensive exploration of diverse topics relevant to the Malaysian context.
+Below is the prompt to generate the synthetic dataset,
+
+\begin{lstlisting}[breaklines=true]
+  topic = 'politics'
+  instruction = f'generate random very specific {topic} questions dalam bahasa melayu related to malaysian context'
+  chatgpt4(instruction)
+\end{lstlisting}
+
+An example of generated dataset,
+
+\begin{lstlisting}[breaklines=true]
+{'question': 'Adakah AI boleh digunakan untuk mempercepat proses pengesanan dan rawatan penyakit berjangkit di Malaysia?',
+ 'answer': 'Ya, AI boleh digunakan untuk mempercepat proses pengesanan dan rawatan penyakit berjangkit di Malaysia. AI dapat membantu dalam pengumpulan dan analisis data kesihatan secara cepat dan tepat, membolehkan doktor dan pakar kesihatan membuat keputusan yang lebih baik dan pantas dalam merawat pesakit. AI juga boleh digunakan untuk mengesan pola penyebaran penyakit berjangkit, memungkinkan tindakan pencegahan dan kawalan yang lebih efektif. Sebagai contoh, AI boleh digunakan dalam sistem pengawasan epidemik untuk mengenal pasti kawasan yang berisiko tinggi dan mengambil langkah-langkah pencegahan segera.'}
+\end{lstlisting}
+
+All synthetic dataset and implementation published at \href{https://huggingface.co/datasets/mesolitica/chatgpt4-malaysian-general-qa#synthetic-malaysian-qa}{mesolitica/chatgpt4-malaysian-general-qa}.
+
+\subsubsection{Synthetic Ayat Aktif to Ayat Pasif}
+
+Derived from content available at \url{https://soalanspm.com/ayat-aktif-dan-ayat-pasif/}, we utilized ChatGPT4 to generate synthetic transformations from active sentence (ayat aktif) to passive sentence (ayat pasif). This process involved leveraging the capabilities of ChatGPT4 to produce linguistically accurate and contextually relevant conversions, contributing to the enrichment of our dataset with diverse examples of passive sentence structures derived from the provided active sentences.
+Below is the prompt to generate the synthetic dataset,
+
+\begin{lstlisting}[breaklines=true]
+  instruction = 'Ayat Aktif: Puan Aishah menasihati Ali agar belajar bersungguh-sungguh kerana peperiksaan hampir tiba.\nAyat Pasif: Ali dinasihati oleh Puan Aishah agar bersungguh-sungguh kerana peperiksaan hampir tiba.'
+  instruction = f'{instruction}\n\ngenerate similar questions included answers like above.'
+  chatgpt4(instruction)
+\end{lstlisting}
+
+An example of generated dataset,
+
+\begin{lstlisting}[breaklines=true]
+  {'s': 'Ayat Aktif: Encik Razak mengajar pelajar-pelajar tentang kepentingan menjaga alam sekitar.\nAyat Pasif: Pelajar-pelajar diajar tentang kepentingan menjaga alam sekitar oleh Encik Razak.'}
+\end{lstlisting}
+
+All synthetic dataset and implementation published at \href{https://huggingface.co/datasets/mesolitica/chatgpt4-ayat-aktif-pasif}{mesolitica/chatgpt4-ayat-aktif-pasif}.
+
+\subsubsection{Synthetic Malay Paper 1}
+
+We expanded the diversity of our Malay Paper 1 dataset by incorporating synthetic questions generated from various Malay Paper 1 websites. Leveraging the capabilities of ChatGPT4, we prompted the model to generate questions similar to those found in Malay Paper 1 examinations. This approach allowed us to introduce a broader range of question types and structures, enhancing the overall diversity of our dataset. The synthetic questions generated through ChatGPT4 provide additional variations, contributing to a more comprehensive and representative dataset for Malay Paper 1 examinations.
+Below is the prompt to generate the synthetic dataset,
+
+\begin{lstlisting}[breaklines=true]
+  instruction = 'Jawab soalan berikut.\n3 Manisah amat menggemari pekasam ikan _______ yang dibuat oleh neneknya.\nA peparam\nC pepuyu\nB jejentik\nD reriang\nJawapan: C'
+  instruction = f'{instruction}\n\ngenerate similar questions included answers like above.'
+\end{lstlisting}
+
+An example of generated dataset,
+
+\begin{lstlisting}[breaklines=true]
+  {'question': '1. ........, kamu sudah pandai bermain gitar sekarang!\nA. Oh\nB. Eh\nC. Hai\nD. Ah',
+ 'answer': 'B'}
+\end{lstlisting}
+
+All synthetic dataset and implementation published at \href{https://huggingface.co/datasets/mesolitica/chatgpt4-kertas1}{mesolitica/chatgpt4-kertas1}.
+
+\subsubsection{synthetic Malaysian Open QA Choice}\label{sec:synthetic-qa-choice}
+
+We employed the tool at \url{https://github.com/jxnl/instructor} to generate Open QA Choice questions from diverse sources such as MS Wikipedia, MajalahSains, and Dewan Bahasa articles. Leveraging the Pydantic class, we applied a structured approach to prompt ChatGPT3.5 for generating Open QA Choice responses within the given context. This methodology facilitated the creation of a dataset enriched with Open QA Choice questions derived from authoritative and varied content, offering a more comprehensive and nuanced set of queries for the language model.
+Below is the prompt to generate the synthetic dataset,
+
+\begin{lstlisting}[breaklines=true]
+  from pydantic import BaseModel, Field
+  from enum import Enum
+  from typing import List
+
+  class AnswerEnum(str, Enum):
+      A = 'A'
+      B = 'B'
+      C = 'C'
+      D = 'D'
+      
+  class Selective_QA(BaseModel):
+      question: str
+      A: str
+      B: str
+      C: str
+      D: str
+      answer: AnswerEnum
+          
+  class QAS(BaseModel):
+      qa: List[Selective_QA]
+  
+  paragraph = 'Pelaburan Syarikat China di Malaysia Tingkat Hubungan ...'
+  instruction = f"""
+  paragraph ```
+  {paragraph}
+  ```
+
+  berdasarkan paragraph, jana soalan melayu dan jawapan melayu
+  """
+  chatgpt(instruction, response_model=QAS)
+\end{lstlisting}
+
+An example of generated dataset,
+
+\begin{lstlisting}[breaklines=true]
+  {'paragraph': 'Pelaburan Syarikat China di Malaysia Tingkat Hubungan ...',
+ 'qa': {'qa': [{'question': 'Siapakah Menteri Perdagangan Antarabangsa dan Industri Malaysia?',
+    'A': 'Tengku Datuk Seri Utama Tengku Zafrul Aziz',
+    'B': 'Datuk Arham Abdul Rahman',
+    'C': 'Tengku Zafrul Tengku Abdul Aziz',
+    'D': 'Datuk Seri Utama Tengku Zafrul Aziz',
+    'answer': 'A'},
+   {'question': 'Apakah yang dikatakan oleh Tengku Datuk Seri Utama Tengku Zafrul Aziz mengenai peningkatan minat syarikat China melabur di Malaysia?',
+    'A': 'Memberi petanda baik kepada negara',
+    'B': 'Meningkatkan hubungan dua hala antara Malaysia dan China',
+    'C': 'Disokong oleh keyakinan terhadap kerajaan Perpaduan negara',
+    'D': 'Semua jawapan di atas betul',
+    'answer': 'D'},
+   {'question': 'Berapakah nilai pelaburan berpotensi yang diperoleh daripada syarikat China yang bernilai RM 170 bilion?',
+    'A': 'RM 55.4 bilion',
+    'B': 'RM 264.4 bilion',
+    'C': 'RM 170 bilion',
+    'D': 'RM 11 545',
+    'answer': 'C'},
+   {'question': 'Berapakah bilangan projek yang melibatkan China dan telah diluluskan dalam tahun 2022?',
+    'A': '91 projek',
+    'B': '20 projek',
+    'C': '11 545 projek',
+    'D': 'Tidak dinyatakan dalam teks',
+    'answer': 'A'}]}}
+\end{lstlisting}
+
+All synthetic dataset and implementation published at \href{https://huggingface.co/datasets/mesolitica/chatgpt-malaysian-qa-choice}{mesolitica/chatgpt-malaysian-qa-choice}.
+
+\subsubsection{synthetic Malaysian Open QA}
+
+We adopted the approach outlined in ~\ref{sec:synthetic-qa-choice} to generate Open QA questions. This involved extracting content from diverse sources, which are from MS Wikipedia, Malaysia Hansard, and Malay CommonCrawl. By following this approach, we aimed to create a robust dataset of Open QA questions that span a wide spectrum of topics and contexts. The inclusion of content from reputable sources ensures that the questions generated are both informative and relevant, contributing to a comprehensive dataset for training and evaluating language models in the Open QA domain.
+
+Below is the prompt to generate the synthetic dataset,
+
+\begin{lstlisting}[breaklines=true]
+  from pydantic import BaseModel, Field
+  from typing import List
+
+  class QA(BaseModel):
+      question: str
+      answer: str
+          
+  class QAS(BaseModel):
+      qa: List[QA]
+    
+    paragraph = 'PANDAN JAYA SITI AISHAH KUALA LUMPUR SUHANI KUALA LUMPUR ...'
+    instruction = f"""
+    paragraph ```
+    {paragraph}
+    ```
+  
+    berdasarkan paragraph, jana soalan melayu dan jawapan melayu
+    """
+    chatgpt(instruction, response_model=QAS)
+\end{lstlisting}
+
+An example of generated dataset,
+
+\begin{lstlisting}[breaklines=true]
+  {'paragraph': "PANDAN JAYA SITI AISHAH KUALA LUMPUR SUHANI KUALA LUMPUR ...",
+ 'qa': {'qa': [{'question': 'Siapakah yang berada di Pantai Dalam?',
+    'answer': 'Suhani'},
+   {'question': 'Di mana lokasi SHAH di Alor Gajah?', 'answer': 'Bukit Katil'},
+   {'question': 'Siapakah yang berada di Taman Rembau Utama?',
+    'answer': 'Mazliena Mohd'}]}}
+\end{lstlisting}
+
+All synthetic dataset and implementation published at \href{https://huggingface.co/datasets/mesolitica/chatgpt-malaysian-open-qa}{mesolitica/chatgpt-malaysian-open-qa}.
+
+\subsubsection{Malay Instruction using Alpaca Evolution}
 
 We follow evolution instruction from \cite{xu2023wizardlm} with slightly changes,
 
@@ -315,7 +559,6 @@ Our breadth instruction,
   '#Given Prompt#', '#Created Prompt#', 'given prompt' and 'created prompt' are not allowed to appear in #Created Prompt#
 \end{lstlisting}
 
-
 Original depth instruction,
 
 \begin{lstlisting}[]
@@ -328,7 +571,6 @@ Original depth instruction,
   You should try your best not to make the #Rewritten Prompt# become verbose, #Rewritten Prompt# can only add 10 to 20 words into #The Given Prompt#. 
   '#The Given Prompt#', '#Rewritten Prompt#', 'given prompt' and 'rewritten prompt' are not allowed to appear in #Rewritten Prompt#
 \end{lstlisting}
-
 
 Our depth instruction,
 
@@ -343,18 +585,91 @@ Our depth instruction,
 	'#The Given Prompt#', '#Rewritten Prompt#', 'given prompt' and 'rewritten prompt' are not allowed to appear in #Rewritten Prompt#
 \end{lstlisting}
 
-After that, we use ChatGPT3.5 API to generate the synthetic data, an example of generated dataset,
+Our approach involved utilizing the dataset available at \href{https://raw.githubusercontent.com/gururise/AlpacaDataCleaned/main/alpaca_data_cleaned.json}{AlpacaDataCleaned} as a starting point. To refine and enhance this dataset, we applied the Evolution Instruction above using ChatGPT3.5. Once we obtained the synthetic instructions, we employed ChatGPT3.5 to generate corresponding answers. In cases where the answers were generated in Indonesian, we employed the Neural Machine Translation mentioned at ~\ref{sec:generating-instruction-dataset} to translate them into Malay. This multi-step process aimed to produce a dataset with improved diversity and accuracy, ensuring that the generated questions and answers are not only contextually relevant but also linguistically aligned with the Malaysian language.
+An example of generated dataset,
 
 \begin{lstlisting}[breaklines=true]
   Instruction: Tulislah sebuah cerita pendek dengan gaya narasi orang ketiga tentang seorang protagonis yang harus membuat keputusan karier penting. Ceritakan bagaimana protagonis tersebut menghadapi dilema antara mempertahankan pekerjaan yang stabil atau mengambil risiko dengan mencari peluang karier baru di Malaysia yang menjanjikan kehidupan yang lebih baik. Kembangkan karakter dan latar belakang protagonis, serta ceritakan perjalanan dan pertimbangannya dalam mengambil keputusan penting tersebut.
   Answer: Di sebuah bandar kecil di Indonesia, hiduplah seorang wanita bernama Maya. Maya adalah seorang pekerja keras yang telah bekerja di sebuah syarikat besar selama lima tahun. Dia mempunyai pekerjaan yang stabil dan gaji yang mencukupi. Namun, dalam hatinya, Maya merasakan bahawa pekerjaannya tidak memberikan kepuasan dan cabaran yang mencukupi untuknya. Maya bercita-cita untuk meningkatkan kerjaya dan mencapai kejayaan yang lebih besar. Dia sering bermimpi untuk hidup yang lebih baik, dengan pendapatan yang lebih tinggi dan peluang untuk mengembara ke seluruh dunia. Pada suatu hari, Maya mendengar berita bahawa di Malaysia terdapat peluang kerjaya yang menjanjikan. Maya menjadi tertarik dengan peluang ini. Dia mula mencipta tentang industri dan peluang pekerjaan di Malaysia. Maya tahu bahawa kerjaya di sana boleh memberikan pendapatan yang jauh lebih tinggi daripada yang dia terima sekarang. Selain itu, dia juga tahu bahawa di Malaysia terdapat persekitaran kerja yang lebih dinamik dan berbeza-beza, yang akan memberikan cabaran baru untuknya. Namun, Maya juga menyedari bahawa untuk mencari peluang kerjaya di Malaysia, dia harus meninggalkan semua yang dia telah bangunkan di Indonesia, termasuk keluarga dan rakan-rakannya. Maya berasa sedih dan terfikir, kerana dia sangat menyayangi keluarga dan tidak tahan berpisah dengan mereka. Maya menghabiskan masa berhari-hari memikirkan pilihan kerjaya ini. Dia menulis segala kelebihan dan kekurangan kedua-dua pilihan yang dia hadapi. Dia bercakap dengan keluarga dan rakan-rakannya, dan mereka menyokong keputusannya, walaupun mereka sedih dengan pemergian Maya. Akhirnya, selepas pertimbangan yang teliti, Maya memutuskan untuk mengambil risiko dan mencari peluang kerjaya baru di Malaysia. Dia merasakan bahawa ini adalah peluang yang jarang berlaku, dan dia harus mengambil langkah di luar zon selesa untuk mencapai impian dan cita-citanya. Maya menyedari bahawa hidup adalah tentang mengambil risiko dan menghadapi cabaran baru. Perjalanan Maya ke Malaysia bukanlah mudah. Dia harus melalui beberapa halangan dan penyesuaian budaya baru. Namun, dengan ketabahan dan semangat yang kuat, Maya berjaya mendapatkan pekerjaan di sebuah syarikat besar di Kuala Lumpur. Dia berasa gembira dan bangga dengan keputusannya. Selama bertahun-tahun di Malaysia, Maya mencapai kejayaan yang luar biasa. Dia menikmati kerjaya yang dia lalui dan mempunyai kehidupan yang lebih baik dan lebih selesa daripada yang pernah dia bayangkan di Indonesia. Maya juga terus menjalin hubungan dengan keluarga dan rakan-rakannya di negara ini, walaupun jarak memisahkan mereka. Dalam cerita ini, Maya adalah contoh yang memberi inspirasi kepada seseorang yang berani mengambil risiko dengan meninggalkan pekerjaan yang stabil dan mencari peluang kerjaya baru. Keputusannya membawa perubahan besar dalam hidupnya, dan ia menunjukkan kepada kita bahawa kadang-kadang kita harus berani keluar dari zon selesa untuk mencapai impian dan cita-cita kita.
 \end{lstlisting}
 
+Additionally, we replicated these steps on ~\ref{sec:synthetic-malaysian-qa}, introducing additional perspectives and topics to create a more comprehensive and inclusive collection of synthetic questions and answers from the base topics.
+An example of generated dataset,
+
+\begin{lstlisting}[breaklines=true]
+  {'instruction': 'Dapatkah anda membuat suatu versi yang diperbaharui daripada ayat yang memberi fokus kepada kepentingan kecocokan budaya dalam penilaian calon? \n\nMemang, saya memahami tanggungjawab jawatan ini dan bersedia untuk menganalisis serta mengkaji kecekapan teknikal dan kebolehan komunikasi calon dengan cekap, memberikan maklum balas yang bernas terhadap jawapan mereka, dan memberikan cadangan yang mendalam berkenaan kesesuaian mereka dengan jawatan tersebut.',
+ 'output': 'Tentu, berikut ini adalah versi yang diperbaharui daripada ayat yang lebih memberi fokus kepada kepentingan kecocokan budaya dalam penilaian calon:\n\n"Saya menaruh perhatian yang besar terhadap pentingnya kecocokan budaya dalam menilai calon. Saya sepenuhnya memahami tanggung jawab jabatan ini dan siap untuk menganalisis dan mengevaluasi secara teliti keahlian teknis dan kemampuan komunikasi calon. Saya akan memberikan tanggapan yang mendalam terhadap jawaban mereka dan memberikan saran yang relevan mengenai kesesuaian mereka dengan jabatan ini."',
+ 'indon_ins': False,
+ 'indon_output': True,
+ 'instruction_ms': 'Bolehkah anda membuat versi yang diperbaharui daripada ayat yang memberi tumpuan kepada kepentingan kecocokan budaya dalam penilaian calon?\n\nMemang, saya memahami tanggungjawab jawatan ini dan bersedia untuk menganalisis serta mengkaji kecekapan teknikal dan kebolehan komunikasi calon dengan cekap, memberikan maklum balas yang bernas terhadap jawapan mereka, dan memberikan cadangan yang mendalam berkenaan kesesuaian mereka dengan jawatan tersebut.',
+ 'output_ms': 'Sudah tentu, berikut adalah versi yang diperbaharui daripada ayat yang lebih memberi tumpuan kepada kepentingan kesesuaian budaya dalam penilaian calon:\n\n"Saya memberi perhatian yang besar kepada kepentingan kesesuaian budaya dalam menilai calon. Saya sepenuhnya memahami tanggungjawab jawatan ini dan bersedia untuk menganalisis dan menilai dengan teliti kepakaran teknikal dan keupayaan komunikasi calon. Saya akan memberikan jawapan yang mendalam terhadap jawapan mereka dan memberikan nasihat yang relevan tentang kesesuaian mereka dengan jawatan ini."',
+ 'rejected_ins': False,
+ 'rejected_output': False}
+\end{lstlisting}
+
 All synthetic dataset and implementation published at \href{https://huggingface.co/datasets/mesolitica/chatgpt-malay-instructions}{mesolitica/chatgpt-malay-instructions}.
 
-\subsubsection{Malay UltraChat}
+\subsubsection{Malay UltraChat}\label{sec:malay-ultrachat}
 
-We extended our efforts to generate a multiturn dataset. Acknowledging the efficacy of multiturn conversations in training language models to understand context and coherence, we sought inspiration from Ultrachat \cite{ding2023enhancing}. Ultrachat served as a valuable reference, guiding us in crafting a dataset that incorporates multifaceted interactions and conversations. An example of generated dataset,
+Our objective extends beyond single-turn datasets, as we aim to generate a diverse multiturn dataset encompassing various sources such as Astro Awani, papers with the 'melayu' keyword from Crossref, Epenerbitan, public PDFs from gov.my, JurnalDBP, lom.agc.gov.my, MS Wikipedia, Malaysia Hansard, textbooks, \url{https://maktabahalbakri.com/}, and \url{https://muftiwp.gov.my/ms/}. Inspired by the approach taken by Ultrachat \cite{ding2023enhancing}, we seek to create a robust and multifaceted dataset that captures the intricacies of conversational exchanges across a broad spectrum of topics, sources, and contexts. This endeavor contributes to the development of language models capable of handling multiturn conversations with depth and relevance, reflecting real-world conversational dynamics.
+
+The first step to generate UltraChat, we must generate list of questions, below is the prompt we use to generate the questions,
+
+\begin{lstlisting}[breaklines=true]
+  paragraph = '17 Oktober 2014 \n17 October 2014\n\nP.U. (A) 279   WARTA KERAJAAN PERSEKUTUAN\n\n ...'
+  instruction = f'{paragraph}\ngenerate a question related to the context'
+  chatgpt(instruction)
+\end{lstlisting}
+
+In the next step, we simply loop through the dataset N times, continually adding the generated answers to the initial context,
+
+\begin{lstlisting}[breaklines=true]
+  system_malay = 'Above is a conversation between a user and an intelligent assistant. You suppose to simulate conversation between the user and the assistant in malay language. Bear in mind your major request is to ask the assistant to generate some material. So you can ask the assistant either to make it more detailed, add more related information, or any other request to improve the generated material. Be creative and diverse in your request. Make the response short and the language casual.'
+  def ultrachat(row, n = 1):
+    results = [
+        {'role': 'context', 'content': row['paragraph']},
+        {'role': 'user', 'content': row['question']},
+    ]
+    initial = f"""
+    {row['paragraph']}
+
+    {row['question']}
+    """.strip()
+    messages = [
+        {'role': 'system', 'content': system_malay},
+        {'role': 'user', 'content': initial},
+    ]
+    r = chatgpt(messages)
+    results.append({
+        'role': 'assistant', 'content': r,
+    })
+    messages.append({
+        'role': 'assistant', 'content': r,
+    })
+    
+    for _ in range(n):
+        messages_temp = messages + [
+            {'role': 'user', 'content': 'Now suppose you are the user, say something to continue the conversation based on given context. Make the response short and the language casual'}
+        ]
+        r = chatgpt(messages_temp)
+        results.append({
+            'role': 'user', 'content': r,
+        })
+        messages.append({
+            'role': 'user', 'content': r,
+        })
+        r = chatgpt(messages)
+        results.append({
+            'role': 'assistant', 'content': r,
+        })
+        messages.append({
+            'role': 'assistant', 'content': r,
+        })
+    
+    return results
+\end{lstlisting}
+
+An example of generated dataset,
 
 \begin{lstlisting}[breaklines=true]
   [{'role': 'context',
@@ -403,7 +718,15 @@ We extended our efforts to generate a multiturn dataset. Acknowledging the effic
   'indon': False}]
 \end{lstlisting}
 
-We also generated multi-turn coding instruction, an example as below,
+To address instances where the output from ChatGPT3.5 is occasionally generated in Indonesian, we use the Neural Machine Translation mentioned at ~\ref{sec:generating-instruction-dataset} to ensure that the answers are consistently in Malay. This additional step helps maintain linguistic coherence and alignment with our dataset's intended language, enhancing the overall quality and consistency of the generated responses.
+
+All synthetic dataset and implementation published at \href{https://huggingface.co/datasets/mesolitica/malaysian-ultrachat}{mesolitica/malaysian-ultrachat}.
+
+\subsubsection{Malay Coding UltraChat}
+
+Derived from the source at \url{https://huggingface.co/datasets/TokenBender/glaive_coder_raw_text}, we employed the same method from ~\ref{sec:malay-ultrachat} to systematically generate a multiturn dataset focused on Malay coding. This approach allowed us to adapt existing content and structure it into a format suitable for multiturn conversations related to coding scenarios. By utilizing the Ultrachat template, we ensured consistency in the style and context of the generated coding interactions, contributing to the development of a specialized multiturn dataset tailored to the domain of Malay coding.
+
+An example of generated dataset,
 
 \begin{lstlisting}[breaklines=true]
   [{'role': 'user',
@@ -448,102 +771,13 @@ We also generated multi-turn coding instruction, an example as below,
   'indon': True}]
 \end{lstlisting}
 
-All synthetic dataset and implementation published at \href{https://huggingface.co/datasets/mesolitica/malaysian-ultrachat}{mesolitica/malaysian-ultrachat} and \href{https://huggingface.co/datasets/mesolitica/chatgpt-code-instruct-multiturn}{mesolitica/chatgpt-code-instruct-multiturn}.
-
-\subsubsection{Synthetic Malay CommonSense}
-
-We expanded our training dataset by creating a set of synthetic common sense questions and answers using ChatGPT4. Taking inspiration from CommonsenseQA \cite{talmor2019commonsenseqa}, we developed questions that explore common sense reasoning. This addition to our training data helps the language model improve its understanding of everyday situations and enhances its ability to generate commonsense responses. An example of generated dataset,
-
-\begin{lstlisting}[breaklines=true]
-  Question: 1. Seseorang yang bersara mungkin perlu kembali bekerja jika mereka apa? A. mempunyai hutang B. mencari pendapatan C. meninggalkan pekerjaan D. memerlukan wang E. kehilangan kunci
-  Anwer: D
-\end{lstlisting}
-
-All synthetic dataset and implementation published at \href{https://huggingface.co/datasets/mesolitica/chatgpt4-commonsense-qa}{mesolitica/chatgpt4-commonsense-qa}.
-
-
-
-\subsubsection{Coding Dataset}
-
-We improved our coding dataset with original code samples from \url{https://huggingface.co/datasets/theblackcat102/evol-codealpaca-v1}, inspired by the WizardCoder \cite{luo2023wizardcoder}. To make the dataset more inclusive, we used ChatGPT4 to translate English coding questions into Malay and generate corresponding Malay answers. This approach expands the language model's capabilities, allowing it to understand and respond to coding queries in both English and Malay.
-
-While this process exhibited proficiency, there were instances where ChatGPT4 generated responses in Indonesian. To ensure linguistic consistency, we use our own Neural Machine Translation mentioned at ~\ref{sec:generating-instruction-dataset}, seamlessly translating the Indonesian responses to Malay.
-
-Output from ChatGPT4,
-
-\begin{lstlisting}[breaklines=true]
-  Untuk mengubah skrip ini, kita Akkan menggunakan konsep pengulangan 'while' dan memastikan indeks tidak melebihi panjang senarai. Selain itu, kita harus memastikan skrip kita mengendalikan senarai kosong dengan betul.
-
-  Berikut adalah cara untuk mengubahnya:
-
-  ```python
-    # Menetapkan senarai integer
-    arr = [1, 2, 3, 4]
-
-    # Tentukan panjang senarai
-    n = len(arr)
-
-    # Pastikan senarai tidak kosong
-    if n > 0:
-      i = 0
-      # Melalui senarai dan keluarkan setiap elemen individu
-      while i < n:
-          print(arr[i])
-          i += 1
-    else:
-      print("Senarai adalah kosong.")
-  ```
-
-  Dalam skrip ini, sebelum kita mula mengulangi, kita memeriksa sama ada `n`, yang merupakan panjang senarai, lebih besar daripada 0. Jika tidak (yang bermaksud senarai kosong), kita mencetak mesej yang sesuai.
-
-  Kemudian, kita menggunakan pengulangan 'while' untuk mengulangi semasa indeks `i` kurang daripada panjang `n` senarai. Semasa setiap iterasi, kita mencetak elemen senarai dan menambahkan 1 ke indeks, supaya kita boleh bergerak ke elemen seterusnya pada iterasi seterusnya.
-
-  Ini akan mengelakkan ralat indeks, kerana kita tidak akan pernah mencuba mengakses indeks yang melebihi had senarai.
-\end{lstlisting}
-
-
-
-Translated using our own Neural Machine Translation,
-
-\begin{lstlisting}[breaklines=true]
-  Untuk mengubah skrip ini, kita Akkan menggunakan konsep pengulangan 'while' dan memastikan indeks tidak melebihi panjang senarai. Selain itu, kita perlu memastikan skrip kita mengawal senarai kosong dengan betul.
-
-  Berikut adalah cara untuk mengubahnya:
-
-  ```python
-    # Set up a list of integers
-    arr = [1, 2, 3, 4]
-
-    # Tentukan panjang senarai
-    n = len(arr)
-
-    # Pastikan senarai tidak kosong
-    if n > 0:
-      i = 0
-      # Melalui senarai dan keluarkan setiap elemen individu
-      while i < n:
-          print(arr[i])
-          i += 1
-    else:
-      print("Senarai adalah kosong.")
-  ```
-
-  Dalam skrip ini, sebelum kita mula mengulangi, kita memeriksa sama ada `n`, iaitu panjang senarai, lebih besar daripada 0. Jika tidak (yang bermaksud senarai kosong), kita mencetak mesej yang sesuai.
-
-  Kemudian, kita menggunakan pengulangan 'while' untuk mengulangi semasa indeks `i` kurang daripada panjang `n` senarai. Semasa setiap iterasi, kita mencetak elemen senarai dan menambahkan 1 ke indeks, supaya kita boleh bergerak ke elemen seterusnya pada iterasi seterusnya.
-
-  Ini akan mengelakkan ralat indeks, kerana kita tidak akan mencuba mengakses indeks yang melebihi had senarai.
-\end{lstlisting}
-
-All synthetic dataset and implementation published at \href{https://huggingface.co/datasets/mesolitica/chatgpt4-code-instruct}{mesolitica/chatgpt4-code-instruct}.
+All synthetic dataset and implementation published at \href{https://huggingface.co/datasets/mesolitica/chatgpt-code-instruct-multiturn}{mesolitica/chatgpt-code-instruct-multiturn}.
 
 \subsection{Malay Instruction Dataset}
 
 \subsubsection{Synthetic Kesalahan Tatabahasa (Grammar Errors) Dataset}
 
 We crafted a synthetic dataset focusing on introducing grammatical errors using the \href{https://malaya.readthedocs.io/en/stable/load-dependency.html}{Malaya dependency parser}. We performed a positional swap based on the parsed tree structure. This deliberate introduction of errors was intended to create a dataset challenging language models to identify and rectify grammatical mistakes.
-
-
 
 \begin{figure}[h]
   \centering

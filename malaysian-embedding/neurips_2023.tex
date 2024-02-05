@@ -102,7 +102,7 @@ In recognition of this disparity, our research endeavors to address the existing
 
   \item \textbf{Synthetic RAG dataset:} We created positive and negative pairs using synthetic QA dataset from Malaysian Mistral \cite{zolkepli2024large}. These pairs help enhance semantic retrieval, enabling the model to discern intricate connections between contexts and questions. Positive pairs highlight correct retrievals, while negative pairs offer learning opportunities for refining the model's comprehension. This approach enriches the dataset and contributes to developing a more context-aware embedding model for a nuanced understanding of the Malaysian language context.
 
-  \item \textbf{Finetuned Large Language Model:} We fine-tuned Malaysian Mistral \cite{zolkepli2024large} models with 191M and 349M parameters, along with Malaysian Llama2 models of 600M, 1B, and 2B parameters using a contrastive loss. To cater to different embedding needs, we extracted the initial N layers of these models and continued pretraining, creating smaller models customized for specific embedding tasks. This approach allows for adaptability and optimal performance in various scenarios.
+  \item \textbf{Finetuned Large Language Model:} We fine-tuned Malaysian Llama2 models of 600M, 1B, and 2B parameters using a contrastive loss. To cater to different embedding needs, we extracted the initial N layers of these models and continued pretraining, creating smaller models customized for specific embedding tasks. This approach allows for adaptability and optimal performance in various scenarios.
 \end{itemize}
 
 \section{Hard Mining Dataset Procedure}
@@ -257,6 +257,10 @@ Complete continue pre-training 32768 context length implementation at \href{http
 
 \subsection{Contrastive Fine-tuning}
 
+In our experimentation, we meticulously curated two distinct datasets to fine-tune our embedding models. The first dataset comprises 100\% hard mining instances, where we leveraged the scipy.spatial.KDTree for efficient mining of relevant pairs. For the second dataset, we embraced a 100\% synthetic approach, generating RAG (Retrieval-Augmented Generation) instances. Notably, 30\% of this synthetic dataset was derived from the hard mining dataset, ensuring a blend of real-world and synthetic data.
+
+For the embedding finetuning process, we opted for a contrastive loss function \cite{1467314}. This choice enables the model to discern between positive and negative pairs effectively. The training sessions were conducted using an 8192 context length, with the flexibility to scale up to 32768 context length seamlessly. This adaptability is crucial as the models were continued pretraining on 32768 context length, contributing to a more robust understanding of longer text inputs.
+
 \begin{equation}
   \mathcal{L}_{\text{contrastive}}(y, d) = \begin{cases}
     (1 - d)^2             & \text{if } y = 1 \\
@@ -264,9 +268,121 @@ Complete continue pre-training 32768 context length implementation at \href{http
   \end{cases}
 \end{equation}
 
-where $y$ is the binary label (1 for positive pairs, 0 for negative pairs), $d$ is the dissimilarity score, and $\alpha$ is a margin parameter.
+For contrastive loss where $y$ is the binary label (1 for positive pairs, 0 for negative pairs), $d$ is the dissimilarity score, and $\alpha$ is a margin parameter.
+
+\pagebreak
+
+The contrastive fine-tuning hyperparameters for 2B parameter model are detailed below:
+
+\begin{table}[h]
+  \centering
+  \begin{tabular}{lccl}
+    \hline
+    \textbf{Hyperparameter} & \textbf{Value} \\
+    \hline
+    DeepSpeed               & ZeRO-3 Offload \\
+    Batch Size              & 3              \\
+    Learning Rate           & constant 2e-5  \\
+    Precision               & bfloat16       \\
+    \hline
+  \end{tabular}
+\end{table}
+
+Complete contrastive fine-tuning 32768 context length implementation at \href{https://github.com/mesolitica/llm-embedding/blob/main/run-2b-contrastive.sh}{here}.
 
 \section{Evaluation}
+
+We meticulously curated test sets from diverse sources, including b.cari.com.my, c.cari.com.my, Malay news, Malaysian Twitter, research papers with the "Melayu" keyword, and the lom.agc.gov.my dataset. These datasets cover a wide spectrum of contexts, reflecting the model's ability to handle various content types and domains.
+
+For the evaluation process, we employed the recall@k metric, which measures the model's effectiveness in retrieving relevant information within the top-k predictions. This evaluation metric allows us to assess how well our models perform in providing accurate and contextually relevant results across different datasets, providing valuable insights into their overall efficacy.
+
+\begin{table}[hbt!]
+  \centering
+  \begin{tabular}{lcccl}
+    \hline
+    \textbf{Model}           & \textbf{Recall @1} & \textbf{Recall @3} & \textbf{Recall @5} & \textbf{Recall @10} \\
+    \hline
+    OpenAI ada-002           & 31.62              & 62.42              & 69.44              & 76.23               \\
+    llama2-embedding-600m-8k & 31.68              & 68.81              & 77.89              & 84.53               \\
+    llama2-embedding-1b-8k   & \textbf{32.62}     & \textbf{69.47}     & \textbf{79.02}     & \textbf{86.03}      \\
+    \hline
+  \end{tabular}
+  \caption{b.cari.com.my semantic similarity evaluation}
+\end{table}
+
+\begin{table}[hbt!]
+  \centering
+  \begin{tabular}{lcccl}
+    \hline
+    \textbf{Model}           & \textbf{Recall @1} & \textbf{Recall @3} & \textbf{Recall @5} & \textbf{Recall @10} \\
+    \hline
+    OpenAI ada-002           & 8.38               & 21.38              & 27.86              & 35.89               \\
+    llama2-embedding-600m-8k & 8.32               & 18.73              & 23.97              & 31.4                \\
+    llama2-embedding-1b-8k   & \textbf{8.69}      & 19.96              & 26.08              & 34.3                \\
+    \hline
+  \end{tabular}
+  \caption{c.cari.com.my semantic similarity evaluation}
+\end{table}
+
+\begin{table}[hbt!]
+  \centering
+  \begin{tabular}{lcccl}
+    \hline
+    \textbf{Model}           & \textbf{Recall @1} & \textbf{Recall @3} & \textbf{Recall @5} & \textbf{Recall @10} \\
+    \hline
+    OpenAI ada-002           & 13.86              & 29.52              & 37.45              & 47.54               \\
+    llama2-embedding-600m-8k & 14.26              & 27.58              & 36.4               & 47.11               \\
+    llama2-embedding-1b-8k   & \textbf{14.61}     & 28.52              & 36.4               & \textbf{47.75}      \\
+    \hline
+  \end{tabular}
+  \caption{Malay News semantic similarity evaluation}
+\end{table}
+
+\begin{table}[hbt!]
+  \centering
+  \begin{tabular}{lcccl}
+    \hline
+    \textbf{Model}           & \textbf{Recall @1} & \textbf{Recall @3} & \textbf{Recall @5} & \textbf{Recall @10} \\
+    \hline
+    OpenAI ada-002           & 22.94              & 49.19              & 59.3               & 72.48               \\
+    llama2-embedding-600m-8k & \textbf{23.49}     & 52.0               & 64.16              & 78.59               \\
+    llama2-embedding-1b-8k   & 23.05              & \textbf{53.42}     & \textbf{64.98}     & \textbf{79.25}      \\
+    \hline
+  \end{tabular}
+  \caption{Malaysian Twitter semantic similarity evaluation}
+\end{table}
+
+\begin{table}[hbt!]
+  \centering
+  \begin{tabular}{lccccl}
+    \hline
+    \textbf{Model}           & \textbf{Recall @1} & \textbf{Recall @3} & \textbf{Recall @5} & \textbf{Recall @10} \\
+    \hline
+    OpenAI ada-002           & 31.6               & 51.2               & 58.78              & 67.21               \\
+    llama2-embedding-600m-8k & 12.6               & 26.5               & 35.35              & 47.51               \\
+    llama2-embedding-1b-8k   & 22.0               & 42.8               & 53.79              & 67.08               \\
+    llama2-embedding-2b-8k   & 26.7               & 49.1               & \textbf{60.91}     & \textbf{73.97}      \\
+    \hline
+  \end{tabular}
+  \caption{"Melayu" keyword research papers RAG evaluation}
+\end{table}
+
+\begin{table}[hbt!]
+  \centering
+  \begin{tabular}{lccccl}
+    \hline
+    \textbf{Model}           & \textbf{Recall @1} & \textbf{Recall @3} & \textbf{Recall @5} & \textbf{Recall @10} \\
+    \hline
+    OpenAI ada-002           & 19.16              & 28.27              & 32.25              & 36.85               \\
+    llama2-embedding-600m-8k & 6.6                & 13.75              & 18.86              & 27.45               \\
+    llama2-embedding-1b-8k   & 11.89              & 23.97              & 30.94              & 41.34               \\
+    llama2-embedding-2b-8k   & 15.49              & \textbf{29.11}     & \textbf{37.25}     & \textbf{48.86}      \\
+    \hline
+  \end{tabular}
+  \caption{lom.agc.gov.my RAG evaluation}
+\end{table}
+
+\pagebreak
 
 We also compared with other models and published the benchmark at \href{https://huggingface.co/spaces/mesolitica/malaysian-embedding-leaderboard}{mesolitica/malaysian-embedding-leaderboard}.
 

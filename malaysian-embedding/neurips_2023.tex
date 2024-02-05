@@ -142,7 +142,7 @@ For a given base text like 'Selamat Tidur mutual ku semua,' the 5\% percentile r
 
 \pagebreak
 
-In the pursuit of efficient hard mining for our embedding dataset, we strategically employ the scipy.spatial.KDTree approach. While the prevailing trend involves utilizing Faiss multi-GPUs for mining tasks, our deliberate choice of scipy.spatial.KDTree stems from a consideration of both effectiveness and cost-effectiveness. Leveraging a virtual machine with ample CPU and memory resources proves to be a more economical alternative compared to configurations with multi-GPUs.
+In the pursuit of efficient hard mining for our embedding dataset, we strategically employ the scipy.spatial.KDTree approach. While the prevailing trend involves utilizing Faiss multi-GPUs \cite{johnson2017billionscale} for mining tasks, our deliberate choice of scipy.spatial.KDTree stems from a consideration of both effectiveness and cost-effectiveness. Leveraging a virtual machine with ample CPU and memory resources proves to be a more economical alternative compared to configurations with multi-GPUs.
 
 The decision to opt for scipy.spatial.KDTree is rooted in our commitment to resource optimization within the confines of budget constraints. By harnessing the power of this spatial data structure, we strike a balance between achieving effective hard mining and ensuring the judicious utilization of available computing resources. This strategic choice aligns with our overarching goal of delivering optimal performance without compromising on cost efficiency.
 

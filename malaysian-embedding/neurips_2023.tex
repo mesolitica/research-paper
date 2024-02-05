@@ -76,17 +76,65 @@
 \maketitle
 
 \begin{abstract}
-  In this work, we present a novel approach to multi-lingual embedding in the context of the Malaysian language. We fine-tuned the Malaysian Llama2 model specifically for embedding tasks involving both negative and positive pairs. The resulting embeddings exhibit exceptional performance, showcasing their suitability for applications related to semantic similarity and RAG (Retrieval-Augmented Generation).
+  In this work, we present a comprehensive exploration of finetuning Malaysian language models, specifically Llama2 and Mistral, on embedding tasks involving negative and positive pairs. We release two distinct models tailored for Semantic Similarity and Retrieval-Augmented Generation (RAG).
 
-  Our approach demonstrates state-of-the-art results, surpassing the performance of OpenAI's text-embedding-ada-002 model on Malaysian contextual embedding and RAG tasks. The fine-tuned Malaysian Llama2 model not only sets a new benchmark but also establishes itself as a powerful tool for capturing nuanced semantic relationships in the multi-lingual Malaysian language landscape.
+  For Semantic Similarity, our 600 million parameter Llama2 model outperforms OpenAI text-embedding-ada-002 across all recall@k metrics for b.cari.com.my, c.cari.com.my, Malay news, and Malaysian Twitter test sets.
+
+  In the realm of RAG models, our approach proves competitive with OpenAI text-embedding-ada-002 in the Malaysian context. Notably, our 2 billion parameter Llama2 model achieves superior Recall@5, Recall@10 for the "Melayu" keyword research papers dataset and excels in Recall@3, Recall@5, and Recall@10 for the lom.agc.gov.my dataset.
+
+  These findings underscore the effectiveness of our finetuning strategy and highlight the performance gains in both Semantic Similarity and RAG tasks.
 
   All models released at \href{https://huggingface.co/collections/mesolitica/malaysian-embedding-6523612bfe5881ad35f81b99}{HuggingFace Mesolitica Malaysian Embedding Collection}.
 
 \end{abstract}
 
+\section{Introduction}
+
+In the wake of the release of ChatGPT, the landscape of conversational AI has seen a surge in the development of chatbots armed with proprietary knowledge bases. The success of these chatbots hinges on their ability to perform semantic search effectively—essentially, retrieving the most relevant information from a knowledge base to provide accurate responses to user queries. This functionality relies on a sophisticated embedding model capable of capturing and understanding the nuances of language.
+
+For English-based applications, companies have readily embraced the closed-source OpenAI text-embedding-ada-002 model as a turnkey solution for robust embedding capabilities. However, when it comes to the Malay language, the performance of such out-of-the-box solutions falls short. The intricacies of Malay linguistics, along with its unique semantic structure, pose challenges that generic models struggle to overcome.
+
+In recognition of this disparity, our research endeavors to address the existing gap in the provision of effective embedding models tailored specifically for the Malay language. Rather than relying on closed-source alternatives, our approach seeks to introduce an open-source solution that not only caters to the linguistic intricacies of Malay but also outperforms existing models in the context of semantic search. By doing so, we aim to propel the field of natural language processing forward, fostering innovation and accessibility for Malay language applications in the realm of conversational AI and knowledge retrieval.
+
+\begin{itemize}
+  \item \textbf{Hard mining embedding dataset:} We utilize OpenAI text-embedding-ada-002 and bge-large-en \cite{bge_embedding} from Beijing Academy of Artificial Intelligence as base models to convert Malaysian texts into embedding representations. Subsequently, we employ hard mining techniques to refine and optimize these embeddings, enhancing their quality and relevance. This approach aims to extract more meaningful semantic information from the original texts, ensuring our embeddings align seamlessly with the nuances of the Malay language for improved performance in various applications.
+
+  \item \textbf{Finetuned Large Language Model:} We fine-tuned Malaysian Mistral \cite{zolkepli2024large} models with 191M and 349M parameters, along with Malaysian Llama2 models of 600M, 1B, and 2B parameters using a contrastive loss. To cater to different embedding needs, we extracted the initial N layers of these models and continued pretraining, creating smaller models customized for specific embedding tasks. This approach allows for adaptability and optimal performance in various scenarios.
+\end{itemize}
+
+\section{Preparing Dataset}
+
+\subsection{Converting to Embedding representation}
+
+\subsubsection{OpenAI text-embedding-ada-002 base model}
+
+The utilization of OpenAI's text-embedding-ada-002 plays a pivotal role in transforming samples sourced from diverse platforms, including b.cari.com.my, carigold, Malaysian Facebook posts, Lowyat, Malaysian news, and Malaysian Twitter, into rich and meaningful embedding representations. The text-embedding-ada-002 model serves as the cornerstone for capturing the semantic essence of these Malaysian texts, offering a standardized and condensed representation that encapsulates the contextual information present in the original content.
+
+These initial embedding representations serve as the baseline dataset, laying the foundation for our subsequent hard mining process. The diverse array of sources ensures that our baseline dataset is comprehensive, capturing the linguistic nuances and variations prevalent across different Malaysian platforms. By employing text-embedding-ada-002, we aim to establish a robust starting point for the subsequent stages of our embedding model development.
+
+As we embark on the hard mining process, the quality and richness of the baseline dataset become crucial. The embeddings generated by text-embedding-ada-002 provide a solid foundation for identifying and isolating challenging cases within the dataset, setting the stage for the refinement and enhancement of our models through targeted training iterations
+
+All embedding representation dataset and implementation published at \href{https://github.com/mesolitica/malaysian-dataset/tree/master/embedding/ada-002}{mesolitica/malaysian-dataset/embedding/ada-002}.
+
+\subsubsection{bge-large-en base model}
+
+Our approach involves addressing the language diversity challenge posed by BGE-Large-EN, which is specifically trained on English datasets. To overcome this limitation, we implemented a multi-step process to enrich our embedding representation. We initiated the process by generating noisy translations for content from b.cari.com.my, c.cari.com.my, Malaysian Reddit, and Malaysian Twitter. Leveraging the capabilities of ChatGPT3.5, we translated these Malaysian texts into standard English. Subsequently, a post-filtering mechanism was applied to refine and enhance the accuracy of the noisy translations, ensuring that the resulting English translations retained the intended semantic meaning of the original Malaysian content.
+
+The translated segments were then used to create an additional set of embedding representations, adding a layer of linguistic diversity to our dataset. This diversification strategy is particularly important to capture the broad spectrum of linguistic nuances present in Malaysian online platforms. By combining the outputs from BGE-Large-EN and OpenAI text-embedding-ada-002, we aimed to create a more comprehensive and representative embedding model. The synergy of these two models contributes to the holistic coverage of the Malaysian language landscape, enhancing the robustness and inclusivity of our embedding representation dataset. This meticulous process ensures that our models can effectively encapsulate the diversity of language expressions found across various Malaysian online sources.
+
+All embedding representation dataset and implementation published at \href{https://github.com/mesolitica/malaysian-dataset/tree/master/embedding/bge-large-en}{mesolitica/malaysian-dataset/embedding/bge-large-en}.
+
 \section{Acknowledgement}
 
-Special thanks to Malaysia-AI volunteers especially \href{https://www.linkedin.com/in/wan-adzhar-faiq-adzlan-19a27baa/}{Wan Adzhar Faiq Adzlan}, \href{https://www.linkedin.com/in/ammar-azman/}{Ammar Azman}, \href{https://www.linkedin.com/in/amzar96/}{M. Amzar}, \href{https://www.linkedin.com/in/muhammad-farhan-helmy-0529501a7/}{Muhammad Farhan} and \href{https://www.linkedin.com/in/syafie-nizam/}{Syafie Nizam} for contributing dataset to train MaLLaM.
+Special thanks to Malaysia-AI volunteers especially \href{https://www.linkedin.com/in/wan-adzhar-faiq-adzlan-19a27baa/}{Wan Adzhar Faiq Adzlan}, \href{https://www.linkedin.com/in/ammar-azman/}{Ammar Azman}, \href{https://www.linkedin.com/in/amzar96/}{M. Amzar}, \href{https://www.linkedin.com/in/muhammad-farhan-helmy-0529501a7/}{Muhammad Farhan} and \href{https://www.linkedin.com/in/syafie-nizam/}{Syafie Nizam} for contributing dataset to train Malaysian Embedding models.
+
+We would like to express our gratitude to NVIDIA Inception for generously providing us with the opportunity to train our model on the Azure cloud. Their support has played a crucial role in the success of our research, enabling us to leverage advanced technologies and computational resources.
+
+We extend our thanks to the wider research community for their valuable insights and collaborative discussions, which have greatly influenced our work. This paper reflects the collective efforts and contributions from both NVIDIA Inception and the broader research community.
+
+\section{Conclusion}
+
+In conclusion, we have introduced an open-source Malaysian embedding model that exhibits competitive performance, particularly excelling in tasks such as Retrieval-Augmented Generation (RAG) and semantic similarity. This model stands as a viable alternative, eliminating the reliance on closed-source solutions. By offering a publicly accessible and proficient Malaysian embedding model, our contribution aims to foster transparency, accessibility, and innovation within the field, paving the way for diverse applications and further advancements in natural language processing for the Malay language.
 
 \bibliography{neurips_2023}{}
 \bibliographystyle{unsrt}

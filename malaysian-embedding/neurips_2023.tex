@@ -36,8 +36,7 @@
 \usepackage{cite}
 \usepackage{graphicx}
 \usepackage{hyperref}
-\usepackage{algorithm}
-\usepackage{algpseudocode}
+\usepackage{amsmath}
 
 
 \lstset{
@@ -163,6 +162,113 @@ def mining(kd_tree, i, vectors, lower_bound, upper_bound, max_size = 5):
 \end{lstlisting}
 
 All hard-mining implementation published at \href{https://github.com/mesolitica/llm-embedding/tree/main/mining-openai}{mesolitica/llm-embedding/mining-openai} and \href{https://github.com/mesolitica/llm-embedding/tree/main/mining-bge}{mesolitica/llm-embedding/mining-bge}
+
+\section{Retrieval-Augmented Generation Dataset Procedure}
+
+Addressing the inherent challenges associated with traditional RAG datasets, where the length of context far surpasses that of user questions, necessitates a nuanced strategy to optimize the performance of our language models. In the typical RAG scenario, contexts may span entire documents or articles, providing a rich source of information, while user queries tend to be concise and specific. This incongruence in length poses a considerable hurdle for many existing embedding models, which may struggle to effectively comprehend and respond to extensive contextual information.
+
+In response to this challenge, we have devised a tailored approach leveraging a synthetic Malaysian Open QA dataset from Malaysian Mistral \cite{zolkepli2024large}. This synthetic dataset is curated by supplying contextual information to ChatGPT3.5 and prompting it to generate a comprehensive list of QA pairs based on that context. By employing this method, we ensure that the generated QA pairs align seamlessly with the intricate linguistic nuances of the Malaysian language context, effectively addressing the disparity between the lengths of context and user questions.
+
+Furthermore, we incorporate a robust post-validation mechanism to enhance the overall quality of our dataset. Utilizing a keyword-based validation approach, we meticulously evaluate and accept QA pairs only when the generated answer exhibits a substantial overlap of at least 60\% with the original context. This stringent validation criterion serves as a powerful filter, guaranteeing that the generated QA pairs maintain a high degree of relevance and fidelity to the provided context.
+
+This comprehensive approach, combining synthetic dataset generation and meticulous post-validation measures, empowers our models to effectively navigate and understand extended contextual information. The resulting dataset is finely tuned to the specific requirements of RAG tasks on longer texts, contributing significantly to the enhancement of contextual understanding within our language models.
+
+Example of the dataset,
+
+\begin{lstlisting}[breaklines=true]
+  [{'paragraph': 'The Legend of Korra ialah ...',
+  'url': 'https://ms.wikipedia.org/wiki?curid=823980',
+  'qa': {'qa': [{'question': 'Apakah siri animasi yang ditayangkan di Nickelodeon sejak 2012?',
+     'answer': 'The Legend of Korra'},
+    {'question': 'Siapakah pencipta siri animasi The Legend of Korra?',
+     'answer': 'Bryan Konietzko dan Michael Dante DiMartino'},
+    {'question': "Apakah yang dimaksudkan dengan 'bending' dalam siri animasi The Legend of Korra?",
+     'answer': 'Kekuatan untuk memanipulasi elemen seperti air, bumi, api, atau udara'},
+    {'question': 'Siapakah Avatar Korra?',
+     'answer': 'Pengganti Aang dalam siri sebelumnya yang menghadapi pergolakan politik dan roh semangat dalam dunia pemodenan'},
+    {'question': 'Apakah kejayaan siri The Legend of Korra?',
+     'answer': 'Kejayaan yang kritikal dan komersial dengan jumlah penonton tertinggi bagi siri animasi di Amerika Syarikat pada tahun 2012'}]}},
+ {'paragraph': 'adalah sebuah siri televisyen penstriman ...',
+  'url': 'https://ms.wikipedia.org/wiki?curid=1070143',
+  'qa': {'qa': [{'question': 'Apakah nama siri televisyen tersebut?',
+     'answer': 'Alice in Borderland'},
+    {'question': 'Siapakah pengarah siri televisyen tersebut?',
+     'answer': 'Shinsuke Sato'},
+    {'question': 'Apakah tarikh penayangan perdana siri televisyen tersebut di Netflix?',
+     'answer': '10 Disember 2020'},
+    {'question': 'Apakah ulasan positif yang diterima siri televisyen tersebut?',
+     'answer': 'visual, sinematografi, penyuntingan, dan penggunaan grafik kekerasan'},
+    {'question': 'Berapa musim siri televisyen tersebut?',
+     'answer': 'Dua musim'}]}}]
+\end{lstlisting}
+
+The formulation of positive and negative pairs within our dataset intricately contributes to the robustness of our language models. For positive pairs, we draw directly from the actual QA pairs generated based on the provided context. This approach ensures that the positive pairs inherently encapsulate the contextual understanding and thematic relevance of the given information. By anchoring the positive pairs in the real QA generation process, we fortify our dataset with instances that authentically represent the nuanced interplay between context and questions.
+
+The negative pairs play a pivotal role in diversifying the dataset and enhancing the model's ability to discern between relevant and irrelevant information. These negative pairs are sourced from different data points, involving QA pairs generated from alternative contexts. This deliberate introduction of contrasting information encourages the model to refine its discriminatory abilities, discerning not only what constitutes a suitable answer within a given context but also differentiating it from responses generated in dissimilar thematic settings.
+
+By methodically incorporating both positive and negative pairs, our dataset encapsulates a rich spectrum of linguistic intricacies and context-dependent reasoning. This meticulous curation of pairs not only strengthens the contextual understanding of our language models but also fosters a more discerning and adaptive response mechanism, poised to handle a diverse array of user queries within a wide spectrum of contextual scenarios.
+
+Example of generated positive and negative pairs,
+
+\begin{lstlisting}[breaklines=true]
+  {'query': 'The Legend of Korra ...',
+ 'positive_pairs': ['Apakah siri animasi yang ditayangkan di Nickelodeon sejak 2012?',
+  'Siapakah pencipta siri animasi The Legend of Korra?',
+  "Apakah yang dimaksudkan dengan 'bending' dalam siri animasi The Legend of Korra?"],
+ 'negative_pairs': ['Apakah tarikh penayangan perdana siri televisyen tersebut di Netflix?',
+  'Bilakah pencabaran terhadap Bill Clinton dimulakan?',
+  'Pencabaran terhadap Bill Clinton telah dimulakan pada 8 Oktober 1998.']
+  }
+\end{lstlisting}
+
+All synthetic dataset and implementation published at \href{https://github.com/mesolitica/malaysian-dataset/tree/master/embedding/instructions-pair}{mesolitica/malaysian-dataset/embedding/instructions-pair}.
+
+\section{Fine-tuning Procedure}
+
+\subsection{First N hidden layers Continue Pre-training}\label{sec:n-layers}
+
+We are extending the pretraining of our language models by focusing on the initial N layers from the base models. This helps us create a more compact yet insightful representation. Using the same dataset as Malaysian Mistral \cite{zolkepli2024large}, our approach ensures efficiency. We employ a packing technique with a context length of 32768 to enhance the model's understanding of diverse linguistic contexts.
+
+Our continued pretraining efforts encompass three different parameter sizes: 600 million, 1 billion, and 2 billion. For the 600 million parameter model, we extract information from the first two hidden layers of Malaysian Llama2. Likewise, the 1 billion parameter model draws insights from the first four hidden layers of Malaysian Llama2. Lastly, the 2 billion parameter model leverages knowledge from the first six hidden layers of Malaysian Llama2. This tiered approach allows us to tailor our models to different scales, capturing varying levels of intricacies within the Malaysian language.
+
+During this phase is to maximize the likelihood of the entire sequence,
+
+\[
+  P(x_1, x_2, \ldots, x_T) = \prod_{t=1}^{T} P(x_t | x_1, x_2, \ldots, x_{t-1})
+\]
+
+We utilized Standard\_NC96ads\_A100\_v4 Azure instance which contains 4x A100 80 GB GPUs. The continue pre-training hyperparameters are detailed below:
+
+\begin{table}[h]
+  \centering
+  \begin{tabular}{lccl}
+    \hline
+    \textbf{Hyperparameter} & \textbf{Value} \\
+    \hline
+    DeepSpeed               & ZeRO-3 Offload \\
+    Batch Size              & 4              \\
+    Learning Rate           & constant 2e-5  \\
+    Precision               & bfloat16       \\
+    \hline
+  \end{tabular}
+\end{table}
+
+Complete continue pre-training 32768 context length implementation at \href{https://github.com/mesolitica/malaya/tree/5.1/session/llama2#600m-32768-context-length-flash-attention-2}{here}.
+
+\subsection{Contrastive Fine-tuning}
+
+\begin{equation}
+  \mathcal{L}_{\text{contrastive}}(y, d) = \begin{cases}
+    (1 - d)^2             & \text{if } y = 1 \\
+    \max(d - \alpha, 0)^2 & \text{if } y = 0
+  \end{cases}
+\end{equation}
+
+where $y$ is the binary label (1 for positive pairs, 0 for negative pairs), $d$ is the dissimilarity score, and $\alpha$ is a margin parameter.
+
+\section{Evaluation}
+
+We also compared with other models and published the benchmark at \href{https://huggingface.co/spaces/mesolitica/malaysian-embedding-leaderboard}{mesolitica/malaysian-embedding-leaderboard}.
 
 \section{Acknowledgement}
 

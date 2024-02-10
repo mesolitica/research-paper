@@ -18,3 +18,4 @@ apt install texlive-extra-utils latexmk -y
 
 1. [malaysian-mistral](malaysian-mistral/neurips_2023.tex), https://arxiv.org/abs/2401.13565
 2. [MaLLaM](mallam/neurips_2023.tex), https://arxiv.org/abs/2401.14680
+3. [malaysian embedding](malaysian-embedding/neurips_2023.tex), https://arxiv.org/abs/2402.03053

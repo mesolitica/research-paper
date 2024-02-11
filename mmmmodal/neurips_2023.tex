@@ -104,7 +104,7 @@ Language models trained with instructions have shown remarkable performance acro
 
 \section{Synthetic Data Generation for Audio Instructions}
 
-We crawled the audio from youtube and use pseudolabeling approach to transcribe the audio from speech to text using OpenAI's Whisper Large V3. 
+We gathered the audio from youtube and use pseudolabeling approach to transcribe the audio from speech to text using OpenAI's Whisper Large V3. 
 
 We then generate synthetic audio instruction using \href{https://huggingface.co/mistralai/Mixtral-8x7B-Instruct-v0.1}{mistralai/Mixtral-8x7B-Instruct-v0.1} model. This model, specifically designed for instruction generation, integrates advanced natural language understanding capabilities to produce coherent and contextually relevant audio instructions from the transcribed text.
 
@@ -136,9 +136,71 @@ An example of generated dataset:
 'filename': 'output-audio/1-0-0.mp3'}
 \end{lstlisting}
 
-All synthetic dataset and implementation published at \href{https://huggingface.co/datasets/mesolitica/malaysian-youtube-audio-instructions}{mesolitica/malaysian-youtube-audio-instructions}.
+The audio synthetic dataset and implementation published at \href{https://huggingface.co/datasets/mesolitica/malaysian-youtube-audio-instructions}{mesolitica/malaysian-youtube-audio-instructions}.
 
 \section{Synthetic Visual Malaysian Context Dataset}
+
+We gathered datasets that include images and captions, as detailed in the sources mentioned at \href{https://huggingface.co/collections/mesolitica/multimodal-malaysian-llm-dataset-653a16214037a1bc4417eb3a}{Multimodal Malaysian LLM dataset}. We then generate synthetic instruction data based on image captions using a custom script as we parsed a JSON Lines file containing image captions.
+
+Below are the script that we used to generate synthetic visual instructions:
+\begin{lstlisting}[breaklines=true]
+  chats = []
+  with open('motomalaysia-data.jsonl.translated') as fopen:
+      for l in fopen:
+          l = json.loads(l)
+          overview = l['specs']['overview_translated']
+          overview = [s for s in overview if s]
+          overview = '\n'.join(overview)
+          spec = '\n'.join(l['specs']['specs'])
+          conversations = []
+          conversations.extend([
+              {"role": "user", "content": "<image>Ini model apa?"},
+              {"role": "assistant", "content": l['specs']['model_name']},
+          ])
+          if len(overview):
+              conversations.extend([
+                  {"role": "user", "content": "apa kelebihan moto tu?"},
+                  {"role": "assistant", "content": overview},
+              ])
+          conversations.extend([
+              {"role": "user", "content": "apa spesifikasi moto tu?"},
+              {"role": "assistant", "content": spec},
+          ])
+          chats.append({
+              'image': l['local_image'],
+              'image_url': l['img_url'],
+              'conversations': conversations
+          })
+\end{lstlisting}
+An example of generated dataset are as follow:
+\begin{lstlisting}[breaklines=true]
+{
+  "image": "pic/Yamaha NMAX (2016)_1.jpg",
+  "image_url": "https://www.motomalaysia.com/wp-content/uploads/2017/10/yamaha-nmax-2.jpg",
+  "conversations": [
+    {
+      "role": "user",
+      "content": "<image>Ini model apa?"
+    },
+    {
+      "role": "assistant",
+      "content": "Yamaha NMAX (2016)"
+    },
+    {
+      "role": "user",
+      "content": "apa spesifikasi moto tu?"
+    },
+    {
+      "role": "assistant",
+      "content": "Manufacturer: Yamaha\nModel: 2016\nGeneration: Yamaha NMAX (2016)\n\nType: Scooter\nColour Available: Grey, Red\n\nDimension: 1,955 x 740 x 1,115 mm\nWheelbase: 1,350 mm\nWeight: 136 kg\nSeat Height: 765 mm\nGround Clearance: 135 mm\nMeter Display: Digital - Speedometer, Fuel Gauge\n\nEngine: 4-Stroke, SOHC\nDisplacement: 155 CC\nNo Of Cylinders: 1-Cylinder\nCompression Ratio: 10.5 : 1\nBore x Stroke: 58mm x 58.7mm\nMax Power: 11.1 kW @ 8,000 RPM\nMax Torque: 14.4 Nm @ 6,000 RPM\nTransmission: Automatic, CVT\nClutch: Dry, centrifugal, Shoe\nIgnition System: Transistor Coil Ignition (TCI)\nStarting System: Electric Starter\nCooling System: Liquid Cooled\nFuel System: Fuel Injection\nFuel Capacity: 6.6 Liters\n\nFeatures:\nType: Underbone\nFront Suspension: Telescopic\nRear Suspension: Unit Swing\nFront Brake: Disc\nRear Brake: Disc\nFront Tire: 110/70-13\nRear Tire: 130/70-13"
+    }
+  ]
+}
+\end{lstlisting}
+
+We designed a synthetic question-answering dialogues between assistant and a person about the photo. The answers are based on captions associated with the original data of the image.
+
+The synthetic visual dataset and its implementation can be found on the HuggingFace Collections page under \href{https://huggingface.co/collections/mesolitica/multimodal-malaysian-llm-dataset-653a16214037a1bc4417eb3a}{Multimodal Malaysian LLM dataset}.
 
 \section{Synthetic Data Generation for Multi-Images, Multi-Audio Multi-turn Instructions}
 
@@ -214,6 +276,8 @@ This section presents examples that highlight the model's capacity to comprehend
 \section{Future Work}
 
 In our future endeavors, we aim to enhance our capabilities by focusing on several key areas. Firstly, we intend to refine our approach to generating synthetic datasets that incorporate multi-images and multi-audio inputs. This will involve expanding the dataset to include more complex relationships between inputs and facilitating comparisons involving more than two inputs. Additionally, we recognize the importance of incorporating a wider range of visual Malaysian context datasets into our model training pipeline. By diversifying our data sources, we can ensure that our model is equipped to handle a broader array of real-world scenarios and contexts, ultimately improving its performance and relevance in practical applications.
+
+
 
 \section{Acknowledgement}
 

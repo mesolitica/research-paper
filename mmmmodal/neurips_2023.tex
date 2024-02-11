@@ -92,6 +92,8 @@ Language models trained with instructions have shown remarkable performance acro
   \item \textbf{Synthetic Audio Instruction Dataset:} In the realm of Natural Language Processing (NLP), research indicates that the quality of instruction-following data significantly impacts the efficacy of instruction-following models. To illustrate this, we create a synthetic dataset comprising multi-dialogue interactions involving multiple images and audio inputs. Using Mistral, we generate a multiturn dialogue instruction dataset aimed at enhancing the language model's capacity to produce precise and contextually relevant responses. This dataset encompasses three distinct types of instruction-following data: multiple images instructions,
         multi-audio instructions, and combined image and audio instructions.
 
+  \item \textbf{Synthetic Visual Malaysian Context Dataset:} a
+
   \item \textbf{Synthetic Multi-Images Multi-Audio relationship Dataset:} Our approach adopts a two-step training procedure to integrate multimodal and multiturn capabilities into our model. The initial step entails pretraining the feature alignment module. Through this process, we align the image features and audio data with the pre-trained word embeddings of the Language Learning Model (LLM). Specifically, this step involves training the projection layer to ensure alignment between the multi-modal features and textual representations. This alignment facilitates seamless integration of diverse modalities within the model architecture.
 
   \item \textbf{Pretraining Feature Alignment:} a
@@ -101,6 +103,8 @@ Language models trained with instructions have shown remarkable performance acro
 \end{itemize}
 
 \section{Synthetic Data Generation for Audio Instructions}
+
+\section{Synthetic Visual Malaysian Context Dataset}
 
 \section{Synthetic Data Generation for Multi-Images, Multi-Audio Multi-turn Instructions}
 
@@ -179,7 +183,7 @@ In our future endeavors, we aim to enhance our capabilities by focusing on sever
 
 \section{Acknowledgement}
 
-Special thanks to Malaysia-AI volunteers especially \href{https://www.linkedin.com/in/wan-adzhar-faiq-adzlan-19a27baa/}{Wan Adzhar Faiq Adzlan}, \href{https://www.linkedin.com/in/ammar-azman/}{Ammar Azman}, \href{https://www.linkedin.com/in/amzar96/}{M. Amzar}, \href{https://www.linkedin.com/in/muhammad-farhan-helmy-0529501a7/}{Muhammad Farhan} and \href{https://www.linkedin.com/in/syafie-nizam/}{Syafie Nizam} for contributing dataset to train MaLLaM.
+Special thanks to Malaysia-AI volunteers especially \href{https://www.linkedin.com/in/wan-adzhar-faiq-adzlan-19a27baa/}{Wan Adzhar Faiq Adzlan}, \href{https://www.linkedin.com/in/ammar-azman/}{Ammar Azman}, \href{https://www.linkedin.com/in/amzar96/}{M. Amzar}, \href{https://www.linkedin.com/in/muhammad-farhan-helmy-0529501a7/}{Muhammad Farhan}, \href{https://www.linkedin.com/in/syafie-nizam/}{Syafie Nizam}, \href{https://www.linkedin.com/in/halimshukor/}{Halim Shukor}, \href{https://www.linkedin.com/in/alif-aiman-1b334b24b/}{Alif Aiman}, \href{https://www.linkedin.com/in/azwan-zuharimi/}{Azwan Zuharimi} and \href{https://www.linkedin.com/in/haziqzikry/}{Haziq Zikry} for contributing dataset to train MMMModal.
 
 We would like to express our gratitude to NVIDIA Inception for generously providing us with the opportunity to train our model on the Azure cloud. Their support has played a crucial role in the success of our research, enabling us to leverage advanced technologies and computational resources.
 

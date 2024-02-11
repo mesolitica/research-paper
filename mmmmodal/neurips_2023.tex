@@ -1,10 +1,8 @@
 \documentclass[preprint]{article}
 
-
 % if you need to pass options to natbib, use, e.g.:
 %     \PassOptionsToPackage{numbers, compress}{natbib}
 % before loading neurips_2023
-
 
 % ready for submission
 \usepackage{neurips_2023}
@@ -36,6 +34,8 @@
 \usepackage{cite}
 \usepackage{graphicx}
 \usepackage{hyperref}
+\usepackage{array}
+
 
 
 \lstset{
@@ -55,7 +55,7 @@
 
 \hypersetup{
     pdftitle={MMMModal - Multi-Images Multi-Audio Multi-turn Multi-Modal},
-    pdfauthor={Aisyah Razak, Husein Zolkepli, Kamarul Adha, Ariff Nazhan},
+    pdfauthor={Husein Zolkepli, Aisyah Razak,  Kamarul Adha, Ariff Nazhan},
     pdfsubject={Natural Language Processing, Large Language Models, Machine Learning},
     pdfkeywords={language models, natural language processing, deep learning},
     colorlinks=true,
@@ -65,8 +65,8 @@
 }
 \title{MMMModal - Multi-Images Multi-Audio Multi-turn Multi-Modal}
 \author{
-  Aisyah Razak\thanks{aisyahrazak171@gmail.com} \and
   Husein Zolkepli\thanks{husein@mesolitica.com} \and
+  Aisyah Razak\thanks{aisyahrazak171@gmail.com} \and
   Kamarul Adha\thanks{kamarul.adha360@gmail.com} \and
   Ariff Nazhan\thanks{ariffnzhn@gmail.com}
 }
@@ -75,13 +75,111 @@
 
 \maketitle
 
-\section{Acknowledgement}
+\begin{abstract}
+  
+Recent advancements in multimodal pretraining have successfully integrated audio and visual data into Language Learning Models (LLMs), yielding impressive outcomes and giving rise to a new category of multi-modal LLMs. However, none of these approaches have the capability to accommodate multi-turn dialogues and multiple inputs in their enhancements. To tackle these limitations, we introduce MMModal, a streamlined approach for adapting to downstream tasks by leveraging LLM as a conduit to link diverse expert models. In addition, we construct a large-scale multimodal instruction dataset comprising both English and Malay instructions, enabling MMModal to effectively handle multi-turn dialogues across different modalities in English and Malay.
+\end{abstract}
 
+\section{Introduction}
+
+Language models trained with instructions have shown remarkable performance across various domains. However, their limitation in handling only text-based data hampers their applicability. Recent advancements in multimodal pre-training have demonstrated the potential to integrate knowledge from diverse modalities into a unified representation.\cite{lyu2023macawllm}\cite{liu2023visual} Despite these advancements, there remains a lack of existing multimodal models capable of supporting multiple images/audio inputs and multiturn dialogue in current research. Addressing this gap, our proposal introduces MMModal, a multi-modal instruction-tuned Language Learning Model (LLM) that combines image, audio, and text modalities within a single model architecture.
+
+\begin{itemize}
+  \item \textbf{Synthetic Multimodal Multiturn dataset:} In the realm of Natural Language Processing (NLP), research indicates that the quality of instruction-following data significantly impacts the efficacy of instruction-following models. To illustrate this, we create a synthetic dataset comprising multi-dialogue interactions involving multiple images and audio inputs. Using Mistral, we generate a multiturn dialogue instruction dataset aimed at enhancing the language model's capacity to produce precise and contextually relevant responses. This dataset encompasses three distinct types of instruction-following data: multiple images instructions, 
+  multi-audio instructions, and combined image and audio instructions.
+
+\item \textbf{Fine-tuned Multi-Images Multi-Audio Multi-turn Model:} Our approach adopts a two-step training procedure to integrate multimodal and multiturn capabilities into our model. The initial step entails pretraining the feature alignment module. Through this process, we align the image features and audio data with the pre-trained word embeddings of the Language Learning Model (LLM). Specifically, this step involves training the projection layer to ensure alignment between the multi-modal features and textual representations. This alignment facilitates seamless integration of diverse modalities within the model architecture.
+\end{itemize}
+
+\pagebreak
+
+
+\section{Synthetic Data Generation for Multi-Images, Multi-Audio Multi-turn Instructions}
+
+\subsection{Synthetic Multi-Images Instruction}
+
+\subsection{Synthetic Multi-Audio Instruction}
+
+\subsection{Synthetic Image-Audio Instruction}
+
+
+\section{Finetuning Procedure}
+
+\subsection{Overall Architecture}
+
+\subsection{Pretraining for Feature Alignment}
+
+\subsection{Instruction Finetuning}
+
+The fine-tuning hyperparameters are detailed below:
+
+
+\begin{table}[h]
+  \centering
+  \begin{tabular}{lccl}
+    \hline
+    \textbf{Hyperparameter} & \textbf{Value} \\
+    \hline
+    DeepSpeed               & ZeRO-2 Offload \\
+    Batch Size              & 12             \\
+    Learning Rate           & constant 2e-5  \\
+    Precision               & bfloat16       \\
+    \hline
+  \end{tabular}
+\end{table}
+
+Complete fine-tuning 8192 context length implementation at \href{https://github.com/mesolitica/multimodal-LLM/blob/master/run-deepspeed.sh}{here}.
+
+\pagebreak
+
+\section{Examples}
+
+This section presents examples that highlight the model's capacity to comprehend and produce responses relating to visual and audio input, showcasing the efficacy and potential of our proposed MMModal. These examples clearly demonstrate how the model handles and combines various information modalities, including audio and pictures, in the context of natural language processing (NLP). MMModal exhibits its capability by producing insightful, pertinent, and cohesive answers to a diverse set of inquiries. This highlights the model's capacity to create exceptionally efficient interfaces for human-machine communication.
+
+\begin{table}[hbt!]
+  \setlength{\extrarowheight}{3pt} % Adjust the value as needed
+  \renewcommand{\arraystretch}{1.5} % Adjust the value as needed
+    \begin{tabular}{lcccl}
+      \hline
+      \textbf{Multi Images Input Example} \\[6pt]  % Adjust the value as needed
+      \hline
+      \hline 
+      \includegraphics[width=0.45\linewidth,keepaspectratio]{pic/R.jpeg} & \includegraphics[width=0.45\linewidth,keepaspectratio]{pic/Persian-cat-breed.jpg} \\
+      User & What is related between image 1 and image 2? \\
+      \hline
+    \end{tabular}
+\end{table}
+
+\begin{table}[hbt!]
+  \setlength{\extrarowheight}{3pt} % Adjust the value as needed
+  \renewcommand{\arraystretch}{1.5} % Adjust the value as needed
+    \begin{tabular}{lcccl}
+      \hline
+      \textbf{Multi Audio Input Example} \\[6pt]  % Adjust the value as needed
+      \hline
+      \hline 
+      \includegraphics[width=0.45\linewidth,keepaspectratio]{pic/R.jpeg} & \includegraphics[width=0.45\linewidth,keepaspectratio]{pic/Persian-cat-breed.jpg} \\
+      User & What is related between audio 1 and audio 2? \\
+      \hline
+    \end{tabular}
+\end{table}
+
+
+\section{Evaluation}
+
+
+
+\section{Acknowledgement}
 Special thanks to Malaysia-AI volunteers especially \href{https://www.linkedin.com/in/wan-adzhar-faiq-adzlan-19a27baa/}{Wan Adzhar Faiq Adzlan}, \href{https://www.linkedin.com/in/ammar-azman/}{Ammar Azman}, \href{https://www.linkedin.com/in/amzar96/}{M. Amzar}, \href{https://www.linkedin.com/in/muhammad-farhan-helmy-0529501a7/}{Muhammad Farhan} and \href{https://www.linkedin.com/in/syafie-nizam/}{Syafie Nizam} for contributing dataset to train MaLLaM.
 
 We would like to express our gratitude to NVIDIA Inception for generously providing us with the opportunity to train our model on the Azure cloud. Their support has played a crucial role in the success of our research, enabling us to leverage advanced technologies and computational resources.
 
 We extend our thanks to the wider research community for their valuable insights and collaborative discussions, which have greatly influenced our work. This paper reflects the collective efforts and contributions from both NVIDIA Inception and the broader research community.
+
+
+\section{Conclusion}
+
+In this paper, we introduce MMMModal, a multimodal instruction tuned Model (LLM) specifically designed to handle multiple modalities, including images, audio, and text in a multi-turn dialogue setting. Our novel approach focuses on aligning representations from various modality encoders into a unified space. Unlike existing methods, our approach enables the model to effectively process multi-turn dialogues and incorporate multiple images or audio inputs in its responses. We provide examples demonstrating the multi-modal understanding capabilities of MMMModal.
 
 \bibliography{neurips_2023}{}
 \bibliographystyle{unsrt}

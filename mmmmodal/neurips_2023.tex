@@ -320,7 +320,14 @@ During the initial pretraining stage, the primary objective is to equip the mode
 
 In our approach, we adopt the same projection layer as LLAVA, which consists of two hidden layers with GELU activation at the middle. However, we introduce two new tokens, \texttt{<image>} and \texttt{</image>}, to facilitate the incorporation of visual information. These tokens serve as markers to indicate the beginning and end of projected visual output, enabling seamless integration within the text embedding.
 
-The visualization below illustrates the process of inserting projected visual output between the \texttt{<image>} and \texttt{</image>} tokens, enhancing the model's ability to handle multimodal inputs effectively.
+\newpage
+
+The visualization below illustrates the process of inserting projected visual output between the \texttt{<image>} and \texttt{</image>} tokens, enhancing the model's ability to handle visual inputs effectively.
+
+\begin{figure}[hbt!]
+  \centering
+  \includegraphics[width=0.6\linewidth]{pic/visual.png} % Replace with your image file
+\end{figure}
 
 The hyperparameters involves in this pretraining stage are detailed below:
 
@@ -349,6 +356,8 @@ We also want to equip the model with the capability to comprehend and produce la
 In our method, we draw inspiration from LLAVA's projection layer but introduce modifications to handle longer sequences more efficiently. Instead of using two linear layers, we opt for a convolutional layer with a kernel size of 40 and a stride size of 3 for the first layer. The output is then passed through a linear layer with a GELU activation function at its midpoint. This approach helps us reduce the sequence length by a factor of 3, which is crucial given that the Whisper encoder outputs sequences of length 1500. Additionally, we introduce two new tokens, \texttt{<audio>} and \texttt{</audio>}, serving as markers for projected audio output, same procedure stated at Visual Feature Alignment.
 
 The visualization below demonstrates the procedure of embedding projected audio output between the \texttt{<audio>} and \texttt{</audio>} tokens.
+
+
 
 The hyperparameters involves in this pretraining stage are detailed below:
 

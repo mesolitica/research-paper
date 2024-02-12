@@ -35,6 +35,7 @@
 \usepackage{graphicx}
 \usepackage{hyperref}
 \usepackage{array}
+\usepackage{flafter}
 \usepackage[export]{adjustbox} % Required for valign option
 
 
@@ -95,10 +96,10 @@ Despite recent advancements, there remains a lack of current research on multimo
 
 \begin{itemize}
 
-  \item \textbf{Synthetic Audio Instruction Dataset:} 
-  To construct Synthetic Audio Instruction Dataset, our approach involves gathering extracted audio content from YouTube videos. We  employed the Whisper Large V3 model for pseudolabeling to transcribe the audio contents from scraped Youtube videos, followed by a post-filtering process based on score thresholds to ensure high-quality datasets. We then utilized the Mixtral-8x7B-Instruct-v0.1 Model to generate multiturn dialogue instruction-following data involving the audio context.
+  \item \textbf{Synthetic Audio Instruction Dataset:}
+        To construct Synthetic Audio Instruction Dataset, our approach involves gathering extracted audio content from YouTube videos. We  employed the Whisper Large V3 model for pseudolabeling to transcribe the audio contents from scraped Youtube videos, followed by a post-filtering process based on score thresholds to ensure high-quality datasets. We then utilized the Mixtral-8x7B-Instruct-v0.1 Model to generate multiturn dialogue instruction-following data involving the audio context.
 
-  \item \textbf{Synthetic Visual Malaysian Context Dataset:}  We collected images from Malaysian websites along with their descriptions. Through data processing, we converted this information into conversational examples to better incorporate Malaysian context into our model. 
+  \item \textbf{Synthetic Visual Malaysian Context Dataset:}  We collected images from Malaysian websites along with their descriptions. Through data processing, we converted this information into conversational examples to better incorporate Malaysian context into our model.
 
   \item \textbf{Synthetic Multi-Images Multi-Audio relationship Dataset:} Our method involved randomly combining images, audios or pairing them together to create a dataset illustrating relationships of different images and audios. We utilized Mistral to generate multiturn dialogues, prompting the model to respond based on the images, audio captions, and descriptions. This enabled us to collect a corpus tailored for focusing on relationships within multi-modal content, encompassing both images and audio.
 
@@ -110,7 +111,7 @@ Despite recent advancements, there remains a lack of current research on multimo
 
 \section{Synthetic Data Generation for Audio Instructions}
 
-We gathered the audio from youtube and use pseudolabeling approach to transcribe the audio from speech to text using OpenAI's Whisper Large V3. 
+We gathered the audio from youtube and use pseudolabeling approach to transcribe the audio from speech to text using OpenAI's Whisper Large V3.
 
 We then generate synthetic audio instruction using \href{https://huggingface.co/mistralai/Mixtral-8x7B-Instruct-v0.1}{mistralai/Mixtral-8x7B-Instruct-v0.1} model. This model, specifically designed for instruction generation, integrates advanced natural language understanding capabilities to produce coherent and contextually relevant audio instructions from the transcribed text.
 
@@ -123,7 +124,7 @@ generate questions based on context above.
 
 \end{lstlisting}
 
-An example of generated dataset: 
+An example of generated dataset:
 
 \begin{lstlisting}[breaklines=true]
 {'context': 'anda tahu keuntungan boleh lebih tinggi daripada keuntungan kewangan rumah maka saya tidak akan mencari dalam akaun saya akan mencari ke dalam ethereum atau beberapa crypto punks bergantung pada faktor risiko anda kerana rumah kajang dihantar tidak mengganggu dsr saya sejauh ini jadi sekarang apa posisi saya untuk mendapatkan kewangan ketiga jadi mungkin setelah melihat sekeliling saya menemui seorang penjual yang dapat menutupi perhubungan tetapi bank hanya menerima 70% dari itu saya boleh membayar perbezaan dengan menggunakan wang ini kerana sekali lagi ia menyusahkan saya dan aset tetapi jika anda tidak selesa dengan mencari',
@@ -215,7 +216,7 @@ We have observed that most open-source multimodal models accept only single imag
 
 To bridge these gaps, we aim to generate a multiple images, audio and dialogue turns that offers fine-grained interactions between multiple images, audio and words, mimicking user-assistant conversations.
 
-By doing this approach, multimodal model would enhance its capabilities on understanding and reasoning across multiple images, audios and dialogue turns. 
+By doing this approach, multimodal model would enhance its capabilities on understanding and reasoning across multiple images, audios and dialogue turns.
 
 \subsection{Synthetic Multi-Images Instruction}
 
@@ -235,11 +236,55 @@ MMMModal aims to align visual and audio information from pretrained vision and a
 
 During the initial pretraining stage, the primary objective is to equip the model with the ability to understand and generate language based on visual input. This is achieved through exposure to a diverse set of paired image-text data, where the model learns to associate visual information with corresponding textual descriptions. In our work, we utilize the pre-trained SigLip visual encoder to extract visual features for input into the projection layer. This projection layer facilitates the connection of image features into the text embedding space. The output of this projection layer then acts as the input to the Large Language Model, instructing it on how to generate appropriate textual responses based on the visual features provided. Only the linear projection layer is pretrained during the whole pretraining procedure; the pretrained vision encoder and the LLM stay frozen.
 
+In our approach, we adopt the same projection layer as LLAVA, which consists of two hidden layers with GELU activation at the middle. However, we introduce two new tokens, \texttt{<image>} and \texttt{</image>}, to facilitate the incorporation of visual information. These tokens serve as markers to indicate the beginning and end of projected visual output, enabling seamless integration within the text embedding.
+
+The visualization below illustrates the process of inserting projected visual output between the \texttt{<image>} and \texttt{</image>} tokens, enhancing the model's ability to handle multimodal inputs effectively.
+
+The hyperparameters involves in this pretraining stage are detailed below:
+
+\begin{table}[h]
+  \centering
+  \begin{tabular}{lccl}
+    \hline
+    \textbf{Hyperparameter} & \textbf{Value} \\
+    \hline
+    DeepSpeed               & ZeRO-2 Offload \\
+    Batch Size              & 18             \\
+    Batch Size              & 1              \\
+    Learning Rate           & 1e-4           \\
+    Warmup Ratio            & 0.03           \\
+    Precision               & bfloat16       \\
+    \hline
+  \end{tabular}
+\end{table}
+
 The implementation for visual feature alignment pretraining can be found \href{https://github.com/mesolitica/multimodal-LLM/tree/master/vision-only}{here}
 
 \subsection{Pretraining for Audio Feature Alignment}
 
 We also want to equip the model with the capability to comprehend and produce language from audio input. This is achieved by exposing the model to a diverse set of paired audio-text datasets, allowing it to learn the correspondence between audio features and corresponding textual descriptions. We utilize the pre-trained Whisper encoder to extract audio features for input into the projection layer. The injected projection layer plays a pivotal role in this process, serving as a bridge between the audio and text domains. The output of this projection layer serves as input to the Large Language Model, guiding it in generating appropriate textual responses based on the audio features provided. It is important to note that while the linear projection layer is trained throughout the entire pretraining procedure, the pretrained audio encoder and the Large Language Model remain static, or "frozen." This ensures that the model focuses specifically on learning the associations between auditory features and textual information without altering the underlying representations learned in the audio encoder or the language model.
+
+Drawing inspiration from LLAVA, our projection layer diverges by employing a convolutional operation with a kernel size of 40 and a stride size of 3 for the first layer, followed by a linear layer for the second, with a GELU activation function applied at its midpoint. This design choice optimizes the model's ability to process audio inputs effectively. Additionally, we introduce two new tokens, \texttt{<audio>} and \texttt{</audio>}, serving as delimiters to demarcate the commencement and conclusion of projected audio output, thus facilitating its seamless integration within the text embedding.
+
+The visualization below demonstrates the procedure of embedding projected audio output between the \texttt{<audio>} and \texttt{</audio>} tokens.
+
+The hyperparameters involves in this pretraining stage are detailed below:
+
+\begin{table}[h]
+  \centering
+  \begin{tabular}{lccl}
+    \hline
+    \textbf{Hyperparameter} & \textbf{Value} \\
+    \hline
+    DeepSpeed               & ZeRO-2 Offload \\
+    Batch Size              & 18             \\
+    Batch Size              & 1              \\
+    Learning Rate           & 1e-4           \\
+    Warmup Ratio            & 0.03           \\
+    Precision               & bfloat16       \\
+    \hline
+  \end{tabular}
+\end{table}
 
 The implementation for audio feature alignment pretraining can be found \href{https://github.com/mesolitica/multimodal-LLM/tree/master/audio-only}{here}
 
@@ -271,57 +316,57 @@ Complete fine-tuning 8192 context length implementation at \href{https://github.
 
 \section{Examples}
 
-This section presents examples that highlight the model's capacity to comprehend and produce responses relating to visual and audio input, showcasing the efficacy and potential of our proposed MMModal. These examples clearly demonstrate how the model handles and combines various information modalities, including audio and pictures, in the context of natural language processing (NLP). MMModal exhibits its capability by producing insightful, pertinent, and cohesive answers to a diverse set of inquiries. This highlights the model's capacity to create exceptionally efficient interfaces for human-machine communication.
+This section presents examples that highlight the model's capacity to comprehend and produce responses relating to visual and audio input, showcasing the efficacy and potential of our proposed MMModal. These examples clearly demonstrate how the model handles and combines various information modalities, including audio and pictures.
 
-\begin{table}[hbt!]
+\begin{table}[hbt]
   \centering
   \setlength{\extrarowheight}{3pt} % Adjust the value as needed
   \renewcommand{\arraystretch}{1.5} % Adjust the value as needed
   \begin{tabular}{p{6.5cm}p{6.5cm}}
     \hline
-    \textbf{Multi Images Input Example} \\[6pt]  
+    \textbf{Multi Images Input Example}                                                                            \\[6pt]
     \hline
     \includegraphics[width=\linewidth]{pic/R.jpeg} & \includegraphics[width=\linewidth]{pic/Persian-cat-breed.jpg} \\
     \hline
-    User & What is related between image 1 and image 2? \\
-    MMMModal & Nothing? \\
+    User                                           & What is related between image 1 and image 2?                  \\
+    MMMModal                                       & Nothing?                                                      \\
     \hline
   \end{tabular}
 \end{table}
 
-\begin{table}[hbt!]
+\begin{table}[hbt]
   \setlength{\extrarowheight}{3pt}
   \renewcommand{\arraystretch}{1.5}
   \begin{tabular}{p{6.5cm} p{6.5cm}}
     \hline
-    \textbf{Multi Audio Input Example}\\[3pt]
+    \textbf{Multi Audio Input Example}                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           \\[3pt]
     \hline
     \hline
-    Audio 1 Transcription: anda tahu keuntungan boleh lebih tinggi daripada keuntungan kewangan rumah maka saya tidak akan mencari dalam akaun saya akan mencari ke dalam ethereum atau beberapa crypto punks bergantung pada faktor risiko anda kerana rumah kajang dihantar tidak mengganggu dsr saya sejauh ini jadi sekarang apa posisi saya untuk sekali lagi ia menyusahkan saya dan aset tetapi jika anda tidak selesa dengan mencari  & Audio 2 Transcription: anda tahu keuntungan boleh lebih tinggi daripada keuntungan kewangan rumah maka saya tidak akan mencari dalam akaun saya akan mencari ke dalam ethereum atau beberapa crypto punks bergantung pada faktor risiko anda kerana rumah kajang dihantar tidak mengganggu dsr say lagi ia menyusahkan saya dan aset tetapi jika anda tidak selesa dengan mencari  \\
+    Audio 1 Transcription: anda tahu keuntungan boleh lebih tinggi daripada keuntungan kewangan rumah maka saya tidak akan mencari dalam akaun saya akan mencari ke dalam ethereum atau beberapa crypto punks bergantung pada faktor risiko anda kerana rumah kajang dihantar tidak mengganggu dsr saya sejauh ini jadi sekarang apa posisi saya untuk sekali lagi ia menyusahkan saya dan aset tetapi jika anda tidak selesa dengan mencari & Audio 2 Transcription: anda tahu keuntungan boleh lebih tinggi daripada keuntungan kewangan rumah maka saya tidak akan mencari dalam akaun saya akan mencari ke dalam ethereum atau beberapa crypto punks bergantung pada faktor risiko anda kerana rumah kajang dihantar tidak mengganggu dsr say lagi ia menyusahkan saya dan aset tetapi jika anda tidak selesa dengan mencari \\
     \hline
-    User& What is related between audio 1 and audio 2? \\
-    MMMModal & Nothing? \\
+    User                                                                                                                                                                                                                                                                                                                                                                                                                                     & What is related between audio 1 and audio 2?                                                                                                                                                                                                                                                                                                                                      \\
+    MMMModal                                                                                                                                                                                                                                                                                                                                                                                                                                 & Nothing?                                                                                                                                                                                                                                                                                                                                                                          \\
     \hline
   \end{tabular}
 \end{table}
 
-\begin{table}[hbt!]
+\begin{table}[hbt]
   \centering
-  \setlength{\extrarowheight}{3pt} 
+  \setlength{\extrarowheight}{3pt}
   \renewcommand{\arraystretch}{1.5}
   \begin{tabular}{>{\arraybackslash}m{6.5cm}>{\arraybackslash}m{6.5cm}}
     \hline
-    \textbf{Images Audio Input Example} \\[6pt]  
+    \textbf{Images Audio Input Example}                                                                                                                                                                                                                                                                                                                                                                                                                          \\[6pt]
     \hline
     \includegraphics[width=\linewidth,valign=c]{pic/Persian-cat-breed.jpg} & Audio 1 Transcription: anda tahu keuntungan boleh lebih tinggi daripada keuntungan kewangan rumah maka saya tidak akan mencari dalam akaun saya akan mencari ke dalam ethereum atau beberapa crypto punks bergantung pri itu saya boleh membayar perbezaan dengan menggunakan wang ini kerana sekali lagi ia menyusahkan saya dan aset tetapi jika anda tidak selesa dengan mencari \\
     \hline
-    User & What is related between audio 1 and image 2? \\
-    MMMModal & Nothing? \\
+    User                                                                   & What is related between audio 1 and image 2?                                                                                                                                                                                                                                                                                                                                        \\
+    MMMModal                                                               & Nothing?                                                                                                                                                                                                                                                                                                                                                                            \\
     \hline
   \end{tabular}
 \end{table}
 
-\pagebreak
+\newpage
 
 \section{Evaluation}
 

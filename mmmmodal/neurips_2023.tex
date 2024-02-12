@@ -96,8 +96,7 @@ Despite recent advancements, there remains a lack of current research on multimo
 
 \begin{itemize}
 
-  \item \textbf{Synthetic Audio Instruction Dataset:}
-        To construct Synthetic Audio Instruction Dataset, our approach involves gathering extracted audio content from YouTube videos. We  employed the Whisper Large V3 model for pseudolabeling to transcribe the audio contents from scraped Youtube videos, followed by a post-filtering process based on score thresholds to ensure high-quality datasets. We then utilized the Mixtral-8x7B-Instruct-v0.1 Model to generate multiturn dialogue instruction-following data involving the audio context.
+  \item \textbf{Synthetic Audio Instruction Dataset:} To construct Synthetic Audio Instruction Dataset, our approach involves gathering extracted audio content from YouTube videos. We  employed the Whisper Large V3 model for pseudolabeling to transcribe the audio contents from scraped Youtube videos, followed by a post-filtering process based on score thresholds to ensure high-quality datasets. We then utilized the Mixtral-8x7B-Instruct-v0.1 Model to generate multiturn dialogue instruction-following data involving the audio context.
 
   \item \textbf{Synthetic Visual Malaysian Context Dataset:}  We collected images from Malaysian websites along with their descriptions. Through data processing, we converted this information into conversational examples to better incorporate Malaysian context into our model.
 
@@ -111,20 +110,58 @@ Despite recent advancements, there remains a lack of current research on multimo
 
 \section{Synthetic Data Generation for Audio Instructions}
 
-We gathered the audio from youtube and use pseudolabeling approach to transcribe the audio from speech to text using OpenAI's Whisper Large V3.
+In our pursuit of creating a comprehensive dataset for multimodal dialogue understanding and generation, we meticulously curated a vast collection of Malaysian and Singaporean YouTube videos, encompassing an impressive 18,500 hours of content. Spanning a myriad of subjects including gaming, economy, politics, religion, movies, and socioeconomy, this corpus offers a rich and diverse source of audiovisual material reflective of the cultural landscape of the region. To extract meaningful textual representations from this wealth of multimedia content, we employed the sophisticated capabilities of OpenAI's Whisper Large V3 model \cite{radford2022whisper}. By leveraging this cutting-edge technology, we were able to pseudolabel the videos, generating accurate transcriptions that faithfully captured the spoken content within each video. These transcriptions served as the foundation for our subsequent endeavors in generating multi-turn conversations.
 
-We then generate synthetic audio instruction using \href{https://huggingface.co/mistralai/Mixtral-8x7B-Instruct-v0.1}{mistralai/Mixtral-8x7B-Instruct-v0.1} model. This model, specifically designed for instruction generation, integrates advanced natural language understanding capabilities to produce coherent and contextually relevant audio instructions from the transcribed text.
+Utilizing the transcriptions as contextual prompts, we embarked on the process of simulating dialogue interactions between users and virtual assistants. Leveraging the Mixtral-8x7B-Instruct-v0.1 model \cite{jiang2024mixtral}, specifically tailored for generating conversational responses, we orchestrated dynamic exchanges that mirrored real-world interactions. Through this approach, we sought to capture the nuances of human conversation, including the fluidity of dialogue and the contextual relevance of responses. By intertwining the audio context derived from the YouTube video transcriptions with the conversational capabilities of our model, we created a dataset ripe for exploration and analysis. This rich tapestry of simulated conversations offers researchers a unique opportunity to delve into the intricacies of multimodal dialogue processing, paving the way for advancements in natural language understanding and generation.
 
-Below is the prompt to generate the synthetic dataset:
+Furthermore, to ensure linguistic fidelity and cultural resonance, we employed Neural Machine Translation to post-translate the generated output from the Mixtral-8x7B-Instruct-v0.1 model into the Malay language, thereby enriching the dataset with linguistic diversity and contextual relevance tailored for the Malaysian audience.
+
+In the first step, we create questions from the provided context. This process involves carefully analyzing the context and using advanced techniques to generate relevant questions. These questions aim to capture the key points and details of the context effectively. Below is the prompt we use to generate the questions,
 
 \begin{lstlisting}[breaklines=true]
-anda tahu keuntungan boleh lebih tinggi daripada keuntungan kewangan rumah maka saya tidak akan mencari dalam akaun saya akan mencari ke dalam ethereum atau beberapa crypto punks bergantung pada faktor risiko anda kerana rumah kajang dihantar tidak mengganggu dsr saya sejauh ini jadi sekarang apa posisi saya untuk mendapatkan kewangan ketiga jadi mungkin setelah melihat sekeliling saya menemui seorang penjual yang dapat menutupi perhubungan tetapi bank hanya menerima 70% dari itu saya boleh membayar perbezaan dengan menggunakan wang ini kerana sekali lagi ia menyusahkan saya dan aset tetapi jika anda tidak selesa dengan mencari 
+  paragraph = 'anda tahu keuntungan boleh lebih tinggi daripada keuntungan kewangan ...'
+  instruction = f'{paragraph}\n\ngenerate questions based on context above'
+  mixtral(instruction)
+\end{lstlisting}
+
+In the second step, we repeatedly refine and expand upon the initial questions. This iterative process helps us cover various aspects of the context more thoroughly, resulting in a broader range of questions, the pseudo Python code to generate the synthetic multo-turn as below,
+
+\begin{lstlisting}[breaklines=true]
+  def format_prompt(message, history):
+    prompt = "<s>"
+    for user_prompt, bot_response in history:
+        prompt += f"[INST] {user_prompt} [/INST]"
+        prompt += f" {bot_response}</s> "
+    prompt += f"[INST] {message} [/INST]"
+    return prompt
+
+  def format_user(history):
+    prompt = "<s>"
+    for user_prompt, bot_response in history:
+        prompt += f"[INST] {user_prompt} [/INST]"
+        prompt += f" {bot_response}</s> "
+    prompt += f"[INST]"
+    return prompt
   
-generate questions based on context above. 
+  paragraph = 'anda tahu keuntungan boleh lebih tinggi daripada keuntungan kewangan ...'
+  initial_question = 'Why might someone consider investing in cryptocurrencies like Ethereum instead of traditional financial investments such as real estate?'
+  prompt = f'{paragraph}\n{initial_question}'
+  formatted_prompt = format_prompt(question, [])
+  answer = mixtral(formatted_prompt)
+
+  history = [(prompt, answer)]
+  for _ i in range(N):
+    formatted_prompt = format_user(history)
+    question = mixtral(formatted_prompt)
+
+    formatted_prompt = format_prompt(question, history)
+    answer = mixtral(formatted_prompt)
+
+    history.append((question, answer))
 
 \end{lstlisting}
 
-An example of generated dataset:
+An example of generated dataset,
 
 \begin{lstlisting}[breaklines=true]
 {'context': 'anda tahu keuntungan boleh lebih tinggi daripada keuntungan kewangan rumah maka saya tidak akan mencari dalam akaun saya akan mencari ke dalam ethereum atau beberapa crypto punks bergantung pada faktor risiko anda kerana rumah kajang dihantar tidak mengganggu dsr saya sejauh ini jadi sekarang apa posisi saya untuk mendapatkan kewangan ketiga jadi mungkin setelah melihat sekeliling saya menemui seorang penjual yang dapat menutupi perhubungan tetapi bank hanya menerima 70% dari itu saya boleh membayar perbezaan dengan menggunakan wang ini kerana sekali lagi ia menyusahkan saya dan aset tetapi jika anda tidak selesa dengan mencari',
@@ -147,39 +184,14 @@ The audio synthetic dataset and implementation published at \href{https://huggin
 
 \section{Synthetic Visual Malaysian Context Dataset}
 
-We gathered datasets that include images and captions, as detailed in the sources mentioned at \href{https://huggingface.co/collections/mesolitica/multimodal-malaysian-llm-dataset-653a16214037a1bc4417eb3a}{Multimodal Malaysian LLM dataset}. We then generate synthetic instruction data based on image captions using a custom script as we parsed a JSON Lines file containing image captions.
+To enhance the dataset for visual question answering (QA) tasks, we embarked on a comprehensive curation process aimed at capturing the essence of Malaysian daily life and surroundings. To achieve this, we meticulously gathered a vast array of local context images that encapsulate the cultural, social, and environmental facets unique to Malaysia. Our dataset spans a broad spectrum of themes, encompassing everything from the tantalizing diversity of Malaysian cuisine to the intricate details of local transportation systems and road infrastructure. Leveraging reputable sources such as resepichenom.com, wapcar.my, and motomalaysia.com, we meticulously collected images depicting iconic Malaysian foods, cars, motorcycles, road signs, and driving scenarios.
 
-Below are the script that we used to generate synthetic visual instructions:
-\begin{lstlisting}[breaklines=true]
-  chats = []
-  with open('motomalaysia-data.jsonl.translated') as fopen:
-      for l in fopen:
-          l = json.loads(l)
-          overview = l['specs']['overview_translated']
-          overview = [s for s in overview if s]
-          overview = '\n'.join(overview)
-          spec = '\n'.join(l['specs']['specs'])
-          conversations = []
-          conversations.extend([
-              {"role": "user", "content": "<image>Ini model apa?"},
-              {"role": "assistant", "content": l['specs']['model_name']},
-          ])
-          if len(overview):
-              conversations.extend([
-                  {"role": "user", "content": "apa kelebihan moto tu?"},
-                  {"role": "assistant", "content": overview},
-              ])
-          conversations.extend([
-              {"role": "user", "content": "apa spesifikasi moto tu?"},
-              {"role": "assistant", "content": spec},
-          ])
-          chats.append({
-              'image': l['local_image'],
-              'image_url': l['img_url'],
-              'conversations': conversations
-          })
-\end{lstlisting}
-An example of generated dataset are as follow:
+Each category was carefully selected to provide a holistic representation of Malaysian life, ensuring that our dataset captures the nuances and intricacies inherent to the local culture. For instance, the images of delectable Malaysian dishes sourced from resepichenom.com offer a glimpse into the rich culinary heritage of the nation, featuring beloved classics and regional specialties alike. Similarly, the inclusion of images showcasing Malaysian vehicles and road signs from wapcar.my, motomalaysia.com, and MS Wikipedia adds another layer of authenticity, allowing the model to familiarize itself with the unique characteristics of local transportation and traffic regulations.
+
+Furthermore, our dataset extends beyond static imagery to incorporate dynamic elements, such as online driving tests, providing real-world scenarios and challenges that reflect the everyday experiences of Malaysian motorists. By compiling this diverse and extensive collection of visual content, we aim to provide our model with a rich and immersive learning experience, enabling it to understand and interpret Malaysian contexts with greater accuracy and depth. We designed a synthetic question-answering dialogues between assistant and a person about the photo. The answers are based on captions associated with the original data of the image.
+
+An example of generated dataset are as follow,
+
 \begin{lstlisting}[breaklines=true]
 {
   "image": "pic/Yamaha NMAX (2016)_1.jpg",
@@ -205,13 +217,10 @@ An example of generated dataset are as follow:
 }
 \end{lstlisting}
 
-We designed a synthetic question-answering dialogues between assistant and a person about the photo. The answers are based on captions associated with the original data of the image.
-
 The synthetic visual dataset and its implementation can be found on the HuggingFace Collections page under \href{https://huggingface.co/collections/mesolitica/multimodal-malaysian-llm-dataset-653a16214037a1bc4417eb3a}{Multimodal Malaysian LLM dataset}.
 
-\section{Synthetic Multi-Images Multi-Audio relationship Dataset}
-
 \section{Synthetic Data Generation for Multi-Images, Multi-Audio Multi-turn Instructions}
+
 We have observed that most open-source multimodal models accept only single images in individual multi-turn dialogues. These limitations make it difficult for people to further enhance the models.
 
 To bridge these gaps, we aim to generate a multiple images, audio and dialogue turns that offers fine-grained interactions between multiple images, audio and words, mimicking user-assistant conversations.
@@ -228,9 +237,12 @@ By doing this approach, multimodal model would enhance its capabilities on under
 
 MMMModal aims to align visual and audio information from pretrained vision and audio encoders with an advanced large language model (LLM). We aim to bridge the gap between the visual and audio encoders and the LLM using a linear projection layer. To create an effective multimodal model, we followed a two-stage training approach exemplified by the works of \cite{han2023chartllama,zhu2023minigpt4,liu2024hidden} which have notably produced great results. In the initial stage, the model is pretrained on aligned image-text pairs and audio-text pairs to acquire knowledge of vision and audio language through the alignment projection layer. In the second stage, we fine-tune the pretrained model using a generated multiturn multiaudio images synthetic dataset, incorporating a designed conversational template to enable model comprehension on multi-images, multi-audio, and multi-images-multi-audio within a single multiturn session.
 
-\subsection{Overall Architecture}
+The visualization below provides an overview of the architecture for MMMModal,
 
----
+\begin{figure}[hbt!]
+  \centering
+  \includegraphics[width=0.6\linewidth]{pic/overall-architecture.png} % Replace with your image file
+\end{figure}
 
 \subsection{Pretraining for Visual Feature Alignment}
 
@@ -264,7 +276,7 @@ The implementation for visual feature alignment pretraining can be found \href{h
 
 We also want to equip the model with the capability to comprehend and produce language from audio input. This is achieved by exposing the model to a diverse set of paired audio-text datasets, allowing it to learn the correspondence between audio features and corresponding textual descriptions. We utilize the pre-trained Whisper encoder to extract audio features for input into the projection layer. The injected projection layer plays a pivotal role in this process, serving as a bridge between the audio and text domains. The output of this projection layer serves as input to the Large Language Model, guiding it in generating appropriate textual responses based on the audio features provided. It is important to note that while the linear projection layer is trained throughout the entire pretraining procedure, the pretrained audio encoder and the Large Language Model remain static, or "frozen." This ensures that the model focuses specifically on learning the associations between auditory features and textual information without altering the underlying representations learned in the audio encoder or the language model.
 
-Drawing inspiration from LLAVA, our projection layer diverges by employing a convolutional operation with a kernel size of 40 and a stride size of 3 for the first layer, followed by a linear layer for the second, with a GELU activation function applied at its midpoint. This design choice optimizes the model's ability to process audio inputs effectively. Additionally, we introduce two new tokens, \texttt{<audio>} and \texttt{</audio>}, serving as delimiters to demarcate the commencement and conclusion of projected audio output, thus facilitating its seamless integration within the text embedding.
+In our method, we draw inspiration from LLAVA's projection layer but introduce modifications to handle longer sequences more efficiently. Instead of using two linear layers, we opt for a convolutional layer with a kernel size of 40 and a stride size of 3 for the first layer. The output is then passed through a linear layer with a GELU activation function at its midpoint. This approach helps us reduce the sequence length by a factor of 3, which is crucial given that the Whisper encoder outputs sequences of length 1500. Additionally, we introduce two new tokens, \texttt{<audio>} and \texttt{</audio>}, serving as delimiters to demarcate the commencement and conclusion of projected audio output, thus facilitating its seamless integration within the text embedding.
 
 The visualization below demonstrates the procedure of embedding projected audio output between the \texttt{<audio>} and \texttt{</audio>} tokens.
 

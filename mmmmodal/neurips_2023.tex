@@ -211,18 +211,88 @@ The synthetic visual dataset and its implementation can be found on the HuggingF
 
 \section{Synthetic Multi-Images Multi-Audio relationship Dataset}
 
-\section{Synthetic Data Generation for Multi-Images, Multi-Audio Multi-turn Instructions}
-We have observed that most open-source multimodal models accept only single images in individual multi-turn dialogues. These limitations make it difficult for people to further enhance the models.
-
-To bridge these gaps, we aim to generate a multiple images, audio and dialogue turns that offers fine-grained interactions between multiple images, audio and words, mimicking user-assistant conversations.
-
-By doing this approach, multimodal model would enhance its capabilities on understanding and reasoning across multiple images, audios and dialogue turns.
-
 \subsection{Synthetic Multi-Images Instruction}
 
 \subsection{Synthetic Multi-Audio Instruction}
 
 \subsection{Synthetic Image-Audio Instruction}
+
+\section{Synthetic Data Generation for Multi-Images, Multi-Audio Multi-turn Instructions}
+We have observed that most open-source multimodal models accept only single images in individual multi-turn dialogues. These limitations make it difficult for people to further enhance the models.
+
+To bridge these gaps, we aim to generate a multiple images, audio and dialogue turns that offers fine-grained interactions between multiple images, audio and words, mimicking user-assistant conversations.
+
+We build a script that parse visual and audio context datasets and perform an algorithm that combine each visual context row into another audio context or image context row based on probability which makes our combined data more varied.
+
+Below are the script to combine synthetic visual and audio context dataset: 
+
+\begin{lstlisting}[breaklines=true]
+  llava_index = set(range(len(llava_en)))
+  audio_index = set(range(len(audio_en)))
+  combine = []
+  llava = set()
+  audio = set()
+  for i in tqdm(range(50000)):
+      try:
+          filename = []
+          conversations = []
+          for _ in range(random.randint(2, 4)):
+              if random.random() > 0.4:
+                  img_id = random.choice(list(llava_index - llava))
+                  llava.add(img_id)
+                  s = llava_en[img_id]
+              else:
+                  audio_id = random.choice(list(audio_index - audio))
+                  audio.add(audio_id)
+                  s = audio_en[audio_id]
+              filename.extend(s['filename'])
+              conversations.extend(s['conversations'])
+          combine.append({
+              'filename': filename,
+              'conversations': conversations
+          })
+      except Exception as e:
+          print(e)
+          break
+\end{lstlisting}
+
+An example of combined synthetic visual and audio context datasets:
+
+\begin{lstlisting}[breaklines=true]
+  {'filename': ['/home/ubuntu/output-audio/0-3201-1.mp3',
+  '/home/ubuntu/filtered-llava-images/000000416018.jpg',
+  '/home/ubuntu/filtered-llava-images/000000128752.jpg',
+  '/home/ubuntu/filtered-llava-images/000000501015.jpg'],
+ 'conversations': [{'role': 'user',
+   'content': "<audio>What is Tasha's opinion on the spiciness of the first soup served?"},
+  {'role': 'assistant',
+   'content': 'Based on the conversation, Tasha felt that the first soup served was too spicy.'},
+  {'role': 'user', 'content': 'Okay. Mengapa Tasha pandangan begini?'},
+  {'role': 'assistant',
+   'content': 'The exact reason for Tasha\'s opinion is not mentioned in the conversation, but she can be heard saying "Yup. Yes. Ni pedas gila." which suggests that the first soup served was extremely spicy.'},
+  {'role': 'user',
+   'content': 'Okay. Sekarang kita tanya Jane. Okay. Jane, how spicy is your soup?'},
+  {'role': 'assistant',
+   'content': 'Based on the conversation, Jane said "Second pedas" which means that she found the spiciness of her soup to be less spicy compared to the first soup.'},
+  {'role': 'user',
+   'content': "What implications does the presence of the steering wheel controller have for the type of game they're playing?\n<image>"},
+  {'role': 'assistant',
+   'content': 'Given that one of the people in the image is holding a video game controller shaped like a steering wheel, it is highly likely that they are playing a racing or driving simulation game. The steering wheel controller is specifically designed to provide a more immersive and realistic gaming experience for games that involve controlling vehicles. This suggests that the game they are engaging with is focused on car or vehicle navigation, and the participants are actively controlling in-game actions by manipulating the steering wheel controller.'},
+  {'role': 'user',
+   'content': 'What factors could affect the flight of this aircraft?\n<image>'},
+  {'role': 'assistant',
+   'content': "Several factors could affect the flight of the British Airways jetliner observed in the image. These may include:\n\n1. Weather conditions: The plane is flying through a foggy sky, which may impact visibility, turbulence, and overall flight conditions. Adverse weather events, such as storms or strong winds, could also significantly impact the flight.\n\n2. Air traffic: The presence of other aircraft in the airspace could influence the flight route, altitude, or speed. Air traffic controllers need to manage multiple aircraft in the sky to maintain safety and avoid conflicts.\n\n3. Technical issues: Aircraft systems and equipment must function properly to ensure a safe and efficient flight. Any technical issues or malfunctions may disrupt the flight and require prompt action from the crew.\n\n4. Human factors: The skills, experience, and decision-making processes of pilots and other crew members can significantly impact the safety, comfort, and efficiency of the flight.\n\n5. Regulatory constraints: International aviation regulations and guidelines from governing bodies can affect the aircraft's flight trajectory, speed, altitude, and other operational aspects.\n\nConsidering these factors, the British Airways jetliner needs to navigate through the foggy sky efficiently while maintaining safety protocols and adhering to aviation regulations."},
+  {'role': 'user',
+   'content': '<image>\nHow would you describe the positioning of the bottles in this image?'},
+  {'role': 'assistant',
+   'content': "In the image, there are several bottles positioned in various locations. Some bottles are inside the refrigerator, with one being held in the person's hand, while others are placed outside of the fridge. The person is posing near the open refrigerator, which appears to have quite a few bottles arranged in it. The bottles inside the fridge are lined up horizontally on different shelves at various heights, indicating that they might be chilling until they are ready to be consumed. There are also a couple of bottles placed outside the fridge, possibly on a countertop or other surfaces within the image. The dining table and a laptop can also be seen in the background, but they are not directly related to the positioning of the bottles."}]}
+\end{lstlisting}
+
+By doing this approach, multimodal model would enhance its capabilities on understanding and reasoning across multiple images, audios and dialogue turns.
+
+
+The implementation can be found on the Github repository page under \href{https://github.com/mesolitica/multimodal-LLM/tree/master/prepare-dataset}{https://github.com/mesolitica/multimodal-LLM}.
+
 
 \section{Finetuning Procedure}
 

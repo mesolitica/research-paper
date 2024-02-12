@@ -35,6 +35,7 @@
 \usepackage{graphicx}
 \usepackage{hyperref}
 \usepackage{array}
+\usepackage[export]{adjustbox} % Required for valign option
 
 
 
@@ -85,20 +86,25 @@
 
 \section{Introduction}
 
-Language models trained with instructions have shown remarkable performance across various domains. However, their limitation in handling only text-based data hampers their applicability. Recent advancements in multimodal pre-training have demonstrated the potential to integrate knowledge from diverse modalities into a unified representation.\cite{lyu2023macawllm}\cite{liu2023visual} Despite these advancements, there remains a lack of existing multimodal models capable of supporting multiple images/audio inputs and multiturn dialogue in current research. Addressing this gap, our proposal introduces MMModal, a multi-modal instruction-tuned Language Learning Model (LLM) that combines image, audio, and text modalities within a single model architecture.
+
+Language models trained with instructions have demonstrated remarkable performance across various domains. However, their limitation in handling only text-based data hampers their applicability. Recent advancements in multimodal pre-training have shown the potential to integrate knowledge from diverse modalities into a unified representation \cite{lyu2023macawllm,liu2023visual,openai2023gpt4}.
+
+The introduction of OpenAI's GPT-4 \cite{openai2023gpt4}, which incorporates LLM with visual understanding capability, marked a milestone in the industry's progress, demonstrating significant advancements in addressing open-ended visual question-answering (VQA) tasks. Pioneering research initiatives such as LLaVA \cite{liu2023visual} and MiniGPT-4 \cite{zhu2023minigpt4} provide insightful directions in visual and text understanding capability. Their findings suggest that by incorporating visual encoders into existing LLMs and fine-tuning them using multi-modal instruction-tuning datasets, LLMs can be effectively transformed into multimodal LLMs. While Macaw-LLM \cite{lyu2023macawllm} introduces the integration of LLM with four different modalities: text, audio, video, and images. They successfully process information from different inputs effectively, enabling seamless information retrieval across domains. Existing dataset for multimodal instruction made available from \cite{liu2023visual} primarily supports instruction-following data involving visual content for conversation, detailed description and complex reasoning data.
+
+Despite recent advancements, there remains a lack of current research on multimodal models capable of handling multiple images or audio inputs along with multi-turn dialogue. Moreover, there is a lack of existing multimodal datasets incorporating multi-turn interactions with multiple audio and image inputs, and little consideration has been given to the Malaysian context. To address these gaps, our proposal introduces MMMModal, a multimodal large language model fine-tuned for multi-modal instruction, integrating image, audio, and text modalities within a single model architecture. Additionally, we present a corpus and employ an adaptive synthetic data generation method tailored to provide access to multi-image, multi-audio, multi-turn datasets with regards to languages in Malay and English.
 
 \begin{itemize}
 
-  \item \textbf{Synthetic Audio Instruction Dataset:} In the realm of Natural Language Processing (NLP), research indicates that the quality of instruction-following data significantly impacts the efficacy of instruction-following models. To illustrate this, we create a synthetic dataset comprising multi-dialogue interactions involving multiple images and audio inputs. Using Mistral, we generate a multiturn dialogue instruction dataset aimed at enhancing the language model's capacity to produce precise and contextually relevant responses. This dataset encompasses three distinct types of instruction-following data: multiple images instructions,
-        multi-audio instructions, and combined image and audio instructions.
+  \item \textbf{Synthetic Audio Instruction Dataset:} 
+  To construct Synthetic Audio Instruction Dataset, our approach involves gathering extracted audio content from YouTube videos. We  employed the Whisper Large V3 model for pseudolabeling to transcribe the audio contents from scraped Youtube videos, followed by a post-filtering process based on score thresholds to ensure high-quality datasets. We then utilized the Mixtral-8x7B-Instruct-v0.1 Model to generate multiturn dialogue instruction-following data involving the audio context.
 
-  \item \textbf{Synthetic Visual Malaysian Context Dataset:} a
+  \item \textbf{Synthetic Visual Malaysian Context Dataset:}  We collected images from Malaysian websites along with their descriptions. Through data processing, we converted this information into conversational examples to better incorporate Malaysian context into our model. 
 
-  \item \textbf{Synthetic Multi-Images Multi-Audio relationship Dataset:} Our approach adopts a two-step training procedure to integrate multimodal and multiturn capabilities into our model. The initial step entails pretraining the feature alignment module. Through this process, we align the image features and audio data with the pre-trained word embeddings of the Language Learning Model (LLM). Specifically, this step involves training the projection layer to ensure alignment between the multi-modal features and textual representations. This alignment facilitates seamless integration of diverse modalities within the model architecture.
+  \item \textbf{Synthetic Multi-Images Multi-Audio relationship Dataset:} Our method involved randomly combining images, audios or pairing them together to create a dataset illustrating relationships of different images and audios. We utilized Mistral to generate multiturn dialogues, prompting the model to respond based on the images, audio captions, and descriptions. This enabled us to collect a corpus tailored for focusing on relationships within multi-modal content, encompassing both images and audio.
 
-  \item \textbf{Pretraining Feature Alignment:} a
+  \item \textbf{Pretraining Feature Alignment:} Our approach adopts a two-step training procedure to integrate multimodal and multiturn capabilities into our model. The initial step entails pretraining the feature alignment module. Through this process, we align the image and audio features with the pre-trained word embeddings of the Large Language Model (LLM). Specifically, this step involves training the projection layer to ensure alignment between the multi-modal features and textual representations. This alignment facilitates seamless integration of diverse modalities within the model architecture.
 
-  \item \textbf{Finetuned Multi-Images Multi-Audio Multi-turn Model:} a
+  \item \textbf{Finetuned Multi-Images Multi-Audio Multi-turn Model:} After pre-training for feature alignment, the projector module becomes familiar with the visual and embedding space. However, it still lacks the capability to discern the finer details of images and audios, or to respond to human questions and instructions effectively. In the second stage, we utilize generated synthetic Multimodal data to enhance performance and further align the embeddings with the Large Language Model (LLM). This step improves the LLM's ability to produce more natural and reliable language outputs for multimodal instructions.
 
 \end{itemize}
 
@@ -219,15 +225,33 @@ By doing this approach, multimodal model would enhance its capabilities on under
 
 \section{Finetuning Procedure}
 
+MMMModal aims to align visual and audio information from pretrained vision and audio encoders with an advanced large language model (LLM). We aim to bridge the gap between the visual and audio encoders and the LLM using a linear projection layer. To create an effective multimodal model, we followed a two-stage training approach exemplified by the works of \cite{han2023chartllama,zhu2023minigpt4,liu2024hidden} which have notably produced great results. In the initial stage, the model is pretrained on aligned image-text pairs and audio-text pairs to acquire knowledge of vision and audio language through the alignment projection layer. In the second stage, we fine-tune the pretrained model using a generated multiturn multiaudio images synthetic dataset, incorporating a designed conversational template to enable model comprehension on multi-images, multi-audio, and multi-images-multi-audio within a single multiturn session.
+
 \subsection{Overall Architecture}
+
+---
 
 \subsection{Pretraining for Visual Feature Alignment}
 
+During the initial pretraining stage, the primary objective is to equip the model with the ability to understand and generate language based on visual input. This is achieved through exposure to a diverse set of paired image-text data, where the model learns to associate visual information with corresponding textual descriptions. In our work, we utilize the pre-trained SigLip visual encoder to extract visual features for input into the projection layer. This projection layer facilitates the connection of image features into the text embedding space. The output of this projection layer then acts as the input to the Large Language Model, instructing it on how to generate appropriate textual responses based on the visual features provided. Only the linear projection layer is pretrained during the whole pretraining procedure; the pretrained vision encoder and the LLM stay frozen.
+
+The implementation for visual feature alignment pretraining can be found \href{https://github.com/mesolitica/multimodal-LLM/tree/master/vision-only}{here}
+
 \subsection{Pretraining for Audio Feature Alignment}
+
+We also want to equip the model with the capability to comprehend and produce language from audio input. This is achieved by exposing the model to a diverse set of paired audio-text datasets, allowing it to learn the correspondence between audio features and corresponding textual descriptions. We utilize the pre-trained Whisper encoder to extract audio features for input into the projection layer. The injected projection layer plays a pivotal role in this process, serving as a bridge between the audio and text domains. The output of this projection layer serves as input to the Large Language Model, guiding it in generating appropriate textual responses based on the audio features provided. It is important to note that while the linear projection layer is trained throughout the entire pretraining procedure, the pretrained audio encoder and the Large Language Model remain static, or "frozen." This ensures that the model focuses specifically on learning the associations between auditory features and textual information without altering the underlying representations learned in the audio encoder or the language model.
+
+The implementation for audio feature alignment pretraining can be found \href{https://github.com/mesolitica/multimodal-LLM/tree/master/audio-only}{here}
 
 \subsection{Instruction Finetuning}
 
-The fine-tuning hyperparameters are detailed below:
+Following the initial pre-training alignment phase, the projection layer will be able to generate image and audio features that are effectively aligned with the pretrained Large Language Model text embedding space. However the pretrained LLM may still struggle to provide effective responses to human inquiries and may be unable to comprehend instructions involving multiple images, multiple audio files, and combinations thereof. To address this, we implement a second stage, utilizing the generated synthetic data to enhance performance and refine the alignment between audio, visual embeddings, the LLM, and instructions.
+
+This stage involves fine-tuning the projection layer and the LLM on our collection corpus of generated synthetic data encompassing multiturn, multi-images and multi-audios data. The objective is to enable our multimodal model to process multiple inputs from images or audios and engage in multiturn conversation seamlessly. A significant advancement in our multi-image input capability stems from this fine-tuning procedure.
+
+Throughout fine-tuning, we maintain the visual and audio encoder weights frozen while updating both the pre-trained weights of the projection layer and the LLM. Notably, we also incorporate a mechanism to replace image and audio embeddings based on the position of the image and audio tokens in the text embeddings, ensuring the model's ability to comprehend audio,image and text information effectively.
+
+The hyperparameters involves in this finetuning stage are detailed below:
 
 \begin{table}[h]
   \centering
@@ -250,41 +274,60 @@ Complete fine-tuning 8192 context length implementation at \href{https://github.
 This section presents examples that highlight the model's capacity to comprehend and produce responses relating to visual and audio input, showcasing the efficacy and potential of our proposed MMModal. These examples clearly demonstrate how the model handles and combines various information modalities, including audio and pictures, in the context of natural language processing (NLP). MMModal exhibits its capability by producing insightful, pertinent, and cohesive answers to a diverse set of inquiries. This highlights the model's capacity to create exceptionally efficient interfaces for human-machine communication.
 
 \begin{table}[hbt!]
+  \centering
   \setlength{\extrarowheight}{3pt} % Adjust the value as needed
   \renewcommand{\arraystretch}{1.5} % Adjust the value as needed
-  \begin{tabular}{lcccl}
+  \begin{tabular}{p{6.5cm}p{6.5cm}}
     \hline
-    \textbf{Multi Images Input Example}                                                                                                                    \\[6pt]  % Adjust the value as needed
+    \textbf{Multi Images Input Example} \\[6pt]  
     \hline
+    \includegraphics[width=\linewidth]{pic/R.jpeg} & \includegraphics[width=\linewidth]{pic/Persian-cat-breed.jpg} \\
     \hline
-    \includegraphics[width=0.45\linewidth,keepaspectratio]{pic/R.jpeg} & \includegraphics[width=0.45\linewidth,keepaspectratio]{pic/Persian-cat-breed.jpg} \\
-    User                                                               & What is related between image 1 and image 2?                                      \\
+    User & What is related between image 1 and image 2? \\
+    MMMModal & Nothing? \\
     \hline
   \end{tabular}
 \end{table}
 
 \begin{table}[hbt!]
-  \setlength{\extrarowheight}{3pt} % Adjust the value as needed
-  \renewcommand{\arraystretch}{1.5} % Adjust the value as needed
-  \begin{tabular}{lcccl}
+  \setlength{\extrarowheight}{3pt}
+  \renewcommand{\arraystretch}{1.5}
+  \begin{tabular}{p{6.5cm} p{6.5cm}}
     \hline
-    \textbf{Multi Audio Input Example}                                                                                                                     \\[6pt]  % Adjust the value as needed
+    \textbf{Multi Audio Input Example}\\[3pt]
     \hline
     \hline
-    \includegraphics[width=0.45\linewidth,keepaspectratio]{pic/R.jpeg} & \includegraphics[width=0.45\linewidth,keepaspectratio]{pic/Persian-cat-breed.jpg} \\
-    User                                                               & What is related between audio 1 and audio 2?                                      \\
+    Audio 1 Transcription: anda tahu keuntungan boleh lebih tinggi daripada keuntungan kewangan rumah maka saya tidak akan mencari dalam akaun saya akan mencari ke dalam ethereum atau beberapa crypto punks bergantung pada faktor risiko anda kerana rumah kajang dihantar tidak mengganggu dsr saya sejauh ini jadi sekarang apa posisi saya untuk sekali lagi ia menyusahkan saya dan aset tetapi jika anda tidak selesa dengan mencari  & Audio 2 Transcription: anda tahu keuntungan boleh lebih tinggi daripada keuntungan kewangan rumah maka saya tidak akan mencari dalam akaun saya akan mencari ke dalam ethereum atau beberapa crypto punks bergantung pada faktor risiko anda kerana rumah kajang dihantar tidak mengganggu dsr say lagi ia menyusahkan saya dan aset tetapi jika anda tidak selesa dengan mencari  \\
+    \hline
+    User& What is related between audio 1 and audio 2? \\
+    MMMModal & Nothing? \\
     \hline
   \end{tabular}
 \end{table}
 
+\begin{table}[hbt!]
+  \centering
+  \setlength{\extrarowheight}{3pt} 
+  \renewcommand{\arraystretch}{1.5}
+  \begin{tabular}{>{\arraybackslash}m{6.5cm}>{\arraybackslash}m{6.5cm}}
+    \hline
+    \textbf{Images Audio Input Example} \\[6pt]  
+    \hline
+    \includegraphics[width=\linewidth,valign=c]{pic/Persian-cat-breed.jpg} & Audio 1 Transcription: anda tahu keuntungan boleh lebih tinggi daripada keuntungan kewangan rumah maka saya tidak akan mencari dalam akaun saya akan mencari ke dalam ethereum atau beberapa crypto punks bergantung pri itu saya boleh membayar perbezaan dengan menggunakan wang ini kerana sekali lagi ia menyusahkan saya dan aset tetapi jika anda tidak selesa dengan mencari \\
+    \hline
+    User & What is related between audio 1 and image 2? \\
+    MMMModal & Nothing? \\
+    \hline
+  \end{tabular}
+\end{table}
+
+\pagebreak
 
 \section{Evaluation}
 
 \section{Future Work}
 
 In our future endeavors, we aim to enhance our capabilities by focusing on several key areas. Firstly, we intend to refine our approach to generating synthetic datasets that incorporate multi-images and multi-audio inputs. This will involve expanding the dataset to include more complex relationships between inputs and facilitating comparisons involving more than two inputs. Additionally, we recognize the importance of incorporating a wider range of visual Malaysian context datasets into our model training pipeline. By diversifying our data sources, we can ensure that our model is equipped to handle a broader array of real-world scenarios and contexts, ultimately improving its performance and relevance in practical applications.
-
-
 
 \section{Acknowledgement}
 
@@ -296,7 +339,7 @@ We extend our thanks to the wider research community for their valuable insights
 
 \section{Conclusion}
 
-In this paper, we introduce MMMModal, a multimodal instruction tuned Model (LLM) specifically designed to handle multiple modalities, including images, audio, and text in a multi-turn dialogue setting. Our novel approach focuses on aligning representations from various modality encoders into a unified space. Unlike existing methods, our approach enables the model to effectively process multi-turn dialogues and incorporate multiple images or audio inputs in its responses. We provide examples demonstrating the multi-modal understanding capabilities of MMMModal.
+In this paper, we introduce MMMModal, a multimodal instruction tuned Model (LLM) specifically designed to handle multiple modalities, including images, audio, and text in a multi-turn dialogue setting. Our novel approach focuses on aligning representations from various modality encoders into a unified space. Unlike existing methods, our model effectively able to process multi-turn dialogues and incorporate multiple images or audio inputs in its responses. We provide examples demonstrating the multi-modal understanding capabilities of MMMModal.
 
 \bibliography{neurips_2023}{}
 \bibliographystyle{unsrt}

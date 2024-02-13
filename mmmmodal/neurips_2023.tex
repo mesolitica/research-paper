@@ -416,7 +416,6 @@ By doing this approach, multimodal model would enhance its capabilities on under
 
 The implementation can be found on the Github repository page at \href{https://github.com/mesolitica/multimodal-LLM/tree/master/prepare-dataset}{mesolitica/multimodal-LLM/prepare-dataset}.
 
-
 \section{Finetuning Procedure}
 
 MMMModal aims to align visual and audio information from pretrained vision and audio encoders with an advanced large language model (LLM). We aim to bridge the gap between the visual and audio encoders and the LLM using a linear projection layer. To create an effective multimodal model, we followed a two-stage training approach exemplified by the works of \cite{han2023chartllama,zhu2023minigpt4,liu2024hidden} which have notably produced great results. In the initial stage, the model is pretrained on aligned image-text pairs and audio-text pairs to acquire knowledge of vision and audio language through the alignment projection layer. In the second stage, we fine-tune the pretrained model using a generated multiturn multiaudio images synthetic dataset, incorporating a designed conversational template to enable model comprehension on multi-images, multi-audio, and multi-images-multi-audio within a single multiturn session.
@@ -428,7 +427,7 @@ The visualization below provides an overview of the architecture for MMMModal,
   \includegraphics[width=0.6\linewidth]{pic/overall-architecture.png} % Replace with your image file
 \end{figure}
 
-\subsection{Pretraining for Visual Feature Alignment}
+\subsection{Pretraining for Visual Feature Alignment}\label{sec:visual-alignment}
 
 During the initial pretraining stage, the primary objective is to equip the model with the ability to understand and generate language based on visual input. This is achieved through exposure to a diverse set of paired image-text data, where the model learns to associate visual information with corresponding textual descriptions. In our work, we utilize the pre-trained SigLIP encoder \cite{zhai2023sigmoid} to extract visual features for input into the projection layer. This projection layer facilitates the connection of image features into the text embedding space. The output of this projection layer then acts as the input to the Large Language Model, instructing it on how to generate appropriate textual responses based on the visual features provided. Only the linear projection layer is pretrained during the whole pretraining procedure; the pretrained vision encoder and the LLM stay frozen.
 
@@ -445,11 +444,11 @@ The visualization below illustrates the process of inserting projected visual ou
 
 The implementation for visual feature alignment pretraining can be found \href{https://github.com/mesolitica/multimodal-LLM/tree/master/vision-only}{here}.
 
-\subsection{Pretraining for Audio Feature Alignment}
+\subsection{Pretraining for Audio Feature Alignment}\label{sec:audio-alignment}
 
 We also want to equip the model with the capability to comprehend and produce language from audio input. This is achieved by exposing the model to a diverse set of paired audio-text datasets, allowing it to learn the correspondence between audio features and corresponding textual descriptions. We utilize the pre-trained Whisper encoder to extract audio features for input into the projection layer. The injected projection layer plays a pivotal role in this process, serving as a bridge between the audio and text domains. The output of this projection layer serves as input to the Large Language Model, guiding it in generating appropriate textual responses based on the audio features provided. It is important to note that while the linear projection layer is trained throughout the entire pretraining procedure, the pretrained audio encoder and the Large Language Model remain static, or "frozen." This ensures that the model focuses specifically on learning the associations between auditory features and textual information without altering the underlying representations learned in the audio encoder or the language model.
 
-In our method, we draw inspiration from LLAVA's \cite{liu2023visual} projection layer but introduce modifications to handle longer sequences more efficiently. Instead of using two linear layers, we opt for a convolutional layer with a kernel size of 40 and a stride size of 3 for the first layer. The output is then passed through a linear layer with a GELU activation function at its midpoint. This approach helps us reduce the sequence length by a factor of 3, which is crucial given that the Whisper encoder outputs sequences of length 1500. Additionally, we introduce two new tokens, \texttt{<audio>} and \texttt{</audio>}, serving as markers for projected audio output, same procedure stated at Visual Feature Alignment.
+In our method, we draw inspiration from LLAVA's \cite{liu2023visual} projection layer but introduce modifications to handle longer sequences more efficiently. Instead of using two linear layers, we opt for a convolutional layer with a kernel size of 40 and a stride size of 3 for the first layer. The output is then passed through a linear layer with a GELU activation function at its midpoint. This approach helps us reduce the sequence length by a factor of 3, which is crucial given that the Whisper encoder outputs sequences of length 1500. Additionally, we introduce two new tokens, \texttt{<audio>} and \texttt{</audio>}, serving as markers for projected audio output, the same procedure as ~\ref{sec:visual-alignment}.
 
 \newpage
 
@@ -466,9 +465,7 @@ The implementation for audio feature alignment pretraining can be found \href{ht
 
 Following the initial pre-training alignment phase, the projection layer will be able to generate image and audio features that are effectively aligned with the pretrained Large Language Model text embedding space. However the pretrained LLM may still struggle to provide effective responses to human inquiries and may be unable to comprehend instructions involving multiple images, multiple audio files, and combinations thereof. To address this, we implement a second stage, utilizing the generated synthetic data to enhance performance and refine the alignment between audio, visual embeddings, the LLM, and instructions.
 
-This stage involves fine-tuning the projection layer and the LLM on our collection corpus of generated synthetic data encompassing multiturn, multi-images and multi-audios data. The objective is to enable our multimodal model to process multiple inputs from images or audios and engage in multiturn conversation seamlessly. A significant advancement in our multi-image input capability stems from this fine-tuning procedure.
-
-Throughout fine-tuning, we maintain the visual and audio encoder weights frozen while updating both the pre-trained weights of the projection layer and the LLM. Notably, we also incorporate a mechanism to replace image and audio embeddings based on the position of the image and audio tokens in the text embeddings, ensuring the model's ability to comprehend audio,image and text information effectively.
+This stage involves fine-tuning the projection layer and the LLM on our collection corpus of generated synthetic data encompassing multiturn, multi-images and multi-audios data. The objective is to enable our multimodal model to process multiple inputs from images or audios and engage in multiturn conversation seamlessly by implementing an efficient span fill-in mechanism anchored around the \texttt{<image>} and \texttt{<audio>} tokens, the same procedure as ~\ref{sec:visual-alignment} and ~\ref{sec:audio-alignment}.
 
 The hyperparameters involves in this finetuning stage are detailed below:
 
@@ -491,6 +488,8 @@ Complete fine-tuning 8192 context length implementation at \href{https://github.
 \section{Training Discussion}
 
 In our exploration of visual alignment pretraining, we conducted experiments using both \href{https://huggingface.co/google/siglip-base-patch16-384}{google/siglip-base-patch16-384} and \href{https://huggingface.co/google/siglip-large-patch16-384}{google/siglip-large-patch16-384} architectures. Surprisingly, we observed no discernible difference in terms of loss between the two variants. Similarly, in another set of experiments, we compared the use of SigLIP \cite{zhai2023sigmoid} output with SigLIP \cite{zhai2023sigmoid} hidden layer output for visual alignment pretraining. Intriguingly, while both approaches yielded similar loss outcomes, discrepancies emerged during instruction finetuning. Specifically, utilizing SigLIP \cite{zhai2023sigmoid} output resulted in a significantly higher incidence of hallucinated responses. However, it's essential to note that these findings lack empirical backing, necessitating further investigation to validate their significance.
+
+In contrast, our exploration of audio alignment did not entail a comparative study, primarily due to resource constraints. Instead, we relied on the output from the Malaysian Whisper Small model's hidden layers, informed by insights gleaned from the SigLIP encoder \cite{zhai2023sigmoid}.
 
 \section{Examples}
 

@@ -79,7 +79,7 @@
 
 \begin{abstract}
 
-  Our contribution introduces a groundbreaking multimodal large language model designed to comprehend multi-images, multi-audio, and multi-images-multi-audio within a single multiturn session. Leveraging state-of-the-art models, we utilize the SigLIP encoder for visual inputs and the Whisper Encoder for audio inputs. Notably, this multimodal large language model is bilingual, proficient in understanding both English and Malay simultaneously. We proudly unveil three versions of this model: Qwen1.5 with 0.5B parameters, TinyLlama with 1.1B parameters, and Mistral with 7B parameters. With its ability to navigate diverse modalities and languages, our model represents a significant advancement for the Malaysian context and beyond.
+  Our contribution introduces a groundbreaking multimodal large language model designed to comprehend multi-images, multi-audio, and multi-images-multi-audio within a single multiturn session. Leveraging state-of-the-art models, we utilize the SigLIP encoder for visual inputs and the Whisper Encoder for audio inputs. Notably, this multimodal large language model is bilingual, proficient in understanding both English and Malay simultaneously. We proudly unveil two versions of this model: TinyLlama with 1.1B parameters, and Mistral with 7B parameters. With its ability to navigate diverse modalities and languages, our model represents a significant advancement for the Malaysian context and beyond.
 
   All models released at \href{https://huggingface.co/collections/mesolitica/multimodal-malaysian-llm-65c6f893e03f78fa9e5c8859}{HuggingFace Mesolitica Multimodal Malaysian LLM}.
 
@@ -108,9 +108,9 @@ Despite recent advancements, there remains a lack of current research on multimo
 
 \end{itemize}
 
-\section{Synthetic Data Generation for Audio Instructions}
+\section{Synthetic Data Generation for Audio Instructions}\label{sec:synthetic-audio}
 
-In our pursuit of creating a comprehensive dataset for multimodal dialogue understanding and generation, we meticulously curated a vast collection of Malaysian and Singaporean YouTube videos, encompassing an impressive 18,500 hours of content. Spanning a myriad of subjects including gaming, economy, politics, religion, movies, and socioeconomy, this corpus offers a rich and diverse source of audiovisual material reflective of the cultural landscape of the region. To extract meaningful textual representations from this wealth of multimedia content, we employed the sophisticated capabilities of OpenAI's Whisper Large V3 model \cite{radford2022whisper}. By leveraging this state of theart model, we were able to pseudolabel the videos, generating accurate transcriptions that faithfully captured the spoken content within each video. These transcriptions served as the foundation for our generating multi-turn conversations.
+In our pursuit of creating a comprehensive dataset reflective of the Malaysian and Singaporean digital landscape, we meticulously compiled an extensive corpus comprising over 18,500 hours of YouTube content. This rich repository spans a diverse spectrum of subjects, ranging from the intricacies of gaming and the dynamics of economics to the nuances of political discourse, religious insights, cinematic endeavors, and the multifaceted dimensions of socioeconomics. Leveraging advanced AI technologies, specifically OpenAI's Whisper Large V3 model \cite{radford2022whisper}, we embarked on the ambitious task of pseudolabeling the transcriptions of these videos. This process enabled us to extract textual representations from the audiovisual content, laying a robust foundation for subsequent endeavors in generating multi-turn conversations based on the context embedded within these transcriptions.
 
 Utilizing the transcriptions as contextual prompts, we embarked on the process of simulating dialogue interactions between users and virtual assistants. Leveraging the Mixtral-8x7B-Instruct-v0.1 model \cite{jiang2024mixtral}, specifically tailored for generating conversational responses, we orchestrated dynamic exchanges that mirrored real-world interactions. Through this approach, we sought to capture the nuances of human conversation, including the fluidity of dialogue and the contextual relevance of responses. By intertwining the audio context derived from the YouTube video transcriptions with the conversational capabilities of the model.
 
@@ -223,9 +223,95 @@ The synthetic visual dataset and its implementation can be found on the HuggingF
 
 \subsection{Synthetic Multi-Images Relationship Instruction}
 
+To facilitate the generation of synthetic multi-images visual question answering (QA) data, we employed a systematic approach leveraging existing image captions from the pretrained LLAVA dataset \cite{liu2023visual}. Our methodology involved creating prompts by posing queries related to the relationship between two different image captions. Subsequently, we utilized the Mistral-7B-Instruct-v0.2 model \cite{jiang2023mistral} for the generation of synthetic data, harnessing its capabilities to generate diverse and contextually relevant questions and answers based on the provided prompt below,
+
+\begin{lstlisting}[breaklines=true]
+  pic1 = 'this is the caption for the first picture'
+  pic2 = 'this is the caption for the second picture'
+  prompt = f"""
+  Picture 1: {pic1} 
+  Picture 2: {pic2}
+  What is related between picture 1 and picture 2.
+  """
+  mistral(prompt)
+\end{lstlisting}
+
+An example of generated dataset are as follow,
+
+\begin{lstlisting}[breaklines=true]
+  {'filename': ['00370/003705168.jpg', '00611/006111738.jpg'],
+ 'filename_description': ['paco man edp gift set',
+  "raspberry lemonade is a must in new york's famous cocktail scene"],
+ 'instruction': 'What is related between picture 1 and picture 2',
+ 'answer': "There is no direct relation between Picture 1 (Paco Rabanne 1 Million Edp Gift Set) and Picture 2 (Raspberry Lemonade being a must in New York's famous cocktail scene). Both are unrelated to each other. The first picture is an image of a perfume gift set, while the second picture is a depiction of a popular cocktail in New York City.",
+ 'instruction_ms': 'Apakah yang berkaitan antara gambar 1 dan gambar 2',
+ 'answer_ms': 'Tiada hubungan langsung antara Gambar 1 (Paco Rabanne 1 Million Edp Gift Set) dan Gambar 2 (Raspberry Lemonade menjadi must dalam adegan koktel terkenal di New York). Kedua-duanya tidak berkaitan antara satu sama lain. Gambar pertama ialah imej set hadiah minyak wangi, manakala gambar kedua ialah gambaran koktel popular di New York City.'}
+\end{lstlisting}
+
+All synthetic dataset and implementation published at \href{https://huggingface.co/datasets/mesolitica/synthetic-multiturn-multimodal#multi-images}{mesolitica/synthetic-multiturn-multimodal}.
+
 \subsection{Synthetic Multi-Audio Relationship Instruction}
 
+In our effort to produce synthetic multi-audio question answering (QA) datasets, we utilized pseudolabeled transcriptions sourced from ~\ref{sec:synthetic-audio}. These transcriptions served as the foundation for creating prompts that prompted queries regarding the relationship between two distinct audio transcriptions. Leveraging the capabilities of the Mistral-7B-Instruct-v0.2 model \cite{jiang2023mistral}, we effectively generated synthetic data by formulating diverse and contextually relevant questions and answers based on the prompt below,
+
+\begin{lstlisting}[breaklines=true]
+  audio1 = 'this is the transcription for audio 1'
+  audio2 = 'this is the transcription for audio 2'
+  prompt = f"""
+  Audio 1: {audio1} 
+  Audio 2: {audio2}
+  What is related between audio 1 and audio 2
+  """
+  mistral(prompt)
+\end{lstlisting}
+
+An example of generated dataset are as follow,
+
+\begin{lstlisting}[breaklines=true]
+  {'filename': ['output-audio/3-2080-38.mp3', 'output-audio/0-2823-0.mp3'],
+ 'filename_description': ['Terima kasih Menteri. Saya jemput soalan tambahan yang kedua. Bagan Serai. Terima kasih Tuan Speaker. Berapakah jumlah kemalangan yang menyebabkan kematian disebabkan oleh pengaruh handphone, penggunaan handphone semasa mandu. Kerana guna handphone mandu ini dia macam mabuk lebih Tuan Speaker. Dan dia hilang orientasi. Dia tak tahu di mana traffic light, dia tak tahu dia di mana berada dan tiba-tiba dah sampai. Jadi apa kerajaan nak buat untuk menurunkan tabiat buruk menggunakan handphone semasa mandu.',
+  'dalam video tu saya dah kitamkan kening lah sebab benda tu kita mencuba so at least kita dah mencuba kita kan nak mencuba kan masa ni lah mencuba kan janganlah pula usia macam aku dah 50 pun nak cuba kenapa masa buat lagu raya cover tu tak boleh hijau sebab dia nak image ketupat macam Aina Abdul juga dia ketupat kita bawa image rambut tu warna hijau ketupat juga kan tapi dah habis raya after this memang nak reveal jugalah kan habis ni memang saya akan kekalkan image yang very very formal je lah'],
+ 'instruction': 'What is related between audio 1 and audio 2',
+ 'answer': 'Audio 1 and Audio 2 are unrelated as they discuss different topics. In Audio 1, the speaker is discussing the issue of using handphones while driving and its contribution to accidents. In Audio 2, the speaker is talking about making a cover song for Raya and the challenges they faced in creating the image for the video.',
+ 'instruction_ms': 'Apakah yang berkaitan antara audio 1 dan audio 2',
+ 'answer_ms': 'Audio 1 dan Audio 2 tidak berkaitan kerana mereka membincangkan topik yang berbeza. Dalam Audio 1, penceramah membincangkan isu menggunakan fon tangan semasa memandu dan sumbangannya kepada kemalangan. Dalam Audio 2, penceramah bercakap tentang membuat lagu penutup untuk Raya dan cabaran yang mereka hadapi dalam mencipta imej untuk video itu.'}
+\end{lstlisting}
+
+This approach facilitated the development of comprehensive datasets comprising multi-audio QA pairs, enabling the training and evaluation of multimodal models capable of handling audio-based queries and responses.
+
+All synthetic dataset and implementation published at \href{https://huggingface.co/datasets/mesolitica/synthetic-multiturn-multimodal#multi-audio}{mesolitica/synthetic-multiturn-multimodal}.
+
 \subsection{Synthetic Image-Audio Relationship Instruction}
+
+To create synthetic image-audio question answering (QA) datasets, we employed a combination of existing resources and data sources. Firstly, we utilized image captions obtained from the pretrained LLAVA dataset \cite{liu2023visual}, which provided a rich source of contextual information for images. Additionally, we leveraged pseudolabeled transcriptions sourced from the Malaya dataset, offering comprehensive representations of audio content. Using these assets, we formulated prompts that prompted inquiries regarding the relationship between specific image captions and corresponding audio transcriptions. Through the application of the Mistral-7B-Instruct-v0.2 model \cite{jiang2023mistral}, we generated synthetic data by crafting diverse and contextually relevant questions and answers based on the prompt below,
+
+\begin{lstlisting}[breaklines=true]
+  audio1 = 'this is the transcription for audio'
+  picture1 = 'this is the caption for the image'
+  prompt = f"""
+  Audio 1: {audio1} 
+  Picture 1: {audio2}
+  What is related between audio 1 and picture 1
+  """
+  mistral(prompt)
+\end{lstlisting}
+
+An example of generated dataset are as follow,
+
+\begin{lstlisting}[breaklines=true]
+  {'filename': ['output-audio/3-2648-47.mp3', '00180/001805101.jpg'],
+  'filename_description': ['Saya mahu muka mereka terlihat beras, anda tahu apa yang saya maksudkan. Dan sanitizer. Dan kemudian ini adalah earphone. Sama-sama kalau airpod saya, anda tahu, hilang bateri. Saya tidak pasti jika saya patut membawa tripod saya kerana saya mungkin. Adakah saya akan melakukan TikTok di kafe? Saya tidak tahu tetapi tidak menyakiti untuk membawanya. Maksud saya, ia tidak begitu keras. Saya perlu membawa krim tangan saya. Dan kemudian bumbu. Dan lip balm. Dan kemudian kita siap untuk pergi.',
+   'a water wheel with moss growing on the wheels metal print by randall white'],
+  'instruction': 'What is related between audio 1 and picture 1',
+  'answer': "The audio and picture do not have a direct relation to each other. The audio is about preparing items for an outing, including sanitizer, earphones, a tripod, and various other personal items. The picture is a print of a water wheel with moss growing on it by Randall White. There is no connection between the audio's content and the picture's subject matter.",
+  'instruction_ms': 'Apakah yang berkaitan antara audio 1 dan gambar 1',
+  'answer_ms': 'Audio dan gambar tidak mempunyai hubungan langsung antara satu sama lain. Audio adalah mengenai penyediaan item untuk keluar, termasuk pembersih, fon telinga, tripod dan pelbagai barangan peribadi lain. Gambar itu ialah cetakan roda air dengan lumut yang tumbuh di atasnya oleh Randall White. Tiada kaitan antara kandungan audio dan subjek gambar.'}
+ 
+\end{lstlisting}
+
+This approach enabled us to construct comprehensive datasets comprising image-audio QA pairs, facilitating the training and evaluation of multimodal models capable of handling queries spanning both image and audio modalities.
+
+All synthetic dataset and implementation published at \href{https://huggingface.co/datasets/mesolitica/synthetic-multiturn-multimodal#multi-images-multi-audio}{mesolitica/synthetic-multiturn-multimodal}.
 
 \subsection{Synthetic Multi-Images Multi-Audio in one session Instruction}
 
@@ -235,7 +321,7 @@ To bridge these gaps, we aim to generate a multiple images, audio and dialogue t
 
 We build a script that parse visual and audio context datasets and perform an algorithm that combine each visual context row into another audio context or image context row based on probability which makes our combined data more varied.
 
-Below are the script to combine synthetic visual and audio context dataset:
+Below are the script to combine synthetic visual and audio context dataset,
 
 \begin{lstlisting}[breaklines=true]
   llava_index = set(range(len(llava_en)))
@@ -243,28 +329,24 @@ Below are the script to combine synthetic visual and audio context dataset:
   combine = []
   llava = set()
   audio = set()
-  for i in tqdm(range(50000)):
-      try:
-          filename = []
-          conversations = []
-          for _ in range(random.randint(2, 4)):
-              if random.random() > 0.4:
-                  img_id = random.choice(list(llava_index - llava))
-                  llava.add(img_id)
-                  s = llava_en[img_id]
-              else:
-                  audio_id = random.choice(list(audio_index - audio))
-                  audio.add(audio_id)
-                  s = audio_en[audio_id]
-              filename.extend(s['filename'])
-              conversations.extend(s['conversations'])
-          combine.append({
-              'filename': filename,
-              'conversations': conversations
-          })
-      except Exception as e:
-          print(e)
-          break
+  for i in tqdm(range(N)):
+    filename = []
+    conversations = []
+    for _ in range(random.randint(2, 4)):
+        if random.random() > 0.4:
+            img_id = random.choice(list(llava_index - llava))
+            llava.add(img_id)
+            s = llava_en[img_id]
+        else:
+            audio_id = random.choice(list(audio_index - audio))
+            audio.add(audio_id)
+            s = audio_en[audio_id]
+        filename.extend(s['filename'])
+        conversations.extend(s['conversations'])
+    combine.append({
+        'filename': filename,
+        'conversations': conversations
+    })
 \end{lstlisting}
 
 An example of combined synthetic visual and audio context datasets:
@@ -301,7 +383,7 @@ An example of combined synthetic visual and audio context datasets:
 
 By doing this approach, multimodal model would enhance its capabilities on understanding and reasoning across multiple images, audios and dialogue turns.
 
-The implementation can be found on the Github repository page under \href{https://github.com/mesolitica/multimodal-LLM/tree/master/prepare-dataset}{here}.
+The implementation can be found on the Github repository page at \href{https://github.com/mesolitica/multimodal-LLM/tree/master/prepare-dataset}{mesolitica/multimodal-LLM/prepare-dataset}.
 
 \section{Finetuning Procedure}
 
@@ -316,9 +398,9 @@ The visualization below provides an overview of the architecture for MMMModal,
 
 \subsection{Pretraining for Visual Feature Alignment}
 
-During the initial pretraining stage, the primary objective is to equip the model with the ability to understand and generate language based on visual input. This is achieved through exposure to a diverse set of paired image-text data, where the model learns to associate visual information with corresponding textual descriptions. In our work, we utilize the pre-trained SigLip visual encoder to extract visual features for input into the projection layer. This projection layer facilitates the connection of image features into the text embedding space. The output of this projection layer then acts as the input to the Large Language Model, instructing it on how to generate appropriate textual responses based on the visual features provided. Only the linear projection layer is pretrained during the whole pretraining procedure; the pretrained vision encoder and the LLM stay frozen.
+During the initial pretraining stage, the primary objective is to equip the model with the ability to understand and generate language based on visual input. This is achieved through exposure to a diverse set of paired image-text data, where the model learns to associate visual information with corresponding textual descriptions. In our work, we utilize the pre-trained SigLIP encoder \cite{zhai2023sigmoid} to extract visual features for input into the projection layer. This projection layer facilitates the connection of image features into the text embedding space. The output of this projection layer then acts as the input to the Large Language Model, instructing it on how to generate appropriate textual responses based on the visual features provided. Only the linear projection layer is pretrained during the whole pretraining procedure; the pretrained vision encoder and the LLM stay frozen.
 
-In our approach, we adopt the same projection layer as LLAVA, which consists of two hidden layers with GELU activation at the middle. However, we introduce two new tokens, \texttt{<image>} and \texttt{</image>}, to facilitate the incorporation of visual information. These tokens serve as markers to indicate the beginning and end of projected visual output, enabling seamless integration within the text embedding.
+In our approach, we adopt the same projection layer as LLAVA \cite{liu2023visual}, which consists of two hidden layers with GELU activation at the middle. However, we introduce two new tokens, \texttt{<image>} and \texttt{</image>}, to facilitate the incorporation of visual information. These tokens serve as markers to indicate the beginning and end of projected visual output, enabling seamless integration within the text embedding.
 
 \newpage
 
@@ -329,55 +411,24 @@ The visualization below illustrates the process of inserting projected visual ou
   \includegraphics[width=0.6\linewidth]{pic/visual.png} % Replace with your image file
 \end{figure}
 
-The hyperparameters involves in this pretraining stage are detailed below:
-
-\begin{table}[h]
-  \centering
-  \begin{tabular}{lccl}
-    \hline
-    \textbf{Hyperparameter} & \textbf{Value} \\
-    \hline
-    DeepSpeed               & ZeRO-2 Offload \\
-    Batch Size              & 18             \\
-    Batch Size              & 1              \\
-    Learning Rate           & 1e-4           \\
-    Warmup Ratio            & 0.03           \\
-    Precision               & bfloat16       \\
-    \hline
-  \end{tabular}
-\end{table}
-
-The implementation for visual feature alignment pretraining can be found \href{https://github.com/mesolitica/multimodal-LLM/tree/master/vision-only}{here}
+The implementation for visual feature alignment pretraining can be found \href{https://github.com/mesolitica/multimodal-LLM/tree/master/vision-only}{here}.
 
 \subsection{Pretraining for Audio Feature Alignment}
 
 We also want to equip the model with the capability to comprehend and produce language from audio input. This is achieved by exposing the model to a diverse set of paired audio-text datasets, allowing it to learn the correspondence between audio features and corresponding textual descriptions. We utilize the pre-trained Whisper encoder to extract audio features for input into the projection layer. The injected projection layer plays a pivotal role in this process, serving as a bridge between the audio and text domains. The output of this projection layer serves as input to the Large Language Model, guiding it in generating appropriate textual responses based on the audio features provided. It is important to note that while the linear projection layer is trained throughout the entire pretraining procedure, the pretrained audio encoder and the Large Language Model remain static, or "frozen." This ensures that the model focuses specifically on learning the associations between auditory features and textual information without altering the underlying representations learned in the audio encoder or the language model.
 
-In our method, we draw inspiration from LLAVA's projection layer but introduce modifications to handle longer sequences more efficiently. Instead of using two linear layers, we opt for a convolutional layer with a kernel size of 40 and a stride size of 3 for the first layer. The output is then passed through a linear layer with a GELU activation function at its midpoint. This approach helps us reduce the sequence length by a factor of 3, which is crucial given that the Whisper encoder outputs sequences of length 1500. Additionally, we introduce two new tokens, \texttt{<audio>} and \texttt{</audio>}, serving as markers for projected audio output, same procedure stated at Visual Feature Alignment.
+In our method, we draw inspiration from LLAVA's \cite{liu2023visual} projection layer but introduce modifications to handle longer sequences more efficiently. Instead of using two linear layers, we opt for a convolutional layer with a kernel size of 40 and a stride size of 3 for the first layer. The output is then passed through a linear layer with a GELU activation function at its midpoint. This approach helps us reduce the sequence length by a factor of 3, which is crucial given that the Whisper encoder outputs sequences of length 1500. Additionally, we introduce two new tokens, \texttt{<audio>} and \texttt{</audio>}, serving as markers for projected audio output, same procedure stated at Visual Feature Alignment.
+
+\newpage
 
 The visualization below demonstrates the procedure of embedding projected audio output between the \texttt{<audio>} and \texttt{</audio>} tokens.
 
-
-
-The hyperparameters involves in this pretraining stage are detailed below:
-
-\begin{table}[h]
+\begin{figure}[hbt!]
   \centering
-  \begin{tabular}{lccl}
-    \hline
-    \textbf{Hyperparameter} & \textbf{Value} \\
-    \hline
-    DeepSpeed               & ZeRO-2 Offload \\
-    Batch Size              & 18             \\
-    Batch Size              & 1              \\
-    Learning Rate           & 1e-4           \\
-    Warmup Ratio            & 0.03           \\
-    Precision               & bfloat16       \\
-    \hline
-  \end{tabular}
-\end{table}
+  \includegraphics[width=0.6\linewidth]{pic/audio.png} % Replace with your image file
+\end{figure}
 
-The implementation for audio feature alignment pretraining can be found \href{https://github.com/mesolitica/multimodal-LLM/tree/master/audio-only}{here}
+The implementation for audio feature alignment pretraining can be found \href{https://github.com/mesolitica/multimodal-LLM/tree/master/audio-only}{here}.
 
 \subsection{Instruction Finetuning}
 
@@ -404,6 +455,10 @@ The hyperparameters involves in this finetuning stage are detailed below:
 \end{table}
 
 Complete fine-tuning 8192 context length implementation at \href{https://github.com/mesolitica/multimodal-LLM/blob/master/run-deepspeed.sh}{here}.
+
+\section{Training Discussion}
+
+In our exploration of visual alignment pretraining, we conducted experiments using both \href{https://huggingface.co/google/siglip-base-patch16-384}{google/siglip-base-patch16-384} and \href{https://huggingface.co/google/siglip-large-patch16-384}{google/siglip-large-patch16-384} architectures. Surprisingly, we observed no discernible difference in terms of loss between the two variants. Similarly, in another set of experiments, we compared the use of SigLIP \cite{zhai2023sigmoid} output with SigLIP \cite{zhai2023sigmoid} hidden layer output for visual alignment pretraining. Intriguingly, while both approaches yielded similar loss outcomes, discrepancies emerged during instruction finetuning. Specifically, utilizing SigLIP \cite{zhai2023sigmoid} output resulted in a significantly higher incidence of hallucinated responses. However, it's essential to note that these findings lack empirical backing, necessitating further investigation to validate their significance.
 
 \section{Examples}
 

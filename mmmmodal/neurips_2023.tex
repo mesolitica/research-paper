@@ -92,7 +92,7 @@ Language models trained with instructions have demonstrated remarkable performan
 
 The introduction of OpenAI's GPT-4 \cite{openai2023gpt4}, which incorporates LLM with visual understanding capability, marked a milestone in the industry's progress, demonstrating significant advancements in addressing open-ended visual question-answering (VQA) tasks. Pioneering research initiatives such as LLaVA \cite{liu2023visual} and MiniGPT-4 \cite{zhu2023minigpt4} provide insightful directions in visual and text understanding capability. Their findings suggest that by incorporating visual encoders into existing LLMs and fine-tuning them using multi-modal instruction-tuning datasets, LLMs can be effectively transformed into multimodal LLMs. While Macaw-LLM \cite{lyu2023macawllm} introduces the integration of LLM with four different modalities: text, audio, video, and images. They successfully process information from different inputs effectively, enabling seamless information retrieval across domains. Existing dataset for multimodal instruction made available from \cite{liu2023visual} primarily supports instruction-following data involving visual content for conversation, detailed description and complex reasoning data.
 
-Despite recent advancements, there remains a lack of current research on multimodal models capable of handling multiple images or audio inputs along with multi-turn dialogue. Moreover, there is a lack of existing multimodal datasets incorporating multi-turn interactions with multiple audio and image inputs, and little consideration has been given to the Malaysian context. To address these gaps, our proposal introduces MMMModal, a multimodal large language model fine-tuned for multi-modal instruction, integrating image, audio, and text modalities within a single model architecture. Additionally, we present a corpus and employ an adaptive synthetic data generation method tailored to provide access to multi-image, multi-audio, multi-turn datasets with regards to languages in Malay and English.
+Despite recent advancements, there remains a lack of current research on multimodal models capable of handling multiple images or audio inputs along with multi-turn dialogue. Moreover, there is a lack of existing multimodal datasets incorporating multi-turn interactions with multiple audio and image inputs, and little consideration has been given to the Malaysian context. To address these gaps, our proposal introduces MMMModal, a multimodal large language model fine-tuned for multi-modal instruction, integrating multiple image, audio, and text modalities within a single model architecture. Additionally, we present a corpus and employ an adaptive synthetic data generation method tailored to provide access to multi-image, multi-audio, multi-turn datasets with regards to languages in Malay and English.
 
 \begin{itemize}
 
@@ -221,19 +221,108 @@ The synthetic visual dataset and its implementation can be found on the HuggingF
 
 \section{Synthetic Data Generation for Multi-Images, Multi-Audio Multi-turn Instructions}
 
+We address a notable gap observed in existing open-sourced multimodal datasets, as they lack the capability to replicate the multi-image or multi-audio interactions achieved by OpenAI's ChatGPT4. To address this limitation, we undertook the creation of a dataset that encompasses multiple images and audio segments related within a single multiturn conversation context.
+
+Our methodology began with the assembly of pairs of images, audios or a mix of audios and image each accompanied by its respective description. We leveraged Mistral to generate the dataset for relationship data. The model was then tasked with determining potential relationships between these pairs.
+
+By adopting this approach, we effectively simulated scenarios involving multi-image and multi-audio contexts in multiturn conversations. This simulation serves to enhance the capacity of multimodal models to learn from and respond to diverse media inputs, thereby advancing their capabilities beyond single-media-focused learning paradigms and a single turn conversation.
+
 \subsection{Synthetic Multi-Images Relationship Instruction}
+
+To generate relationship data for multiple images in our multimodal dataset, we utilized image descriptions and employed Mistral to generate relationships based on the provided image descriptions. The following prompt was used for Mistral to generate the data:
+
+\begin{lstlisting}[breaklines=true]
+  paragraph = 'Image 1: Suzuki GSX-S1000GT (2022).
+               Image 2: Suzuki Burgman 400 (2021).'
+  instruction = f'{paragraph}\n\nwhat is related between image 1 and image 2?'
+  mixtral(instruction)
+\end{lstlisting}
+
+An example of generated dataset,
+
+\begin{lstlisting}[breaklines=true]
+  {
+    "image": [
+      "pic/Suzuki GSX-S1000GT (2022)_0.jpg",
+      "pic/Suzuki Burgman 400 (2021)_0.jpg"
+    ],
+    "conversations": [
+      {
+        "role": "user",
+        "content": "<image><image>What is related between picture 1 and picture 2?"
+      },
+      {
+        "role": "assistant",
+        "content": " Both picture 1 and picture 2 feature motorcycles manufactured by Suzuki. The first picture shows the Suzuki GSX-S1000GT (2022), which is a sports bike model. The second picture shows the Suzuki Burgman 400 (2021), which is a scooter model.\n\nAlthough they are different types of motorcycles, they are related in that they are both produced by the same manufacturer, Suzuki."
+      }
+    ]
+  }
+\end{lstlisting}
 
 \subsection{Synthetic Multi-Audio Relationship Instruction}
 
+To generate relationship data from multiple audio segments in our multimodal dataset, we utilized audio transcriptions and employed Mistral to generate relationships based on the provided audio transcriptions. The resulting prompts served as instructions for generating replies related to multiple audio relationship data. Below is the prompt used for Mistral to generate the data:
+
+\begin{lstlisting}[breaklines=true]
+  paragraph = 'Audio 1: Terima kasih Menteri. Saya jemput....
+               Audio 2: dalam video tu saya dah hitamkan....'
+  instruction = f'{paragraph}\n\nwhat is related between audio 1 and audio 2?'
+  mixtral(instruction)
+\end{lstlisting}
+
+An example of generated dataset,
+
+\begin{lstlisting}[breaklines=true]
+  {
+  "filename": [
+    "output-audio/3-2080-38.mp3",
+    "output-audio/0-2823-0.mp3"
+  ],
+  "filename_description": [
+    "Terima kasih Menteri. Saya jemput soalan tambahan yang kedua. Bagan Serai. Terima kasih Tuan Speaker. Berapakah jumlah kemalangan yang menyebabkan kematian disebabkan oleh pengaruh handphone, penggunaan handphone semasa mandu. Kerana guna handphone mandu ini dia macam mabuk lebih Tuan Speaker. Dan dia hilang orientasi. Dia tak tahu di mana traffic light, dia tak tahu dia di mana berada dan tiba-tiba dah sampai. Jadi apa kerajaan nak buat untuk menurunkan tabiat buruk menggunakan handphone semasa mandu.",
+    "dalam video tu saya dah kitamkan kening lah sebab benda tu kita mencuba so at least kita dah mencuba kita kan nak mencuba kan masa ni lah mencuba kan janganlah pula usia macam aku dah 50 pun nak cuba kenapa masa buat lagu raya cover tu tak boleh hijau sebab dia nak image ketupat macam Aina Abdul juga dia ketupat kita bawa image rambut tu warna hijau ketupat juga kan tapi dah habis raya after this memang nak reveal jugalah kan habis ni memang saya akan kekalkan image yang very very formal je lah"
+  ],
+  "instruction": "What is related between audio 1 and audio 2",
+  "answer": "Audio 1 and Audio 2 are unrelated as they discuss different topics. In Audio 1, the speaker is discussing the issue of using handphones while driving and its contribution to accidents. In Audio 2, the speaker is talking about making a cover song for Raya and the challenges they faced in creating the image for the video.",
+  "instruction_ms": "Apakah yang berkaitan antara audio 1 dan audio 2",
+  "answer_ms": "Audio 1 dan Audio 2 tidak berkaitan kerana mereka membincangkan topik yang berbeza. Dalam Audio 1, penceramah membincangkan isu menggunakan fon tangan semasa memandu dan sumbangannya kepada kemalangan. Dalam Audio 2, penceramah bercakap tentang membuat lagu penutup untuk Raya dan cabaran yang mereka hadapi dalam mencipta imej untuk video itu."
+}
+\end{lstlisting}
+
 \subsection{Synthetic Image-Audio Relationship Instruction}
+
+To generate synthetic image-audio relationship data for our multimodal dataset, we combined images with audio segments and utilized Mistral to generate relationships based on the provided image descriptions and audio transcriptions. The following prompt was used for Mistral to generate the data:
+
+\begin{lstlisting}[breaklines=true]
+paragraph = ' Audio 1: I hope she's on the same page with me because I feel like after years of being with her, she also is the same as me and it's money come to her account...    Image 1: new design inflatable game house with air blower.'
+instruction = f'{paragraph}\n\nwhat is related between audio 1 and picture 1?'
+mixtral(instruction)
+\end{lstlisting}
+
+An example of generated dataset,
+
+\begin{lstlisting}[breaklines=true]
+  {
+    "filename": [
+      "output-audio/3-2825-0.mp3",
+      "00117/001170082.jpg"
+    ],
+    "filename_description": [
+      "I hope she's on the same page with me because I feel like after years of being with her, she also is the same as me and it's money come to her account and then we agree that to put money inside because circumstances change. Like for example, her circumstance is better than me now because she works at Colgate. I don't know when I'm supposed to say that, but whatever, right? And she gets a good salary now and because of that good salary, she has no time and she's like, I don't know whether I should have taken this job. I don't even have time to like join my life already. But she earns more now. So like by right,",
+      "new design inflatable game house with air blower"
+    ],
+    "instruction": "What is related between audio 1 and picture 1",
+    "answer": "The relationship between the audio 1 and picture 1 is not clear without additional context. The audio is about a person's thoughts and feelings regarding their partner's financial situation and work commitments. The picture shows a new design inflatable game house with an air blower. There is no apparent connection between the two.",
+    "instruction_ms": "Apakah yang berkaitan antara audio 1 dan gambar 1",
+    "answer_ms": "Hubungan antara audio 1 dan gambar 1 tidak jelas tanpa konteks tambahan. Audio adalah mengenai pemikiran dan perasaan seseorang mengenai situasi kewangan pasangan mereka dan komitmen kerja. Gambar itu menunjukkan rumah permainan kembung reka bentuk baharu dengan pengtiup udara. Tiada hubungan yang jelas antara kedua-duanya."
+  }
+\end{lstlisting}
 
 \subsection{Synthetic Multi-Images Multi-Audio in one session Instruction}
 
-We have observed that most open-source multimodal models accept only single images in individual multi-turn dialogues. These limitations make it difficult for people to further enhance the models.
+To generate multiple images, audio and dialogue turns that offers fine-grained interactions between multiple images, audio and words, mimicking user-assistant conversations.
 
-To bridge these gaps, we aim to generate a multiple images, audio and dialogue turns that offers fine-grained interactions between multiple images, audio and words, mimicking user-assistant conversations.
-
-We build a script that parse visual and audio context datasets and perform an algorithm that combine each visual context row into another audio context or image context row based on probability which makes our combined data more varied.
+We built a script that parse visual and audio context datasets and perform an algorithm that combine each visual context row into another audio context or image context row based on probability which makes our combined data more varied.
 
 Below are the script to combine synthetic visual and audio context dataset:
 
@@ -303,6 +392,7 @@ By doing this approach, multimodal model would enhance its capabilities on under
 
 The implementation can be found on the Github repository page under \href{https://github.com/mesolitica/multimodal-LLM/tree/master/prepare-dataset}{here}.
 
+
 \section{Finetuning Procedure}
 
 MMMModal aims to align visual and audio information from pretrained vision and audio encoders with an advanced large language model (LLM). We aim to bridge the gap between the visual and audio encoders and the LLM using a linear projection layer. To create an effective multimodal model, we followed a two-stage training approach exemplified by the works of \cite{han2023chartllama,zhu2023minigpt4,liu2024hidden} which have notably produced great results. In the initial stage, the model is pretrained on aligned image-text pairs and audio-text pairs to acquire knowledge of vision and audio language through the alignment projection layer. In the second stage, we fine-tune the pretrained model using a generated multiturn multiaudio images synthetic dataset, incorporating a designed conversational template to enable model comprehension on multi-images, multi-audio, and multi-images-multi-audio within a single multiturn session.
@@ -357,8 +447,10 @@ In our method, we draw inspiration from LLAVA's projection layer but introduce m
 
 The visualization below demonstrates the procedure of embedding projected audio output between the \texttt{<audio>} and \texttt{</audio>} tokens.
 
-
-
+\begin{figure}[hbt!]
+  \centering
+  \includegraphics[width=0.6\linewidth]{pic/audio.png} % Replace with your audio file
+\end{figure}
 The hyperparameters involves in this pretraining stage are detailed below:
 
 \begin{table}[h]
@@ -417,10 +509,13 @@ This section presents examples that highlight the model's capacity to comprehend
     \hline
     \textbf{Multi Images Input Example}                                                                            \\[6pt]
     \hline
-    \includegraphics[width=\linewidth]{pic/R.jpeg} & \includegraphics[width=\linewidth]{pic/Persian-cat-breed.jpg} \\
+    \hline
+    \\[-1pt]
+    \includegraphics[width=0.9\linewidth,height=4cm]{pic/bus.jpeg} & \includegraphics[width=0.9\linewidth,height=4cm]{pic/cat.jpg} \\
+    \\[-1pt]
     \hline
     User                                           & What is related between image 1 and image 2?                  \\
-    MMMModal                                       & Nothing?                                                      \\
+    MMMModal                                       & a                                                    \\
     \hline
   \end{tabular}
 \end{table}
@@ -433,10 +528,10 @@ This section presents examples that highlight the model's capacity to comprehend
     \textbf{Multi Audio Input Example}                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           \\[3pt]
     \hline
     \hline
-    Audio 1 Transcription: anda tahu keuntungan boleh lebih tinggi daripada keuntungan kewangan rumah maka saya tidak akan mencari dalam akaun saya akan mencari ke dalam ethereum atau beberapa crypto punks bergantung pada faktor risiko anda kerana rumah kajang dihantar tidak mengganggu dsr saya sejauh ini jadi sekarang apa posisi saya untuk sekali lagi ia menyusahkan saya dan aset tetapi jika anda tidak selesa dengan mencari & Audio 2 Transcription: anda tahu keuntungan boleh lebih tinggi daripada keuntungan kewangan rumah maka saya tidak akan mencari dalam akaun saya akan mencari ke dalam ethereum atau beberapa crypto punks bergantung pada faktor risiko anda kerana rumah kajang dihantar tidak mengganggu dsr say lagi ia menyusahkan saya dan aset tetapi jika anda tidak selesa dengan mencari \\
+    Audio 1 Transcription: sekarang financial media je. So macam you sekarang ni, kita nak tanya banyak ni pasal invest lah, pasal beli rumah lah, beli kereta lah, credit card lah. You boleh cakap ke tak boleh cakap ni? Kan kita kena saman dengan mana-mana. Asalkan ini semua bukan nasihat kewangan. Yang SE tangkap paling banyak tu pasal bila korang kata ini investment yang terbaik. Kalau korang kata macam comparing product, this one the return is better, korang patut letak duit sini. Tu dikirakan financial advice. & Audio 2 Transcription: At the stream key, you wipe what it says and paste what you copied from YouTube earlier. Press done. When you press done, what else? Press the go live button at the bottom right of the Streamlabs software. And automatically, we're live on YouTube. Maybe there's a bit of delay depending on the internet connection we use. Go back to YouTube Studio. When we're live, we'll get info like how many people are watching. How our connection status is. \\
     \hline
-    User                                                                                                                                                                                                                                                                                                                                                                                                                                     & What is related between audio 1 and audio 2?                                                                                                                                                                                                                                                                                                                                      \\
-    MMMModal                                                                                                                                                                                                                                                                                                                                                                                                                                 & Nothing?                                                                                                                                                                                                                                                                                                                                                                          \\
+    User                                                                                                                                                                                                                                                                                                                                                                                                                                     & What is related between the topic discussed in audio 1 and audio 2?                                                                                                                                                                                                                                                                                                                                      \\
+    MMMModal                                                                                                                                                                                                                                                                                                                                                                                                                                 & a                                                                                                                                                                                                                                                                                                                                                                          \\
     \hline
   \end{tabular}
 \end{table}
@@ -449,10 +544,11 @@ This section presents examples that highlight the model's capacity to comprehend
     \hline
     \textbf{Images Audio Input Example}                                                                                                                                                                                                                                                                                                                                                                                                                          \\[6pt]
     \hline
-    \includegraphics[width=\linewidth,valign=c]{pic/Persian-cat-breed.jpg} & Audio 1 Transcription: anda tahu keuntungan boleh lebih tinggi daripada keuntungan kewangan rumah maka saya tidak akan mencari dalam akaun saya akan mencari ke dalam ethereum atau beberapa crypto punks bergantung pri itu saya boleh membayar perbezaan dengan menggunakan wang ini kerana sekali lagi ia menyusahkan saya dan aset tetapi jika anda tidak selesa dengan mencari \\
     \hline
-    User                                                                   & What is related between audio 1 and image 2?                                                                                                                                                                                                                                                                                                                                        \\
-    MMMModal                                                               & Nothing?                                                                                                                                                                                                                                                                                                                                                                            \\
+      \includegraphics[width=0.9\linewidth]{pic/cat.jpg} & Audio 1 Transcription: At the stream key, you wipe what it says and paste what you copied from YouTube earlier. Press done. When you press done, what else? Press the go live button at the bottom right of the Streamlabs software. And automatically, we're live on YouTube. Maybe there's a bit of delay depending on the internet connection we use. Go back to YouTube Studio. When we're live, we'll get info like how many people are watching. How our connection status is. \\
+    \hline
+    User                                                                   & What is related between audio 1 and image 1?                                                                                                                                                                                                                                                                                                                                        \\
+    MMMModal                                                               & a                                                                                                                                                                                                                                                                                                                                                                            \\
     \hline
   \end{tabular}
 \end{table}

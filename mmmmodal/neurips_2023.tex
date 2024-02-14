@@ -487,9 +487,17 @@ Complete fine-tuning 8192 context length implementation at \href{https://github.
 
 \section{Training Discussion}
 
+\subsection{Pretraining Alignment}
+
 In our exploration of visual alignment pretraining, we conducted experiments using both \href{https://huggingface.co/google/siglip-base-patch16-384}{google/siglip-base-patch16-384} and \href{https://huggingface.co/google/siglip-large-patch16-384}{google/siglip-large-patch16-384} architectures. Surprisingly, we observed no discernible difference in terms of loss between the two variants. Similarly, in another set of experiments, we compared the use of SigLIP \cite{zhai2023sigmoid} output with SigLIP \cite{zhai2023sigmoid} hidden layer output for visual alignment pretraining. Intriguingly, while both approaches yielded similar loss outcomes, discrepancies emerged during instruction finetuning. Specifically, utilizing SigLIP \cite{zhai2023sigmoid} output resulted in a significantly higher incidence of hallucinated responses. However, it's essential to note that these findings lack empirical backing, necessitating further investigation to validate their significance.
 
 In contrast, our exploration of audio alignment did not entail a comparative study, primarily due to resource constraints. Instead, we relied on the output from the Malaysian Whisper Small model's hidden layers, informed by insights gleaned from the SigLIP encoder \cite{zhai2023sigmoid}.
+
+\subsection{Instruction Finetuning}
+
+During distributed multi-GPU training, data shuffling may inadvertently result in certain devices receiving instruction samples containing only audio or images, leading to discrepancies in gradient computation across devices. This inconsistency can manifest as "parameters that were not used in producing loss," particularly problematic when employing frameworks like Torch Elastic or DeepSpeed Zero 2, where such discrepancies can cause training to stall indefinitely. To mitigate this issue, we have implemented a solution wherein empty image and audio placeholders are appended to each sample, ensuring that every device receives both modalities. Additionally, attention masks are set to zero for these placeholders, effectively disregarding them during computation. This approach ensures uniformity in gradient calculation across devices, preventing training interruptions and improving overall model stability during distributed training sessions.
+
+Importantly, during inference, we can safely omit the addition of these empty placeholders as we have already configured the model to ignore them by setting the corresponding labels appropriately.
 
 \section{Examples}
 

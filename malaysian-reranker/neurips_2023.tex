@@ -74,7 +74,10 @@
   Halim Shukor\thanks{mhalimshukor@gmail.com} \and
 }
 
+
 \begin{document}
+
+
 
 \maketitle
 
@@ -84,9 +87,20 @@
 \end{abstract}
 
 \section{Introduction}
+We present an innovative adaptation to Retrieval Augmented Generation (RAG), aimed at refining the document retrieval process for improved relevance. Traditionally, RAG involves converting input and potential output into embeddings, subsequently sorting them via semantic search. However, to further enhance the retrieval of relevant documents, we introduce a reranker model. This model is trained to assess the similarity between two documents using cross-entropy loss, akin to a classification model. By assigning probability values between 0 and 1 to document pairs, the reranker effectively reorders documents, prioritising relevance.
+
+While several reranker models have been introduced, none have been trained on local Malaysian data. To address this gap, we adopt a strategy of leveraging our own data to train the reranker model. This adaptation allows us to tailor the reranking process to our specific context, enhancing the efficacy of our RAG architecture. By integrating the reranker model alongside the embedding model and semantic search, we present a comprehensive solution for optimising document retrieval in RAG frameworks.
 
 \section{Post-Mining and Post-Filtering}
+\subsection{Dataset Preparation}
 
+Since a reranker serves to enhance an embedding model and vector search, it necessitates a dataset rich in both highly relevant (strong positive) and highly irrelevant (strong negative) examples. This is pivotal as the reranker's function is to augment document retrieval by discerning the most relevant documents for a given query, thereby surpassing the semantic recognition capabilities of the embedding model.
+
+Our utilization of the pretrained embedding model \href{https://huggingface.co/mesolitica/llama2-embedding-600m-8k}{mesolitica/llama2-embedding-600m-8k} facilitates the conversion of our dataset into embeddings. In contrast to prior methodologies \cite{zolkepli2024multilingual}, wherein we employed OpenAI-ada and bge-large for this purpose, the adoption of our current embedding model, which has been trained on data imbued with Malaysian context, stands as a logical choice for post-mining.
+
+Following the conversion of the dataset into embeddings, we proceed with a data mining approach that involves recording distances between document pairs and representing these on a distribution graph. Analysis of this graph enables the determination of upper and lower threshold bounds, guiding the selection of relevant documents.
+
+Documents situated at the extremes of the threshold spectrum represent varying degrees of similarity: those at the higher end exhibit greater likeness, whereas those at the lower end demonstrate dissimilarity. By curating a dataset comprising pairs from both ends, we establish a collection of highly positive (similar) and highly negative (dissimilar) document pairs.
 \section{Synthetic Title-Context Pair}
 
 We leverage a comprehensive dataset comprised of deduplicated \href{https://huggingface.co/datasets/malaysia-ai/dedup-text-dataset}{Malaysian news articles}, \href{https://huggingface.co/datasets/mesolitica/mixtral-malaysian-abstractive-summarization}{summaries}, and deduplicated \href{https://huggingface.co/datasets/malaysia-ai/dedup-text-dataset}{online articles}. Our methodology involves the creation of positive pairs, wherein the relationship between titles and their corresponding articles is utilized to generate pairs that exhibit semantic coherence and relevance. To achieve this, we meticulously match titles with their respective articles, ensuring that the generated pairs reflect meaningful associations. In parallel, we employ a contrasting approach to form negative pairs, wherein titles are paired with articles different from their original counterparts. This deliberate juxtaposition enables us to capture nuanced distinctions and refine the model's discernment capabilities.

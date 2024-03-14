@@ -85,7 +85,31 @@
 
 \section{Introduction}
 
-\section{Post-Mining and Post-Filtering}
+The development of Retrieval-Augmented Generation (RAG) models stands as a significant stride toward enhancing the interaction between users and machine systems. These models aim to seamlessly integrate information retrieval with text generation, thereby facilitating more precise and contextually relevant responses to user queries. However, the efficacy of RAG models hinges greatly on the quality of the retrieved documents and the subsequent generation process.
+
+Despite the advancements in embedding models for information retrieval, one persistent challenge looms large: the inherent difficulty in accurately selecting the most pertinent documents for a given user query. A common pitfall encountered in building RAG systems is the tendency for the top-k articles returned by embedding models to deviate significantly from the user's intended context or question. This discrepancy often leads to suboptimal performance, as irrelevant or tangentially related articles can undermine the coherence and accuracy of the generated responses.
+
+Furthermore, the repercussions of such mismatches extend beyond mere inefficiency, as they may trigger a phenomenon known as hallucination within the Language Model (LLM). When the top-k articles fail to capture the essence of the user's inquiry, the LLM may attempt to compensate by fabricating information or generating responses based on incomplete or erroneous premises. This phenomenon not only erodes the credibility of the system but also diminishes its utility in practical applications.
+
+To address these challenges and augment the relevance of retrieved documents, the integration of a reranker mechanism has emerged as a pivotal strategy in post-sorting the results obtained from embedding models. The role of the reranker is to meticulously scrutinize the initial set of retrieved articles and prioritize those that exhibit greater alignment with the user's query. By leveraging additional contextual cues and semantic analysis, the reranker endeavors to refine the selection process and ensure that the top-k articles are intrinsically more germane to the user's needs.
+
+In essence, the integration of a reranker within RAG systems represents a crucial step toward mitigating the inherent uncertainties associated with information retrieval and generation tasks. By fine-tuning the selection of retrieved documents, the reranker not only enhances the accuracy and relevance of generated responses but also fosters a more robust and trustworthy interaction between users and machine systems. As such, the exploration and refinement of reranking techniques stand poised to propel the efficacy and applicability of RAG models.
+
+In the absence of a dedicated reranker model for the Malaysian language, we undertake the task by adapting and fine-tuning existing causal language models with 64M, 191M, and 494M parameters to fulfill the reranking objectives.
+
+\begin{itemize}
+
+  \item \textbf{Synthetic Question-Answer Pair:} To construct Synthetic Audio Instruction Dataset, our approach involves gathering extracted audio content from YouTube videos. We  employed the Whisper Large V3 model for pseudolabeling to transcribe the audio contents from scraped Youtube videos, followed by a post-filtering process based on score thresholds to ensure high-quality datasets. We then utilized the Mixtral-8x7B-Instruct-v0.1 Model to generate multiturn dialogue instruction-following data involving the audio context.
+
+  \item \textbf{Synthetic Title-Context Pair:}  We collected images from Malaysian websites along with their descriptions. Through data processing, we converted this information into conversational examples to better incorporate Malaysian context into our model.
+
+  \item \textbf{Synthetic Noisy Translation for synthetic pair:} Our method involved randomly combining images, audios or pairing them together to create a dataset illustrating relationships of different images and audios. We utilized Mistral to generate multiturn dialogues, prompting the model to respond based on the images, audio captions, and descriptions. This enabled us to collect a corpus tailored for focusing on relationships within multi-modal content, encompassing both images and audio.
+
+  \item \textbf{Finetuned Reranker task:} Our approach adopts a two-step training procedure to integrate multimodal and multiturn capabilities into our model. The initial step entails pretraining the feature alignment module. Through this process, we align the image and audio features with the pre-trained word embeddings of the Large Language Model (LLM). Specifically, this step involves training the projection layer to ensure alignment between the multi-modal features and textual representations. This alignment facilitates seamless integration of diverse modalities within the model architecture.
+
+\end{itemize}
+
+\section{Synthetic Question-Answer Pair}
 
 \section{Synthetic Title-Context Pair}
 

@@ -55,7 +55,7 @@
 }
 
 \hypersetup{
-    pdftitle={Enhancing Search with Malaysian Reranking},
+    pdftitle={Enhancing Search with Malaysian Reranking 16384 context length},
     pdfauthor={Wan Adzhar Faiq Adzlan, Kamarul Adha, Husein Zolkepli, Mas Aisyah Ahmad, Aisyah Razak, Halim Shukor},
     pdfsubject={Natural Language Processing, Large Language Models, Machine Learning},
     pdfkeywords={language models, malay natural language processing, deep learning},
@@ -64,7 +64,7 @@
     citecolor=blue,
     urlcolor=blue
 }
-\title{Enhancing Search with Malaysian Reranking}
+\title{Enhancing Search with Malaysian Reranking 16384 context length}
 \author{
   Wan Adzhar Faiq Adzlan\thanks{adzhar.faiq@gmail.com} \and
   Kamarul Adha\thanks{kamarul.adha360@gmail.com} \and
@@ -95,21 +95,23 @@ To address these challenges and augment the relevance of retrieved documents, th
 
 In essence, the integration of a reranker within RAG systems represents a crucial step toward mitigating the inherent uncertainties associated with information retrieval and generation tasks. By fine-tuning the selection of retrieved documents, the reranker not only enhances the accuracy and relevance of generated responses but also fosters a more robust and trustworthy interaction between users and machine systems. As such, the exploration and refinement of reranking techniques stand poised to propel the efficacy and applicability of RAG models.
 
-In the absence of a dedicated reranker model for the Malaysian language, we undertake the task by adapting and fine-tuning existing causal language models with 64M, 191M, and 494M parameters to fulfill the reranking objectives.
+In the absence of a dedicated reranker model for the Malaysian language, we undertake the task by adapting and fine-tuning existing causal language models with 64M, 191M, and 474M parameters to fulfill the reranking objectives.
 
 \begin{itemize}
 
-  \item \textbf{Synthetic Question-Answer Pair:} To construct Synthetic Audio Instruction Dataset, our approach involves gathering extracted audio content from YouTube videos. We  employed the Whisper Large V3 model for pseudolabeling to transcribe the audio contents from scraped Youtube videos, followed by a post-filtering process based on score thresholds to ensure high-quality datasets. We then utilized the Mixtral-8x7B-Instruct-v0.1 Model to generate multiturn dialogue instruction-following data involving the audio context.
+  \item \textbf{Synthetic Question-Answer Pair:} Utilizing the ChatGPT3.5 question-answer instruction dataset curated by Malaysian Mistral \cite{zolkepli2024large}, we generate both positive and negative pairs, a strategy poised to significantly enhance the accuracy of the Retrieval-Augmented Generation (RAG) model.
 
-  \item \textbf{Synthetic Title-Context Pair:}  We collected images from Malaysian websites along with their descriptions. Through data processing, we converted this information into conversational examples to better incorporate Malaysian context into our model.
+  \item \textbf{Synthetic Title-Context Pair:}  We use a dataset of Malaysian news articles, summaries, and online articles to create positive pairs by matching titles with corresponding articles and negative pairs by selecting articles with minimal title-content overlap. This method enhances the model's discernment capabilities.
 
-  \item \textbf{Synthetic Noisy Translation for synthetic pair:} Our method involved randomly combining images, audios or pairing them together to create a dataset illustrating relationships of different images and audios. We utilized Mistral to generate multiturn dialogues, prompting the model to respond based on the images, audio captions, and descriptions. This enabled us to collect a corpus tailored for focusing on relationships within multi-modal content, encompassing both images and audio.
+  \item \textbf{Synthetic Noisy Translation for synthetic pair:} We propose a method to enrich local context social media datasets by preprocessing data through ChatGPT3.5 translation, overcoming language barriers and incorporating diverse linguistic nuances despite "noisy translation." Additionally, we introduce a technique using the Malaysian T5 Small model from Malaya for reverse noisy translation, generating synthetic data with similar semantics and varied sentence structures in the local language to address data scarcity while preserving linguistic richness.
 
-  \item \textbf{Finetuned Reranker task:} Our approach adopts a two-step training procedure to integrate multimodal and multiturn capabilities into our model. The initial step entails pretraining the feature alignment module. Through this process, we align the image and audio features with the pre-trained word embeddings of the Large Language Model (LLM). Specifically, this step involves training the projection layer to ensure alignment between the multi-modal features and textual representations. This alignment facilitates seamless integration of diverse modalities within the model architecture.
+  \item \textbf{Finetuned Reranker task:} We fine-tuned Mistral's Malaysian causal language model with 64M, 191M, and 474M parameters, employing a 16384 context length on a classification pair dataset, optimizing with binary cross-entropy.
 
 \end{itemize}
 
 \section{Synthetic Question-Answer Pair}
+
+
 
 \section{Synthetic Title-Context Pair}
 

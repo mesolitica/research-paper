@@ -82,6 +82,7 @@
 
 \section{Data Source}
 The data for this study was collected from various platforms, including social media, public forums, and publicly available datasets. The majority of the data is in the malay language and relevant to the malay context.
+By utilizing these comprehensive datasets from multiple sources, we have strengthened the robustness and accuracy of our classification model, enabling it to effectively tackle the challenges of identifying self-harm and sexism in online content.
 \subsection{Social Media}
 Data was collected from popular social media platforms such as Twitter and Facebook. Two main approaches were employed to gather relevant data:
 
@@ -92,11 +93,26 @@ Data was collected from popular social media platforms such as Twitter and Faceb
 The combination of these two scraping methods resulted in a comprehensive and diverse dataset from social media, capturing both keyword-specific content and data from profiles that frequently share explicit material.
 
 
-\subsection{Public Dataset}
+\subsection{Public Articles}
 
-\section{Finetuning Procedure}
+For public articles, we have collected data from various articles and blogs which are \href{http://b.cari.com.my}{b.cari}, which hosts a wide range of user-generated content in Malay.
 
-\section{Evaluate}
+The collected dataset consists of human dialogues extracted from these articles and blog posts. It notably includes some dialogues that contain nsfw content. The inclusion of such dialogues, while potentially controversial, is important to allow the trained classifier to effectively detect explicit content that may realistically occur in open-ended dialogue systems.
+
+\subsection{Public Datasets}
+
+We have also collected data from publicly available dataset on kaggle such as \href{https://www.kaggle.com/datasets/nikhileswarkomati/suicide-watch}{Kaggle: Suicide and Depression Detection} datasets. The dataset is a collection of posts from the "SuicideWatch" and "depression" subreddits of the Reddit platform. This dataset contains a wide range of suicide ideation contexts, providing valuable insights for our research.
+
+We also leverage \href{https://github.com/rewire-online/edos}{Explainable Detection of Online Sexism (EDOS)} from github and \href{http://nlp.uned.es/exist2021/}{EXIST: sEXism Identification in Social neTwork (EXIST)} from web that contain a diverse collection of sexism statements, which have significantly contributed to the success of our classifier in identifying and categorizing such content.
+\section{Methodology}
+\subsection{Overall}
+\subsection{Knowledge Distillation}
+\subsection{Centroid Filtering}
+\subsection{Pseudolabeling}
+
+
+\section{Result}
+\subsection{Evaluation}
 
 \section{Acknowledgement}
 

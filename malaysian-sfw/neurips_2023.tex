@@ -68,6 +68,10 @@
 \author{
   Aisyah Razak\thanks{aisyahrazak171@gmail.com} \and
   Ariff Nazhan\thanks{ariffnzhn@gmail.com} \and
+  Kamarul Adha\thanks{kamarul.adha360@gmail.com} \and
+  Wan Adzhar Faiq Adzlan\thanks{adzhar.faiq@gmail.com} \and
+  Mas Aisyah Ahmad\thanks{masaisyahahmad@gmail.com} \and
+  Ammar Azman\thanks{dd@gmail.com} \and
 }
 
 \begin{document}
@@ -104,10 +108,40 @@ The collected dataset consists of human dialogues extracted from these articles 
 We have also collected data from publicly available dataset on kaggle such as \href{https://www.kaggle.com/datasets/nikhileswarkomati/suicide-watch}{Kaggle: Suicide and Depression Detection} datasets. The dataset is a collection of posts from the "SuicideWatch" and "depression" subreddits of the Reddit platform. This dataset contains a wide range of suicide ideation contexts, providing valuable insights for our research.
 
 We also leverage \href{https://github.com/rewire-online/edos}{Explainable Detection of Online Sexism (EDOS)} from github and \href{http://nlp.uned.es/exist2021/}{EXIST: sEXism Identification in Social neTwork (EXIST)} from web that contain a diverse collection of sexism statements, which have significantly contributed to the success of our classifier in identifying and categorizing such content.
+
 \section{Methodology}
-\subsection{Overall}
+
+Supervised text classification requires reliable class labels for training data. However, obtaining these labels can be complex and expensive. Typically, labels are added sequentially by querying an annotator until satisfactory performance is achieved. We introduced an approach that leverages active learning, knowledge distillation of large language models, and text clustering to reduce annotation effort and construct a collection of labeled not safe for work (NSFW) data from our gathered data.
+
+Following figure illustrates the overall flow employed in our methodology to collect NSFW dataset aims to label malaysian dataset for alignment in LLMOps framework.
+
+
 \subsection{Knowledge Distillation}
+
+\begin{lstlisting}[breaklines=true]
+
+    text: <text content>
+
+    If the text shows any sign of prejudice, stereotyping, or discrimination on the basis of sex:, label it as 'sexist'.
+    If the text shows any sign of content that threatens, incites, glorifies, or expresses desire for violence or harm., label it as 'violence'.
+    If the text shows any sign of prejudice, discrimination, or antagonism by an individual, community, or institution against a person or people on the basis of their membership of a particular racial or ethnic group, label it as 'racist'.
+    If the text shows any sign of content depicting adult nudity or sexual behavior that is pornographic or intended to cause sexual arousal, label it as 'porn'.
+    If the text shows any sign of psychiatric or mental illness, label it as 'psychiatric or mental illness'.
+    If the text shows any sign of promotion, or otherwise encourage, suicide or self-harm, label it as 'self-harm'.
+    If the text shows any sign of harassment, label it as 'harassment'.
+    If the text does not show any sign of violation and safe for work, label it as 'safe for work'
+
+    Only use the label from above choice.
+
+    return the result in JSON format {'label', 'explain'}
+
+\end{lstlisting}
+
+
 \subsection{Centroid Filtering}
+
+We utilize labeled data obtained from a large language model (LLM) to enhance the quality and consistency of our dataset. First, we compute the centroid of the feature vectors for the labeled data, representing the central point in the feature space. By measuring the distance of each data point from this centroid, we can identify and filter out data points that are far from the centroid. These distant points are likely to be outliers or less representative of the core data distribution. This process helps in refining the dataset by retaining data that is more coherent and relevant, thereby improving the classifier's performance.
+
 \subsection{Pseudolabeling}
 
 

@@ -144,6 +144,10 @@ We utilize labeled data obtained from a large language model (LLM) to enhance th
 
 \subsection{Pseudolabeling}
 
+We use relevant data of specific category to train a classifier model. The trained model is then will be used to classify unlabeled data, this process is called pseudolabeling. We provisioned the output given by the classifier before feeding all the unlabeled data into bigger classifier model. This process is repeated until we get the desired accuracy.
+
+Below are the example of pseudolabeling process:
+
 
 \section{Result}
 \subsection{Evaluation}

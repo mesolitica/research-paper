@@ -37,7 +37,9 @@
 \usepackage{graphicx}
 \usepackage{hyperref}
 \usepackage{amsmath}
-
+\usepackage{algpseudocode}
+\usepackage{amsmath}
+\usepackage{algorithm}
 
 \lstset{
   breaklines=true,
@@ -84,6 +86,30 @@
 
 \section{Introduction}
 
+\section{Taxonomy}
+
+Designing a universal taxonomy for safe for work guardrails is challenging due to the context-dependent nature of language. Below, we outline our taxonomy for safe-for-work categorization, which will guide the application of guardrails to our large language model or chatbot system. Each category is described to clarify the scope and specifics of what constitutes undesired content:
+
+\begin{itemize}
+    \item \textbf{Pornography:} Content that includes explicit sexual descriptions, depictions of sexual acts, or nudity intended to arouse sexual interest. This category covers sexually explicit text, adult content descriptions, and any language or media that depicts sexual activity.
+
+    \item \textbf{Harassment:} Content that targets individuals or groups with the intent to demean, intimidate, or threaten. This includes abusive language, threats, stalking, or any form of verbal harassment aimed at causing emotional or psychological distress.
+
+    \item \textbf{Sexist:} Content that promotes discrimination or prejudice based on gender. This includes sexist remarks, derogatory comments about any gender, and language that reinforces harmful gender stereotypes or inequality.
+
+    \item \textbf{Racist:} Content that discriminates or promotes hatred based on race, ethnicity, or nationality. This includes racial slurs, derogatory remarks about ethnic groups, and any language that supports racial superiority or inferiority.
+
+    \item \textbf{Religious Insult:} Content that disrespects or mocks religious beliefs, practices, or figures. This includes blasphemy, offensive jokes about religions, and language intended to insult or offend individuals based on their religious affiliations.
+
+    \item \textbf{Self-Harm:} Content that depicts or encourages self-injurious behavior or suicide. This includes descriptions of self-harm methods, discussions promoting suicide, and any language that glorifies or encourages self-destructive actions.
+
+    \item \textbf{Psychiatric or Mental Illness:} Content that stigmatizes or discriminates against individuals with mental health conditions. This includes derogatory terms for mental health issues, insensitive jokes, signs of mental distress or illness, and any language that trivializes or mocks mental illness.
+
+    \item \textbf{Safe for Work:} Content that is appropriate for a professional or public environment, free from explicit, offensive, or discriminatory material. This includes clean language, respectful discourse, and content that does not contain any of the above-mentioned undesired elements.
+\end{itemize}
+
+This taxonomy will help us systematically identify and filter out inappropriate content, where additional redirection can be made to ensure a safe and respectful interaction environment for users.
+
 \section{Data Source}
 The data for this study was collected from various platforms, including social media, public forums, and publicly available datasets. The majority of the data is in the malay language and relevant to the malay context.
 By utilizing these comprehensive datasets from multiple sources, we have strengthened the robustness and accuracy of our classification model, enabling it to effectively tackle the challenges of identifying self-harm and sexism in online content.
@@ -116,7 +142,11 @@ Supervised text classification requires reliable class labels for training data.
 Following figure illustrates the overall flow employed in our methodology to collect NSFW dataset aims to label malaysian dataset for alignment in LLMOps framework.
 
 
-\subsection{Knowledge Distillation}
+\subsection{Knowledge Distillation of Large Language Models}
+
+Data annotation using knowledge distillation from a large language model (LLM) involves prompting a teacher LLM to generate a label \( y \) for a given input \( x \) as the foundational knowledge. This paper primarily explores the zero-shot paradigm, where the LLM receives only the input \( x \) and an instruction \( I \) without any labeled examples or demonstrations. This straightforward yet effective method of extracting knowledge from teacher LLMs has been widely applied to various tasks and applications. It only requires an input dataset, which is then processed by the LLM to produce the desired label \( y \).
+
+In this annotation stage, we utilized two different large language models: mistral-7b and mallam-small. By leveraging mistral-7b, which excels with English-centric prompts, we translated our scraped data into English to provide better context and achieve reliable outputs from the model. While for mallam, we provided inputs from the original malay text as it has better contextual meaning compared to the other models. Below is the prompt we used to generate the labels from the models:
 
 \begin{lstlisting}[breaklines=true]
 
@@ -140,17 +170,45 @@ Following figure illustrates the overall flow employed in our methodology to col
 
 \subsection{Centroid Filtering}
 
-We utilize labeled data obtained from a large language model (LLM) to enhance the quality and consistency of our dataset. First, we compute the centroid of the feature vectors for the labeled data, representing the central point in the feature space. By measuring the distance of each data point from this centroid, we can identify and filter out data points that are far from the centroid. These distant points are likely to be outliers or less representative of the core data distribution. This process helps in refining the dataset by retaining data that is more coherent and relevant, thereby improving the classifier's performance.
+We utilize labeled data obtained from a large language model (LLM) to enhance the quality and consistency of our dataset. First, we compute the centroid of the feature vectors for the labeled data, representing the central point in the feature space. The determination of similarity is guided by the Euclidean distance formula, where lower values indicate greater similarity and higher values signify greater dissimilarity. 
 
-\subsection{Pseudolabeling}
-
-We use relevant data of specific category to train a classifier model. The trained model is then will be used to classify unlabeled data, this process is called pseudolabeling. We provisioned the output given by the classifier before feeding all the unlabeled data into bigger classifier model. This process is repeated until we get the desired accuracy.
-
-Below are the example of pseudolabeling process:
+By measuring the distance of each data point from this centroid, we can identify and filter out data points that are far from the centroid. These distant points are likely to be outliers or less representative of the core topic data distribution. This ensures that the labels encapsulate the nuanced semantics of the specific topic. This filtering process enhances the dataset by retaining data that is more coherent and relevant, thereby improving the performance of the classifier.
 
 
-\section{Result}
-\subsection{Evaluation}
+\begin{figure}[h]
+  \centering
+  \includegraphics[width=0.6\linewidth]{img/centroid-distance.png}
+\end{figure}
+
+\subsection{Active Learning}
+
+We use relevant data from a specific category to train a classifier model. The trained model is then used to classify unlabeled data, a process known as pseudolabeling. The outputs given by the classifier are reviewed before feeding all the unlabeled data into a larger classifier model. This iterative process continues until the desired accuracy is achieved.
+
+The following algorithm outlines the active learning process:
+
+\begin{algorithm}[H]
+\caption{Active Learning for Single Label Classifier}
+\begin{algorithmic}[1]
+\State \textbf{Input:} Labeled data \(D_L\), Unlabeled data \(D_U\), Classifier model \(M\), Desired accuracy \(A_{desired}\)
+\State \textbf{Output:} Trained classifier model \(M\)
+
+\While {Accuracy \(A\) < \(A_{desired}\)}
+    \State Train classifier \(M\) on \(D_L\)
+    \State Predict labels for \(D_U\) using \(M\) (pseudolabeling)
+    \State Filter high-confidence predictions from \(D_U\) to create a new labeled dataset \(D_{L_{new}}\)
+    \State Update labeled dataset: \(D_L \leftarrow D_L \cup D_{L_{new}}\)
+    \State Retrain classifier \(M\) on the updated \(D_L\)
+    \State Manually evaluate the accuracy \(A\) of \(M\)
+\EndWhile
+
+\State \textbf{return} Trained classifier model \(M\)
+\end{algorithmic}
+\end{algorithm}
+
+
+
+\section{Evaluation}
+
 
 \section{Acknowledgement}
 

@@ -86,6 +86,14 @@
 
 \section{Introduction}
 
+With the rapid advancements in natural language processing techniques, such as transformer-based architectures, instruction tuning, and reinforcement learning from human feedback, open-domain dialogue systems—commonly known as chatbots or conversational agents—are becoming increasingly prevalent in our daily lives. However, as users, especially children and teenagers, engage with these chatbots, exposure to harmful and provocative text can have significant adverse effects, impacting individuals' mental well-being, relationships, and emotional state. Therefore, ensuring safe and beneficial interactions has become critically important.
+
+The scarcity of data for identifying not safe for work content, particularly in the Malay language, hinders the advancement of undesired content filtration. In this paper, titled \textit{Adapting Safe-for-Work Classifier for Malaysian Language Text: Enhancing Alignment in LLM-Ops Framework}, we address this challenge by initiating the data gathering process to create a comprehensive dataset of harmful texts. Our methodology involves mining data representative of harmful text categories. Our categorization includes the following labels: pornography, harassment, sexist, racist, religious insult, self-harm, psychiatric or mental illness, and safe for work.
+
+We aim to create a robust classifier tailored for Malaysian language text, enhancing the alignment of our large language model operations framework with safety and ethical standards. This classifier serves as a necessary guardrail within the LLM-Ops framework, providing a cost-effective solution for ensuring safe AI. By systematically identifying and filtering out inappropriate content, this classifier will help create a safe and respectful interaction environment for users.
+
+Furthermore, to the best of our knowledge, there is currently no existing local dataset for the Malaysian language that addresses these specific categories of harmful content. Our work thus represents a pioneering effort in developing and applying this crucial safety measure.
+
 \section{Taxonomy}
 
 Designing a universal taxonomy for safe for work guardrails is challenging due to the context-dependent nature of language. Below, we outline our taxonomy for safe-for-work categorization, which will guide the application of guardrails to our large language model or chatbot system. Each category is described to clarify the scope and specifics of what constitutes undesired content:
@@ -168,7 +176,7 @@ In this annotation stage, we utilized two different large language models: mistr
 \end{lstlisting}
 
 
-\subsection{Centroid Filtering}
+\subsection{Centroid Based Filtering}
 
 We utilize labeled data obtained from a large language model (LLM) to enhance the quality and consistency of our dataset. First, we compute the centroid of the feature vectors for the labeled data, representing the central point in the feature space. The determination of similarity is guided by the Euclidean distance formula, where lower values indicate greater similarity and higher values signify greater dissimilarity. 
 

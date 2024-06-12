@@ -60,7 +60,7 @@
     pdftitle={Adapting Safe-for-Work Classifier for Malaysian Language Text: Enhancing Alignment in LLM-Ops Framework},
     pdfauthor={Aisyah Razak, Ariff Nazhan, Ariff Nazhan},
     pdfsubject={Natural Language Processing, Large Language Models, Machine Learning},
-    pdfkeywords={language models, malay natural language processing, deep learning},
+    pdfkeywords={language models, malay natural language processing, deep learning, text classification},
     colorlinks=true,
     linkcolor=blue,
     citecolor=blue,
@@ -82,7 +82,9 @@
 
 \begin{abstract}
 
+As large language models (LLMs) become increasingly integrated into operational workflows (LLM-Ops), there is a pressing need for effective guardrails to ensure safe and aligned interactions, including the ability to detect potentially unsafe or inappropriate content across languages. However, existing safe-for-work classifiers are primarily focused on English text. To address this gap for the Malaysian language, we present a novel safe-for-work text classifier tailored specifically for Malaysian language content. By curating and annotating a first-of-its-kind dataset of Malaysian text spanning multiple content categories, we trained a classification model capable of identifying potentially unsafe material using state-of-the-art natural language processing techniques. This work represents an important step in enabling safer interactions and content filtering to mitigate potential risks and ensure responsible deployment of LLMs. To maximize accessibility and promote further research towards enhancing alignment in LLM-Ops for the Malaysian context, the model is publicly released at \href{https://huggingface.co/malaysia-ai/malaysian-sfw-classifier}{malaysia-ai/malaysian-sfw-classifier}.
 \end{abstract}
+
 
 \section{Introduction}
 
@@ -154,7 +156,7 @@ Following figure illustrates the overall flow employed in our methodology to col
 
 Data annotation using knowledge distillation from a large language model (LLM) involves prompting a teacher LLM to generate a label \( y \) for a given input \( x \) as the foundational knowledge. This paper primarily explores the zero-shot paradigm, where the LLM receives only the input \( x \) and an instruction \( I \) without any labeled examples or demonstrations. This straightforward yet effective method of extracting knowledge from teacher LLMs has been widely applied to various tasks and applications. It only requires an input dataset, which is then processed by the LLM to produce the desired label \( y \).
 
-In this annotation stage, we utilized two different large language models: mistral-7b and mallam-small. By leveraging mistral-7b, which excels with English-centric prompts, we translated our scraped data into English to provide better context and achieve reliable outputs from the model. While for mallam, we provided inputs from the original malay text as it has better contextual meaning compared to the other models. Below is the prompt we used to generate the labels from the models:
+In this annotation stage, we utilized two different large language models: mistral-7b and mallam-small \cite{zolkepli2024mallam}. By leveraging mistral-7b, which excels with English-centric prompts, we translated our scraped data into English to provide better context and achieve reliable outputs from the model. While for mallam, we provided inputs from the original malay text as it has better contextual meaning compared to the other models. Below is the prompt we used to generate the labels from the models:
 
 \begin{lstlisting}[breaklines=true]
 

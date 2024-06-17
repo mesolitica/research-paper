@@ -1,6 +1,5 @@
 \documentclass[preprint]{article}
 
-
 % if you need to pass options to natbib, use, e.g.:
 %     \PassOptionsToPackage{numbers, compress}{natbib}
 % before loading neurips_2023
@@ -40,6 +39,7 @@
 \usepackage{algpseudocode}
 \usepackage{amsmath}
 \usepackage{algorithm}
+\usepackage{algorithm2e}
 
 \lstset{
   breaklines=true,
@@ -73,7 +73,7 @@
   Kamarul Adha\thanks{kamarul.adha360@gmail.com} \and
   Wan Adzhar Faiq Adzlan\thanks{adzhar.faiq@gmail.com} \and
   Mas Aisyah Ahmad\thanks{masaisyahahmad@gmail.com} \and
-  Ammar Azman\thanks{dd@gmail.com} \and
+  Ammar Azman\thanks{ammarakef98@gmail.com} \and
 }
 
 \begin{document}
@@ -88,7 +88,11 @@ As large language models (LLMs) become increasingly integrated into operational 
 
 \section{Introduction}
 
-With the rapid advancements in natural language processing techniques, such as transformer-based architectures, instruction tuning, and reinforcement learning from human feedback, open-domain dialogue systems—commonly known as chatbots or conversational agents—are becoming increasingly prevalent in our daily lives. However, as users, especially children and teenagers, engage with these chatbots, exposure to harmful and provocative text can have significant adverse effects, impacting individuals' mental well-being, relationships, and emotional state. Therefore, ensuring safe and beneficial interactions has become critically important.
+The AI field, especially natural language processing, has seen remarkable progress with significant breakthroughs like transformer-based architectures, multimodality integration to chatbot applications, and reinforcement learning from human feedback. This has led to the rise of open-domain dialogue systems, known as chatbots or conversational agents, which are now increasingly integrated into our daily lives.
+
+Due to the nature of how large language models are trained, using internet data, it is prevalent that there may be harmful contents 
+
+However, as users, especially children and teenagers, engage with these chatbots, exposure to harmful and provocative text can have significant adverse effects, impacting individuals' mental well-being, relationships, and emotional state. Therefore, ensuring safe and beneficial interactions has become critically important.
 
 The scarcity of data for identifying not safe for work content, particularly in the Malay language, hinders the advancement of undesired content filtration. In this paper, titled \textit{Adapting Safe-for-Work Classifier for Malaysian Language Text: Enhancing Alignment in LLM-Ops Framework}, we address this challenge by initiating the data gathering process to create a comprehensive dataset of harmful texts. Our methodology involves mining data representative of harmful text categories. Our categorization includes the following labels: pornography, harassment, sexist, racist, religious insult, self-harm, psychiatric or mental illness, and safe for work.
 
@@ -114,6 +118,8 @@ Designing a universal taxonomy for safe for work guardrails is challenging due t
     \item \textbf{Self-Harm:} Content that depicts or encourages self-injurious behavior or suicide. This includes descriptions of self-harm methods, discussions promoting suicide, and any language that glorifies or encourages self-destructive actions.
 
     \item \textbf{Psychiatric or Mental Illness:} Content that stigmatizes or discriminates against individuals with mental health conditions. This includes derogatory terms for mental health issues, insensitive jokes, signs of mental distress or illness, and any language that trivializes or mocks mental illness.
+    
+    \item \textbf{Violence:} Content that promotes or glorifies violence or celebrates the suffering or humiliation of others.
 
     \item \textbf{Safe for Work:} Content that is appropriate for a professional or public environment, free from explicit, offensive, or discriminatory material. This includes clean language, respectful discourse, and content that does not contain any of the above-mentioned undesired elements.
 \end{itemize}
@@ -151,6 +157,21 @@ Supervised text classification requires reliable class labels for training data.
 
 Following figure illustrates the overall flow employed in our methodology to collect NSFW dataset aims to label malaysian dataset for alignment in LLMOps framework.
 
+\subsection{Manual Labeling}
+Relying on large language models (LLMs) for data labeling can present challenges, such as inaccuracies and biases introduced by the model. To address these issues and enhance the quality of our dataset, we employed manual labeling using Label Studio.
+
+Label Studio is an open-source data labeling tool that allows for efficient and precise annotation of data. We used Label Studio to manually label approximately 200 data points, which were then added to our dataset as a baseline.
+
+\begin{itemize}
+    \item \textbf{Annotation Process}: Our team meticulously reviewed and annotated the data points to ensure high-quality labels. This process involved cross-checking by multiple annotators to minimize errors and biases.
+    \item \textbf{Baseline Dataset}: The manually labeled data serves as a baseline for our model. By starting with a small, accurately labeled dataset, we provide the model with a strong foundation for learning.
+\end{itemize}
+
+\begin{figure}[h]
+  \centering
+  \includegraphics[width=0.6\linewidth]{img/labelstudio.png}
+  \caption{Manual labeling process using Label Studio.}
+\end{figure}
 
 \subsection{Knowledge Distillation of Large Language Models}
 
@@ -184,11 +205,27 @@ We utilize labeled data obtained from a large language model (LLM) to enhance th
 
 By measuring the distance of each data point from this centroid, we can identify and filter out data points that are far from the centroid. These distant points are likely to be outliers or less representative of the core topic data distribution. This ensures that the labels encapsulate the nuanced semantics of the specific topic. This filtering process enhances the dataset by retaining data that is more coherent and relevant, thereby improving the performance of the classifier.
 
+\begin{algorithm}[H]
+  \caption{Centroid-Based Filtering}
+  \label{alg:centroid_filtering}
+  \begin{algorithmic}[1]
+  \State \textbf{Input:} Labeled text data, LLM for embeddings
+  \State \textbf{Output:} Filtered dataset
+  \State Generate embeddings for the specific topic labeled by LLM
+  \State Compute the centroid of the embeddings
+  \For{\textbf{each} embedding}
+      \State Calculate the Euclidean distance to the centroid
+  \State Observe the distribution of distances
+  \State Set a threshold based on the distance distribution
+  \State Filter out texts with distances more than the threshold
+  \State \textbf{return} Filtered dataset
+  \end{algorithmic}
+  \end{algorithm}
 
-\begin{figure}[h]
-  \centering
-  \includegraphics[width=0.6\linewidth]{img/centroid-distance.png}
-\end{figure}
+% \begin{figure}[h]
+%   \centering
+%   \includegraphics[width=0.6\linewidth]{img/centroid-distance.png}
+% \end{figure}
 
 \subsection{Active Learning}
 
@@ -197,38 +234,68 @@ We use relevant data from a specific category to train a classifier model. The t
 The following algorithm outlines the active learning process:
 
 \begin{algorithm}[H]
-\caption{Active Learning for Single Label Classifier}
-\begin{algorithmic}[1]
-\State \textbf{Input:} Labeled data \(D_L\), Unlabeled data \(D_U\), Classifier model \(M\), Desired accuracy \(A_{desired}\)
-\State \textbf{Output:} Trained classifier model \(M\)
+  \caption{Active Learning for Single Label Classifier}
+  \begin{algorithmic}[1]
+  \State \textbf{Input:} Labeled data \(D_L\), Unlabeled data \(D_U\), Classifier model \(M\), Desired accuracy \(A_{desired}\)
+  \State \textbf{Output:} Trained classifier model \(M\)
+  
+  \While {Accuracy \(A\) < \(A_{desired}\)}
+      \State Train classifier \(M\) on \(D_L\)
+      \State Predict labels for \(D_U\) using \(M\) (pseudolabeling)
+      \State Filter high-confidence predictions from \(D_U\) to create a new labeled dataset \(D_{L_{new}}\)
+      \State Update labeled dataset: \(D_L \leftarrow D_L \cup D_{L_{new}}\)
+      \State Retrain classifier \(M\) on the updated \(D_L\)
+      \State Manually evaluate the accuracy \(A\) of \(M\)
+  \State \textbf{return} Trained classifier model \(M\)
+  \end{algorithmic}
+  \end{algorithm}
 
-\While {Accuracy \(A\) < \(A_{desired}\)}
-    \State Train classifier \(M\) on \(D_L\)
-    \State Predict labels for \(D_U\) using \(M\) (pseudolabeling)
-    \State Filter high-confidence predictions from \(D_U\) to create a new labeled dataset \(D_{L_{new}}\)
-    \State Update labeled dataset: \(D_L \leftarrow D_L \cup D_{L_{new}}\)
-    \State Retrain classifier \(M\) on the updated \(D_L\)
-    \State Manually evaluate the accuracy \(A\) of \(M\)
-\EndWhile
+\section{Result}
+In this section, we evaluate the performance of our finetuned model using the training set. I ran evaluation of all the models on the subset of the. The evaluation metrics used are accuracy, precision, recall, F1 score, and ROC-AUC. These metrics provide a comprehensive view of the model's performance across different aspects.
 
-\State \textbf{return} Trained classifier model \(M\)
-\end{algorithmic}
-\end{algorithm}
+\subsection{Evaluation Metrics}
+\begin{itemize}
+    \item \textbf{Accuracy} measures the overall correctness of the model, indicating the proportion of true results (both true positives and true negatives) among the total number of cases examined.
+    \item \textbf{Precision} is the ratio of correctly predicted positive observations to the total predicted positives, reflecting the model's ability to identify only the relevant instances.
+    \item \textbf{Recall} (or Sensitivity) is the ratio of correctly predicted positive observations to all observations in the actual class, showing the model's ability to capture all relevant instances.
+    \item \textbf{F1 Score} is the weighted average of Precision and Recall, providing a balance between the two metrics, especially useful for imbalanced datasets.
+    \item \textbf{ROC-AUC} (Receiver Operating Characteristic - Area Under Curve) represents the model's ability to distinguish between classes, with higher values indicating better performance.
+\end{itemize}
 
+\subsection{Model Comparison}
+Table \ref{tab:model_comparison} summarizes the performance metrics for different models. Each model was trained and evaluated under the same conditions to ensure a fair comparison. 
 
+\begin{table}[h]
+\centering
+\begin{tabular}{lcccccc}
+\hline
+\textbf{Model} & \textbf{Accuracy} & \textbf{Precision} & \textbf{Recall} & \textbf{F1 Score} \\
+\hline
+malaysian-mistral-191M-MLM & 0.8768 & 0.8601 & 0.8854 & 0.8714 \\
+t5-small-bahasa-cased & 0.85 & 0.84 & 0.86 & 0.85 \\
+roberta-small-bahasa-cased & 0.88 & 0.87 & 0.88 & 0.87 \\
+bert-small-bahasa-cased & 0.92 & 0.91 & 0.93 & 0.92 \\
+\hline
+\end{tabular}
+\caption{Evaluation on Malaysian NSFW Dataset}
+\label{tab:model_comparison}
+\end{table}
 
-\section{Evaluation}
+The results indicate that 
+
+\subsection{Analysis}
+
 
 
 \section{Acknowledgement}
 
-Special thanks to Malaysia-AI volunteers especially \href{https://www.linkedin.com/in/ammar-azman/}{Ammar Azman}, \href{https://www.linkedin.com/in/amzar96/}{M. Amzar}, \href{https://www.linkedin.com/in/muhammad-farhan-helmy-0529501a7/}{Muhammad Farhan}, \href{https://www.linkedin.com/in/syafie-nizam/}{Syafie Nizam}, \href{https://www.linkedin.com/in/alif-aiman-1b334b24b/}{Alif Aiman}, \href{https://www.linkedin.com/in/azwan-zuharimi/}{Azwan Zuharimi} and \href{https://www.linkedin.com/in/haziqzikry/}{Haziq Zikry} for contributing dataset to train Malaysian Reranker models.
-
-We would like to express our gratitude to NVIDIA Inception for generously providing us with the opportunity to train our model on the Azure cloud. Their support has played a crucial role in the success of our research, enabling us to leverage advanced technologies and computational resources.
+We would like to express our gratitude to Mesolitica for providing us with the resources and NVIDIA Inception for generously providing us with the opportunity to train our model on the Azure cloud. Their support has played a crucial role in the success of our research, enabling us to leverage advanced technologies and computational resources.
 
 We extend our thanks to the wider research community for their valuable insights and collaborative discussions, which have greatly influenced our work. This paper reflects the collective efforts and contributions from both NVIDIA Inception and the broader research community.
 
 \section{Conclusion}
+
+In conclusion, our work has presented a novel approach to moderating harmful content in AI safety through the introduction of a Safe For Work (SFW) classifier. By harnessing the power of large language models and data mining techniques, we have constructed a valuable dataset annotated with harmful topics. This pioneering research fills a significant gap in the field,as there is no available data with harmful contents labelled as no prior studies have explored this specific approach. Moving forward, our efforts lay the foundation for further advancements in AI safety and the responsible development of conversational agents and chatbots.
 
 \bibliography{neurips_2023}{}
 \bibliographystyle{unsrt}

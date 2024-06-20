@@ -21,14 +21,14 @@
 % to avoid loading the natbib package, add option nonatbib:
 %    \usepackage[nonatbib]{neurips_2023}
 
-
+\usepackage{bookmark}
 \usepackage[utf8]{inputenc} % allow utf-8 input
 \usepackage[T1]{fontenc}    % use 8-bit T1 fonts
 \usepackage{hyperref}       % hyperlinks
 \usepackage{url}            % simple URL typesetting
 \usepackage{booktabs}       % professional-quality tables
 \usepackage{amsfonts}       % blackboard math symbols
-\usepackage{nicefrac}       % compact symbols for 1/2, etc.
+\usepackage{nicefrac}       % compact symbols for 1/2
 \usepackage{microtype}      % microtypography
 \usepackage{xcolor}         % colors
 \usepackage{listings}
@@ -39,7 +39,6 @@
 \usepackage{algpseudocode}
 \usepackage{amsmath}
 \usepackage{algorithm}
-\usepackage{algorithm2e}
 
 \lstset{
   breaklines=true,
@@ -88,13 +87,13 @@ As large language models (LLMs) become increasingly integrated into operational 
 
 \section{Introduction}
 
-The AI field, especially natural language processing, has seen remarkable progress with significant breakthroughs like transformer-based architectures, multimodality integration to chatbot applications, and reinforcement learning from human feedback. This has led to the rise of open-domain dialogue systems, known as chatbots or conversational agents, which are now increasingly integrated into our daily lives.
+The AI field, especially natural language processing, \cite{markov2023holistic} has seen remarkable progress with significant breakthroughs like transformer-based architectures, multimodality integration to chatbot applications, and reinforcement learning from human feedback. This has led to the rise of open-domain dialogue systems, known as chatbots or conversational agents, which are now increasingly integrated into our daily lives.
 
 Due to the nature of how large language models are trained, using internet data, it is prevalent that there may be harmful contents 
 
 However, as users, especially children and teenagers, engage with these chatbots, exposure to harmful and provocative text can have significant adverse effects, impacting individuals' mental well-being, relationships, and emotional state. Therefore, ensuring safe and beneficial interactions has become critically important.
 
-The scarcity of data for identifying not safe for work content, particularly in the Malay language, hinders the advancement of undesired content filtration. In this paper, titled \textit{Adapting Safe-for-Work Classifier for Malaysian Language Text: Enhancing Alignment in LLM-Ops Framework}, we address this challenge by initiating the data gathering process to create a comprehensive dataset of harmful texts. Our methodology involves mining data representative of harmful text categories. Our categorization includes the following labels: pornography, harassment, sexist, racist, religious insult, self-harm, psychiatric or mental illness, and safe for work.
+The scarcity of data for identifying not safe for work content, particularly in the Malay language, hinders the advancement of undesired content filtration. Past work such as and  have laid foundation in terms of AI moderation using large language models, but there is still no not safe for work task in malay language. In this paper, we address this challenge by initiating the data gathering process to create a comprehensive dataset of harmful texts. Our methodology involves mining data representative of harmful text categories. Our categorization includes the following labels: pornography, harassment, sexist, racist, religious insult, self-harm, psychiatric or mental illness, and safe for work.
 
 We aim to create a robust classifier tailored for Malaysian language text, enhancing the alignment of our large language model operations framework with safety and ethical standards. This classifier serves as a necessary guardrail within the LLM-Ops framework, providing a cost-effective solution for ensuring safe AI. By systematically identifying and filtering out inappropriate content, this classifier will help create a safe and respectful interaction environment for users.
 
@@ -163,7 +162,7 @@ Relying on large language models (LLMs) for data labeling can present challenges
 Label Studio is an open-source data labeling tool that allows for efficient and precise annotation of data. We used Label Studio to manually label approximately 200 data points, which were then added to our dataset as a baseline.
 
 \begin{itemize}
-    \item \textbf{Annotation Process}: Our team meticulously reviewed and annotated the data points to ensure high-quality labels. This process involved cross-checking by multiple annotators to minimize errors and biases.
+    \item \textbf{Annotation Process}: Our team meticulously reviewed and annotated the data points to ensure high-quality labels. 
     \item \textbf{Baseline Dataset}: The manually labeled data serves as a baseline for our model. By starting with a small, accurately labeled dataset, we provide the model with a strong foundation for learning.
 \end{itemize}
 
@@ -177,7 +176,7 @@ Label Studio is an open-source data labeling tool that allows for efficient and 
 
 Data annotation using knowledge distillation from a large language model (LLM) involves prompting a teacher LLM to generate a label \( y \) for a given input \( x \) as the foundational knowledge. This paper primarily explores the zero-shot paradigm, where the LLM receives only the input \( x \) and an instruction \( I \) without any labeled examples or demonstrations. This straightforward yet effective method of extracting knowledge from teacher LLMs has been widely applied to various tasks and applications. It only requires an input dataset, which is then processed by the LLM to produce the desired label \( y \).
 
-In this annotation stage, we utilized two different large language models: mistral-7b and mallam-small \cite{zolkepli2024mallam}. By leveraging mistral-7b, which excels with English-centric prompts, we translated our scraped data into English to provide better context and achieve reliable outputs from the model. While for mallam, we provided inputs from the original malay text as it has better contextual meaning compared to the other models. Below is the prompt we used to generate the labels from the models:
+In this annotation stage, we utilized two different large language models: mistral-7b and MaLLaM-small. By leveraging mistral-7b, which excels with English-centric prompts, we translated our scraped data into English to provide better context and achieve reliable outputs from the model. While for mallam, we provided inputs from the original malay text as it has better contextual meaning compared to the other models. Below is the prompt we used to generate the labels from the models:
 
 \begin{lstlisting}[breaklines=true]
 
@@ -203,29 +202,31 @@ In this annotation stage, we utilized two different large language models: mistr
 
 We utilize labeled data obtained from a large language model (LLM) to enhance the quality and consistency of our dataset. First, we compute the centroid of the feature vectors for the labeled data, representing the central point in the feature space. The determination of similarity is guided by the Euclidean distance formula, where lower values indicate greater similarity and higher values signify greater dissimilarity. 
 
-By measuring the distance of each data point from this centroid, we can identify and filter out data points that are far from the centroid. These distant points are likely to be outliers or less representative of the core topic data distribution. This ensures that the labels encapsulate the nuanced semantics of the specific topic. This filtering process enhances the dataset by retaining data that is more coherent and relevant, thereby improving the performance of the classifier.
-
 \begin{algorithm}[H]
   \caption{Centroid-Based Filtering}
   \label{alg:centroid_filtering}
   \begin{algorithmic}[1]
-  \State \textbf{Input:} Labeled text data, LLM for embeddings
-  \State \textbf{Output:} Filtered dataset
-  \State Generate embeddings for the specific topic labeled by LLM
-  \State Compute the centroid of the embeddings
-  \For{\textbf{each} embedding}
+    \State \textbf{Input:} Labeled text data, LLM for embeddings
+    \State \textbf{Output:} Filtered dataset
+    \State Generate embeddings for the specific topic labeled by LLM
+    \State Compute the centroid of the embeddings
+    \For{\textbf{each} embedding}
       \State Calculate the Euclidean distance to the centroid
-  \State Observe the distribution of distances
-  \State Set a threshold based on the distance distribution
-  \State Filter out texts with distances more than the threshold
-  \State \textbf{return} Filtered dataset
+    \EndFor
+    \State Observe the distribution of distances
+    \State Set a threshold based on the distance distribution
+    \State Filter out texts with distances more than the threshold
+    \State \textbf{return} Filtered dataset
   \end{algorithmic}
-  \end{algorithm}
+\end{algorithm}
 
-% \begin{figure}[h]
-%   \centering
-%   \includegraphics[width=0.6\linewidth]{img/centroid-distance.png}
-% \end{figure}
+
+By measuring the distance of each data point from this centroid, we can identify and filter out data points that are far from the centroid. These distant points are likely to be outliers or less representative of the core topic data distribution. This ensures that the labels encapsulate the nuanced semantics of the specific topic. This filtering process enhances the dataset by retaining data that is more coherent and relevant, thereby improving the performance of the classifier.
+
+\begin{figure}[h]
+  \centering
+  \includegraphics[width=0.6\linewidth]{img/centroid-distance.png}
+\end{figure}
 
 \subsection{Active Learning}
 
@@ -238,7 +239,6 @@ The following algorithm outlines the active learning process:
   \begin{algorithmic}[1]
   \State \textbf{Input:} Labeled data \(D_L\), Unlabeled data \(D_U\), Classifier model \(M\), Desired accuracy \(A_{desired}\)
   \State \textbf{Output:} Trained classifier model \(M\)
-  
   \While {Accuracy \(A\) < \(A_{desired}\)}
       \State Train classifier \(M\) on \(D_L\)
       \State Predict labels for \(D_U\) using \(M\) (pseudolabeling)
@@ -246,50 +246,47 @@ The following algorithm outlines the active learning process:
       \State Update labeled dataset: \(D_L \leftarrow D_L \cup D_{L_{new}}\)
       \State Retrain classifier \(M\) on the updated \(D_L\)
       \State Manually evaluate the accuracy \(A\) of \(M\)
+      \EndWhile
   \State \textbf{return} Trained classifier model \(M\)
   \end{algorithmic}
   \end{algorithm}
 
 \section{Result}
+
 In this section, we evaluate the performance of our finetuned model using the training set. I ran evaluation of all the models on the subset of the. The evaluation metrics used are accuracy, precision, recall, F1 score, and ROC-AUC. These metrics provide a comprehensive view of the model's performance across different aspects.
 
-\subsection{Evaluation Metrics}
-\begin{itemize}
-    \item \textbf{Accuracy} measures the overall correctness of the model, indicating the proportion of true results (both true positives and true negatives) among the total number of cases examined.
-    \item \textbf{Precision} is the ratio of correctly predicted positive observations to the total predicted positives, reflecting the model's ability to identify only the relevant instances.
-    \item \textbf{Recall} (or Sensitivity) is the ratio of correctly predicted positive observations to all observations in the actual class, showing the model's ability to capture all relevant instances.
-    \item \textbf{F1 Score} is the weighted average of Precision and Recall, providing a balance between the two metrics, especially useful for imbalanced datasets.
-    \item \textbf{ROC-AUC} (Receiver Operating Characteristic - Area Under Curve) represents the model's ability to distinguish between classes, with higher values indicating better performance.
-\end{itemize}
-
 \subsection{Model Comparison}
-Table \ref{tab:model_comparison} summarizes the performance metrics for different models. Each model was trained and evaluated under the same conditions to ensure a fair comparison. 
 
 \begin{table}[h]
 \centering
+\caption{Evaluation on Malaysian NSFW Dataset}
+\label{tab:model_comparison}
 \begin{tabular}{lcccccc}
 \hline
 \textbf{Model} & \textbf{Accuracy} & \textbf{Precision} & \textbf{Recall} & \textbf{F1 Score} \\
 \hline
-malaysian-mistral-191M-MLM & 0.8768 & 0.8601 & 0.8854 & 0.8714 \\
-t5-small-bahasa-cased & 0.85 & 0.84 & 0.86 & 0.85 \\
-roberta-small-bahasa-cased & 0.88 & 0.87 & 0.88 & 0.87 \\
+mesolitica/malaysian-mistral-191M-MLM & 0.8768 & 0.8601 & 0.8854 & 0.8714 \\
+mesolitica/t5-base-standard-bahasa-cased & 0.8141 & 0.8132 & 0.8090 & 0.8047 \\
+mesolitica/malaysian-debertav2-base & 0.88 & 0.87 & 0.88 & 0.87 \\
 bert-small-bahasa-cased & 0.92 & 0.91 & 0.93 & 0.92 \\
 \hline
 \end{tabular}
-\caption{Evaluation on Malaysian NSFW Dataset}
-\label{tab:model_comparison}
 \end{table}
+1 
+Table 1 summarizes the performance metrics for different models. Each model was trained and evaluated with the same test set under the same conditions to ensure a fair comparison.
 
 The results indicate that 
 
 \subsection{Analysis}
 
+To gain more insight into the results of our pseudolabeling process, we performed topic modeling for each respective label. This allowed us to explore the topics present within each label in greater detail.
 
+We employed Latent Dirichlet Allocation (LDA) as our topic modeling technique. LDA is a popular method for discovering hidden topics within a collection of documents. By treating each label as a separate document corpus, we were able to identify the dominant topics within each label category.
 
 \section{Acknowledgement}
 
-We would like to express our gratitude to Mesolitica for providing us with the resources and NVIDIA Inception for generously providing us with the opportunity to train our model on the Azure cloud. Their support has played a crucial role in the success of our research, enabling us to leverage advanced technologies and computational resources.
+We would like to express our gratitud`124a
+,mk jhe to Mesolitica for providing us with the resources and NVIDIA Inception for generously providing us with the opportunity to train our model on the Azure cloud. Their support has played a crucial role in the success of our research, enabling us to leverage advanced technologies and computational resources.
 
 We extend our thanks to the wider research community for their valuable insights and collaborative discussions, which have greatly influenced our work. This paper reflects the collective efforts and contributions from both NVIDIA Inception and the broader research community.
 

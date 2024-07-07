@@ -253,7 +253,7 @@ The following algorithm outlines the active learning process:
 
 \section{Result}
 
-In this section, we evaluate the performance of our finetuned model using the training set. I ran evaluation of all the models on the subset of the. The evaluation metrics used are accuracy, precision, recall, F1 score, and ROC-AUC. These metrics provide a comprehensive view of the model's performance across different aspects.
+In this section, we evaluate the performance of our finetuned model using the training set. I ran evaluation of all the models on the subset of the NSFW dataset. The evaluation metrics used are accuracy, precision, recall, and F1 score. These metrics provide a comprehensive view of the model's performance across different aspects.
 
 \subsection{Model Comparison}
 
@@ -266,16 +266,21 @@ In this section, we evaluate the performance of our finetuned model using the tr
 \textbf{Model} & \textbf{Accuracy} & \textbf{Precision} & \textbf{Recall} & \textbf{F1 Score} \\
 \hline
 mesolitica/malaysian-mistral-191M-MLM & 0.8768 & 0.8601 & 0.8854 & 0.8714 \\
-mesolitica/t5-base-standard-bahasa-cased & 0.8141 & 0.8132 & 0.8090 & 0.8047 \\
-mesolitica/malaysian-debertav2-base & 0.88 & 0.87 & 0.88 & 0.87 \\
-bert-small-bahasa-cased & 0.92 & 0.91 & 0.93 & 0.92 \\
+mesolitica/malaysian-mistral-191M-4096 & 0.82583 & 0.81867 & 0.81657 & 0.81556 \\
+microsoft/debertav3-base & 0.26646 & 0.02961 & 0.11111 & 0.04676 \\
 \hline
 \end{tabular}
 \end{table}
-1 
+
 Table 1 summarizes the performance metrics for different models. Each model was trained and evaluated with the same test set under the same conditions to ensure a fair comparison.
 
-The results indicate that 
+The results indicate that the \texttt{mesolitica/malaysian-mistral-191M-MLM} model outperforms the other models across all metrics. It achieves the highest accuracy of 0.8768, as well as strong precision, recall, and F1 score values of 0.8601, 0.8854, and 0.8714, respectively. This suggests that \texttt{mesolitica/malaysian-mistral-191M-MLM} is the most effective model for identifying NSFW content in the Malaysian dataset.
+
+The success of the \texttt{mesolitica/malaysian-mistral-191M-MLM} model can be attributed to the implementation of the LLM2Vec \cite{behnamghader2024llm2veclargelanguagemodels} approach. LLM2Vec: Large Language Models Are Secretly Powerful Text Encoders, is a simple and efficient solution to transform any decoder-only LLM into a powerful text encoder in an unsupervised fashion using adapters (LoRA), without the need to modify the base models.
+
+The \texttt{microsoft/debertav3-base} model has the lowest performance among the compared models, with an accuracy of 0.26646 and significantly lower precision, recall, and F1 score values of 0.02961, 0.11111, and 0.04676, respectively. This model is not suitable for NSFW content detection in the Malaysian dataset.
+
+In summary, the \texttt{mesolitica/malaysian-mistral-191M-MLM} model is the most suitable choice for NSFW content detection in the Malaysian context, providing the highest accuracy and consistency across various performance metrics. The \texttt{mesolitica/malaysian-mistral-191M-4096} model, while less effective, still maintains a respectable level of performance. The \texttt{microsoft/debertav3-base} model, however, does not perform adequately for this task.
 
 \subsection{Analysis}
 
@@ -283,10 +288,49 @@ To gain more insight into the results of our pseudolabeling process, we performe
 
 We employed Latent Dirichlet Allocation (LDA) as our topic modeling technique. LDA is a popular method for discovering hidden topics within a collection of documents. By treating each label as a separate document corpus, we were able to identify the dominant topics within each label category.
 
+\begin{figure}[h]
+  \centering
+  \begin{minipage}[b]{0.45\textwidth}
+    \centering
+    \includegraphics[width=\linewidth]{img/harassment-wordcloud.png}
+  \end{minipage}
+  \hfill
+  \begin{minipage}[b]{0.45\textwidth}
+    \centering
+    \includegraphics[width=\linewidth]{img/racist-wordcloud.png}
+  \end{minipage}
+\end{figure}
+
+\begin{figure}[h]
+  \centering
+  \begin{minipage}[b]{0.45\textwidth}
+    \centering
+    \includegraphics[width=\linewidth]{img/religion-wordcloud.png}
+  \end{minipage}
+  \hfill
+  \begin{minipage}[b]{0.45\textwidth}
+    \centering
+    \includegraphics[width=\linewidth]{img/selfharm-worcloud.png}
+  \end{minipage}
+\end{figure}
+
+
+\begin{figure}[h]
+  \centering
+  \begin{minipage}[b]{0.45\textwidth}
+    \centering
+    \includegraphics[width=\linewidth]{img/porn-wordcloud.png}
+  \end{minipage}
+  \hfill
+  \begin{minipage}[b]{0.45\textwidth}
+    \centering
+    \includegraphics[width=\linewidth]{img/violence-wordcloud.png}
+  \end{minipage}
+\end{figure}
+
 \section{Acknowledgement}
 
-We would like to express our gratitud`124a
-,mk jhe to Mesolitica for providing us with the resources and NVIDIA Inception for generously providing us with the opportunity to train our model on the Azure cloud. Their support has played a crucial role in the success of our research, enabling us to leverage advanced technologies and computational resources.
+We would like to express our gratitude to Mesolitica for providing us with the resources and NVIDIA Inception for generously providing us with the opportunity to train our model on the Azure cloud. Their support has played a crucial role in the success of our research, enabling us to leverage advanced technologies and computational resources.
 
 We extend our thanks to the wider research community for their valuable insights and collaborative discussions, which have greatly influenced our work. This paper reflects the collective efforts and contributions from both NVIDIA Inception and the broader research community.
 

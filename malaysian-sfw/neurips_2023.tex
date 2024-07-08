@@ -39,6 +39,7 @@
 \usepackage{algpseudocode}
 \usepackage{amsmath}
 \usepackage{algorithm}
+\usepackage{caption}
 
 \lstset{
   breaklines=true,
@@ -87,13 +88,11 @@ As large language models (LLMs) become increasingly integrated into operational 
 
 \section{Introduction}
 
-The AI field, especially natural language processing, \cite{markov2023holistic} has seen remarkable progress with significant breakthroughs like transformer-based architectures, multimodality integration to chatbot applications, and reinforcement learning from human feedback. This has led to the rise of open-domain dialogue systems, known as chatbots or conversational agents, which are now increasingly integrated into our daily lives.
+The AI field, especially natural language processing, \cite{markov2023holistic} has seen remarkable progress with significant breakthroughs like transformer-based architectures \cite{vaswani2023attentionneed}, multimodality integration to chatbot applications, and reinforcement learning from human feedback. This has led to the rise of open-domain dialogue systems, known as chatbots or conversational agents, which are now increasingly integrated into our daily lives.
 
-Due to the nature of how large language models are trained, using internet data, it is prevalent that there may be harmful contents 
+Due to the nature of how large language models are trained, using internet data, it is prevalent that there may be harmful contents included. However, as users continues engaging with these chatbots, exposure to harmful and provocative text can have significant adverse effects, impacting individuals' mental well-being, relationships, and emotional state. Therefore, ensuring safe and beneficial interactions has become critically important.
 
-However, as users, especially children and teenagers, engage with these chatbots, exposure to harmful and provocative text can have significant adverse effects, impacting individuals' mental well-being, relationships, and emotional state. Therefore, ensuring safe and beneficial interactions has become critically important.
-
-The scarcity of data for identifying not safe for work content, particularly in the Malay language, hinders the advancement of undesired content filtration. Past work such as and  have laid foundation in terms of AI moderation using large language models, but there is still no not safe for work task in malay language. In this paper, we address this challenge by initiating the data gathering process to create a comprehensive dataset of harmful texts. Our methodology involves mining data representative of harmful text categories. Our categorization includes the following labels: pornography, harassment, sexist, racist, religious insult, self-harm, psychiatric or mental illness, and safe for work.
+The scarcity of data for identifying not safe for work content, particularly in the Malay language, hinders the advancement of undesired content filtration. Past work such as \cite{markov2023holistic,qiu2024facilitatingpornographictextdetection}  have laid foundation in terms of AI moderation using large language models, but there is still no not safe for work task in malay language. In this paper, we address this challenge by initiating the data gathering process to create a comprehensive dataset of harmful texts. Our methodology involves mining data representative of harmful text categories. Our categorization includes the following labels: pornography, harassment, sexist, racist, religious insult, self-harm, psychiatric or mental illness, and safe for work.
 
 We aim to create a robust classifier tailored for Malaysian language text, enhancing the alignment of our large language model operations framework with safety and ethical standards. This classifier serves as a necessary guardrail within the LLM-Ops framework, providing a cost-effective solution for ensuring safe AI. By systematically identifying and filtering out inappropriate content, this classifier will help create a safe and respectful interaction environment for users.
 
@@ -156,8 +155,14 @@ Supervised text classification requires reliable class labels for training data.
 
 Following figure illustrates the overall flow employed in our methodology to collect NSFW dataset aims to label malaysian dataset for alignment in LLMOps framework.
 
+\begin{figure}[h]
+  \centering
+  \includegraphics[width=0.6\linewidth]{img/flow-sfw.png}
+  \caption{Overall Model Training Framework}
+\end{figure}
+
 \subsection{Manual Labeling}
-Relying on large language models (LLMs) for data labeling can present challenges, such as inaccuracies and biases introduced by the model. To address these issues and enhance the quality of our dataset, we employed manual labeling using Label Studio.
+Relying on large language models (LLMs) for data labeling can present challenges, such as inaccuracies and biases introduced by the model. To address these issues and enhance the quality of our dataset, we employed manual labeling using Label Studio to complement dataset produced from the label produced by large language models.
 
 Label Studio is an open-source data labeling tool that allows for efficient and precise annotation of data. We used Label Studio to manually label approximately 200 data points, which were then added to our dataset as a baseline.
 
@@ -176,7 +181,7 @@ Label Studio is an open-source data labeling tool that allows for efficient and 
 
 Data annotation using knowledge distillation from a large language model (LLM) involves prompting a teacher LLM to generate a label \( y \) for a given input \( x \) as the foundational knowledge. This paper primarily explores the zero-shot paradigm, where the LLM receives only the input \( x \) and an instruction \( I \) without any labeled examples or demonstrations. This straightforward yet effective method of extracting knowledge from teacher LLMs has been widely applied to various tasks and applications. It only requires an input dataset, which is then processed by the LLM to produce the desired label \( y \).
 
-In this annotation stage, we utilized two different large language models: mistral-7b and MaLLaM-small. By leveraging mistral-7b, which excels with English-centric prompts, we translated our scraped data into English to provide better context and achieve reliable outputs from the model. While for mallam, we provided inputs from the original malay text as it has better contextual meaning compared to the other models. Below is the prompt we used to generate the labels from the models:
+In this annotation stage, we utilized two different large language models: mistral-7b and MaLLaM-small. By leveraging mistral-7b, which excels with English-centric prompts, we translated our scraped data into English to provide better context and achieve reliable outputs from the model. While for MaLLaM \cite{zolkepli2024mallam}, we provided inputs from the original malay text as it has better contextual meaning compared to the other models. Below is the prompt we used to generate the labels from the models:
 
 \begin{lstlisting}[breaklines=true]
 
@@ -227,6 +232,12 @@ By measuring the distance of each data point from this centroid, we can identify
   \centering
   \includegraphics[width=0.6\linewidth]{img/centroid-distance.png}
 \end{figure}
+
+\subsection{Sentiment Polarity Filtering}
+
+Ensuring data label accuracy is crucial for optimal model performance, particularly when dealing with the inherently subjective nature of textual data. To improve the quality of our labeled data, we employed sentiment polarity filtering. This approach involves filtering out data labeled with positive sentiment from our dataset, which was initially produced through knowledge distillation of large language models.
+
+For instance, negative sentences like \texttt{Padan muka hang. Tau takut}, categorized under harassment, clearly exhibit negative polarity. In contrast, sentences deemed safe for work typically exhibit positive or neutral polarity. By filtering the dataset based on sentiment polarity, we aim to enhance the dataset's quality, ensuring it includes only the most relevant data.
 
 \subsection{Active Learning}
 
@@ -293,11 +304,13 @@ We employed Latent Dirichlet Allocation (LDA) as our topic modeling technique. L
   \begin{minipage}[b]{0.45\textwidth}
     \centering
     \includegraphics[width=\linewidth]{img/harassment-wordcloud.png}
+    \captionof{figure}{Harassment Wordcloud}
   \end{minipage}
   \hfill
   \begin{minipage}[b]{0.45\textwidth}
     \centering
     \includegraphics[width=\linewidth]{img/racist-wordcloud.png}
+    \captionof{figure}{Racist Wordcloud}
   \end{minipage}
 \end{figure}
 
@@ -306,37 +319,55 @@ We employed Latent Dirichlet Allocation (LDA) as our topic modeling technique. L
   \begin{minipage}[b]{0.45\textwidth}
     \centering
     \includegraphics[width=\linewidth]{img/religion-wordcloud.png}
+    \captionof{figure}{Religion}
   \end{minipage}
   \hfill
   \begin{minipage}[b]{0.45\textwidth}
     \centering
     \includegraphics[width=\linewidth]{img/selfharm-worcloud.png}
+    \captionof{figure}{Self-harm Wordcloud}
   \end{minipage}
 \end{figure}
-
 
 \begin{figure}[h]
   \centering
   \begin{minipage}[b]{0.45\textwidth}
     \centering
     \includegraphics[width=\linewidth]{img/porn-wordcloud.png}
+    \captionof{figure}{Porn Wordcloud}
   \end{minipage}
   \hfill
   \begin{minipage}[b]{0.45\textwidth}
     \centering
     \includegraphics[width=\linewidth]{img/violence-wordcloud.png}
+    \captionof{figure}{Violence Wordcloud}
+  \end{minipage}
+\end{figure}
+
+\begin{figure}[h]
+  \centering
+  \begin{minipage}[b]{0.45\textwidth}
+    \centering
+    \includegraphics[width=\linewidth]{img/sexist-wordcloud.png}
+    \captionof{figure}{Sexist Wordcloud}
+  \end{minipage}
+  \hfill
+  \begin{minipage}[b]{0.45\textwidth}
+    \centering
+    \includegraphics[width=\linewidth]{img/mental-wordcloud.png}
+    \captionof{figure}{Psychiatric or Mental Illness Wordcloud}
   \end{minipage}
 \end{figure}
 
 \section{Acknowledgement}
 
-We would like to express our gratitude to Mesolitica for providing us with the resources and NVIDIA Inception for generously providing us with the opportunity to train our model on the Azure cloud. Their support has played a crucial role in the success of our research, enabling us to leverage advanced technologies and computational resources.
+We would like to express our gratitude to Mesolitica for providing us with the resources to train our model. Their support has played a crucial role in the success of our research, enabling us to leverage advanced technologies and computational resources.
 
 We extend our thanks to the wider research community for their valuable insights and collaborative discussions, which have greatly influenced our work. This paper reflects the collective efforts and contributions from both NVIDIA Inception and the broader research community.
 
 \section{Conclusion}
 
-In conclusion, our work has presented a novel approach to moderating harmful content in AI safety through the introduction of a Safe For Work (SFW) classifier. By harnessing the power of large language models and data mining techniques, we have constructed a valuable dataset annotated with harmful topics. This pioneering research fills a significant gap in the field,as there is no available data with harmful contents labelled as no prior studies have explored this specific approach. Moving forward, our efforts lay the foundation for further advancements in AI safety and the responsible development of conversational agents and chatbots.
+In conclusion, our work has presented a novel approach to moderating harmful content in AI safety through the introduction of a Safe For Work (SFW) classifier. By harnessing the power of large language models and data mining techniques, we have constructed a valuable dataset annotated with harmful topics and the first SFW classifier for Malaysian texts. This pioneering research fills a significant gap in the field, as no prior studies have explored this specific approach. Encouraged by our promising results, we leave for future work the refinement of the classifier to better distinguish among varying levels of harmful content and different types of harmful topics. Given the vast amount of user-generated content online, we believe this work represents a significant step forward in AI safety and content moderation.
 
 \bibliography{neurips_2023}{}
 \bibliographystyle{unsrt}

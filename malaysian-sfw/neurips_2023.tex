@@ -126,7 +126,7 @@ This taxonomy will help us systematically identify and filter out inappropriate 
 
 \section{Data Source}
 The data for this study was collected from various platforms, including social media, public forums, and publicly available datasets. The majority of the data is in the malay language and relevant to the malay context.
-By utilizing these comprehensive datasets from multiple sources, we have strengthened the robustness and accuracy of our classification model, enabling it to effectively tackle the challenges of identifying self-harm and sexism in online content.
+By utilizing these comprehensive datasets from multiple sources, we have strengthened the robustness and accuracy of our classification model, enabling it to effectively tackle the challenges of identifying harmful topics in online content.
 \subsection{Social Media}
 Data was collected from popular social media platforms such as Twitter and Facebook. Two main approaches were employed to gather relevant data:
 
@@ -149,6 +149,9 @@ We have also collected data from publicly available dataset on kaggle such as \h
 
 We also leverage \href{https://github.com/rewire-online/edos}{Explainable Detection of Online Sexism (EDOS)} from github and \href{http://nlp.uned.es/exist2021/}{EXIST: sEXism Identification in Social neTwork (EXIST)} from web that contain a diverse collection of sexism statements, which have significantly contributed to the success of our classifier in identifying and categorizing such content.
 
+
+
+
 \section{Methodology}
 
 Supervised text classification requires reliable class labels for training data. However, obtaining these labels can be complex and expensive. Typically, labels are added sequentially by querying an annotator until satisfactory performance is achieved. We introduced an approach that leverages active learning, knowledge distillation of large language models, and text clustering to reduce annotation effort and construct a collection of labeled not safe for work (NSFW) data from our gathered data.
@@ -157,7 +160,7 @@ Following figure illustrates the overall flow employed in our methodology to col
 
 \begin{figure}[h]
   \centering
-  \includegraphics[width=0.6\linewidth]{img/flow-sfw.png}
+  \includegraphics[width=0.8\linewidth]{img/flow-sfw.png}
   \caption{Overall Model Training Framework}
 \end{figure}
 
@@ -297,77 +300,113 @@ In summary, the \texttt{mesolitica/malaysian-mistral-191M-MLM} model is the most
 
 To gain more insight into the results of our pseudolabeling process, we performed topic modeling for each respective label. This allowed us to explore the topics present within each label in greater detail.
 
-We employed Latent Dirichlet Allocation (LDA) as our topic modeling technique. LDA is a popular method for discovering hidden topics within a collection of documents. By treating each label as a separate document corpus, we were able to identify the dominant topics within each label category.
+We employed BERTopic as our topic modeling technique. BERTopic is a popular method for discovering hidden topics within a collection of documents. By treating each label as a separate document corpus, we were able to identify the dominant topics within each label category. The results of BERTopic can be seen in Table \ref*{table:topics} below.
+
+\begin{table}[h!]
+  \centering
+  \begin{tabular}{|c|l|}
+  \hline
+  \textbf{Topic} & \textbf{Words} \\
+  \hline
+  Self-Harm & mati, mistake, bunuh, hidup, aku, je, kena, sakit, tak,kalau \\
+  Harassment & sial, babi, bodoh, jialat, perangai, pukimak, kena, like, ni, gila \\
+  Porn & seks, lucah, wanita, dubur, lelaki, filem, fuck, gadis, melayu, porn \\
+  Religion Insult & islam, allah, agama, solat, aku, like, jelek, je, it, kristen \\
+  Sexist & lelaki, suami, perempuan, isteri, anak, rumah, laki, je, kerja, dia \\
+  Psychiatric or Mental illness & ini, manusia, meluahkan, menjerit, tekanan, hatiku, mencari, menangis, mereka, aku \\
+  Safe For Work & liao, aku, like, je, the, it, good, confession, you, best \\
+  Violence & kena, rumah, tu, saya, aku, polis, dia, kejadian, pintu, kereta \\
+  Racist & melayu, aku, cina, malaysia, je, malay, bangsa, like, ni, dap \\
+  \hline
+  \end{tabular}
+  \caption{Top 10 words for each topics identified by the BERTopic model for each label.}
+\label{table:topics}
+\end{table}
+
+
+By examining the top words for each topic, we can gain an understanding of the common themes and specific vocabulary associated with each label. For example, words related to self-harm include "mati" (die), "bunuh" (kill), and "sakit" (pain), while harassment-related words include strong negative expressions such as "sial" (damn) and "babi" (pig).
+
+In addition to the tabulated results, we also created word clouds to visually represent the most prominent words for each topic. These word clouds provide an intuitive overview of the vocabulary distribution within each label category.
+
 
 \begin{figure}[h]
-  \centering
-  \begin{minipage}[b]{0.45\textwidth}
-    \centering
-    \includegraphics[width=\linewidth]{img/harassment-wordcloud.png}
-    \captionof{figure}{Harassment Wordcloud}
-  \end{minipage}
-  \hfill
-  \begin{minipage}[b]{0.45\textwidth}
-    \centering
-    \includegraphics[width=\linewidth]{img/racist-wordcloud.png}
-    \captionof{figure}{Racist Wordcloud}
-  \end{minipage}
+\centering
+\begin{minipage}[b]{0.45\textwidth}
+\centering
+\includegraphics[width=\linewidth]{img/harassment-wordcloud.png}
+\captionof{figure}{Harassment Wordcloud}
+\end{minipage}
+\hfill
+\begin{minipage}[b]{0.45\textwidth}
+\centering
+\includegraphics[width=\linewidth]{img/racist-wordcloud.png}
+\captionof{figure}{Racist Wordcloud}
+\end{minipage}
 \end{figure}
 
 \begin{figure}[h]
-  \centering
-  \begin{minipage}[b]{0.45\textwidth}
-    \centering
-    \includegraphics[width=\linewidth]{img/religion-wordcloud.png}
-    \captionof{figure}{Religion}
-  \end{minipage}
-  \hfill
-  \begin{minipage}[b]{0.45\textwidth}
-    \centering
-    \includegraphics[width=\linewidth]{img/selfharm-worcloud.png}
-    \captionof{figure}{Self-harm Wordcloud}
-  \end{minipage}
+\centering
+\begin{minipage}[b]{0.45\textwidth}
+\centering
+\includegraphics[width=\linewidth]{img/religion-wordcloud.png}
+\captionof{figure}{Religion Insult Wordcloud}
+\end{minipage}
+\hfill
+\begin{minipage}[b]{0.45\textwidth}
+\centering
+\includegraphics[width=\linewidth]{img/selfharm-worcloud.png}
+\captionof{figure}{Self-Harm Wordcloud}
+\end{minipage}
 \end{figure}
 
 \begin{figure}[h]
-  \centering
-  \begin{minipage}[b]{0.45\textwidth}
-    \centering
-    \includegraphics[width=\linewidth]{img/porn-wordcloud.png}
-    \captionof{figure}{Porn Wordcloud}
-  \end{minipage}
-  \hfill
-  \begin{minipage}[b]{0.45\textwidth}
-    \centering
-    \includegraphics[width=\linewidth]{img/violence-wordcloud.png}
-    \captionof{figure}{Violence Wordcloud}
-  \end{minipage}
+\centering
+\begin{minipage}[b]{0.45\textwidth}
+\centering
+\includegraphics[width=\linewidth]{img/porn-wordcloud.png}
+\captionof{figure}{Porn Wordcloud}
+\end{minipage}
+\hfill
+\begin{minipage}[b]{0.45\textwidth}
+\centering
+\includegraphics[width=\linewidth]{img/violence-wordcloud.png}
+\captionof{figure}{Violence Wordcloud}
+\end{minipage}
 \end{figure}
 
 \begin{figure}[h]
-  \centering
-  \begin{minipage}[b]{0.45\textwidth}
-    \centering
-    \includegraphics[width=\linewidth]{img/sexist-wordcloud.png}
-    \captionof{figure}{Sexist Wordcloud}
-  \end{minipage}
-  \hfill
-  \begin{minipage}[b]{0.45\textwidth}
-    \centering
-    \includegraphics[width=\linewidth]{img/mental-wordcloud.png}
-    \captionof{figure}{Psychiatric or Mental Illness Wordcloud}
-  \end{minipage}
+\centering
+\begin{minipage}[b]{0.45\textwidth}
+\centering
+\includegraphics[width=\linewidth]{img/sexist-wordcloud.png}
+\captionof{figure}{Sexist Wordcloud}
+\end{minipage}
+\hfill
+\begin{minipage}[b]{0.45\textwidth}
+\centering
+\includegraphics[width=\linewidth]{img/mental-wordcloud.png}
+\captionof{figure}{Psychiatric or Mental Illness Wordcloud}
+\end{minipage}
 \end{figure}
+
+
+
+
+
+
+These word clouds further emphasize the differences in language and focus across the various labels. For instance, the "Porn" word cloud is dominated by words like "seks" (sex) and "lucah" (porn), while the "Racist" word cloud includes terms such as "melayu" (Malay), "cina" (Chinese), and "dap" (Democratic Action Party).
+
+Through BERTopic, we were able to effectively capture the unique characteristics of each label, providing deeper insights into the underlying themes and issues present within the data. This detailed analysis supports our understanding of the pseudolabeling process and highlights the nuanced language used across different categories.
+
+\section{Conclusion}
+
+In conclusion, our work has presented a novel approach to moderating harmful content in AI safety through the introduction of a Safe For Work (SFW) classifier. By harnessing the power of large language models and data mining techniques, we have constructed a valuable dataset annotated with harmful topics and the first SFW classifier for Malaysian texts. This pioneering research fills a significant gap in the field, as no prior studies have explored this specific approach. Encouraged by our promising results, we leave for future work the refinement of the classifier to better distinguish among varying levels of harmful content and different types of harmful topics. Given the vast amount of user-generated content online, we believe this work represents a significant step forward in AI safety and content moderation.
 
 \section{Acknowledgement}
 
 We would like to express our gratitude to Mesolitica for providing us with the resources to train our model. Their support has played a crucial role in the success of our research, enabling us to leverage advanced technologies and computational resources.
 
 We extend our thanks to the wider research community for their valuable insights and collaborative discussions, which have greatly influenced our work. This paper reflects the collective efforts and contributions from both NVIDIA Inception and the broader research community.
-
-\section{Conclusion}
-
-In conclusion, our work has presented a novel approach to moderating harmful content in AI safety through the introduction of a Safe For Work (SFW) classifier. By harnessing the power of large language models and data mining techniques, we have constructed a valuable dataset annotated with harmful topics and the first SFW classifier for Malaysian texts. This pioneering research fills a significant gap in the field, as no prior studies have explored this specific approach. Encouraged by our promising results, we leave for future work the refinement of the classifier to better distinguish among varying levels of harmful content and different types of harmful topics. Given the vast amount of user-generated content online, we believe this work represents a significant step forward in AI safety and content moderation.
 
 \bibliography{neurips_2023}{}
 \bibliographystyle{unsrt}

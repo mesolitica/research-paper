@@ -304,6 +304,14 @@ In summary, the \texttt{mesolitica/malaysian-mistral-191M-MLM} model is the most
 
 We convert the texts into embedding representations with a size of 1024 using the \href{https://mesolitica.com/retrieval}{Mesolitica Retrieval API}, which is the current state-of-the-art Malaysian embedding API. After obtaining the embeddings, we decompose them into a 2-dimensional representation using UMAP (Uniform Manifold Approximation and Projection) \cite{2018arXivUMAP} from the UMAP library \cite{mcinnes2018umap-software}.
 
+We sampled 1200 rows for each label to prevent over-scattering and used the default parameters from UMAP for the dimensionality reduction.
+
+\begin{figure}[h]
+  \centering
+  \includegraphics[width=0.7\linewidth]{img/2d.png}
+  \caption{2D visualization using UMAP}
+\end{figure}
+
 \subsubsection*{Topic Modeling}
 
 For topic modeling, we use Term Frequency-Inverse Document Frequency (TFIDF) as the vectorization method with parameters \texttt{max\_df=0.95} and \texttt{min\_df=1}. Additionally, we utilize stop words from the Malaya Toolkit \cite{Malaya} to filter out common words that may not contribute meaningfully to the topics. For the decomposition step, we employ Latent Dirichlet Allocation (LDA) from the Scikit-learn library \cite{scikit-learn}, and generate the top 10 topics.
@@ -430,7 +438,7 @@ In conclusion, our work has presented a novel approach to moderating harmful con
 
 \section{Acknowledgement}
 
-We would like to express our gratitude to Mesolitica for providing us with the resources to train our model. Their support has played a crucial role in the success of our research, enabling us to leverage advanced technologies and computational resources.
+We would like to express our gratitude to Mesolitica for providing us with the resources to train our models. Their support has played a crucial role in the success of our research, enabling us to leverage advanced technologies and computational resources.
 
 We extend our thanks to the wider research community for their valuable insights and collaborative discussions, which have greatly influenced our work. This paper reflects the collective efforts and contributions from both NVIDIA Inception and the broader research community.
 

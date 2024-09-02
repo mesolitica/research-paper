@@ -1,7 +1,7 @@
 \documentclass[preprint]{article}
 
 
-% if you need to pass options to natbib, use, e.g.:
+% if you need to pas options to natbib, use, e.g.:
 %     \PassOptionsToPackage{numbers, compress}{natbib}
 % before loading neurips_2023
 
@@ -56,7 +56,7 @@
 
 \hypersetup{
     pdftitle={Distilled Malaysian Whisper: Enhancing Low-Resource ASR with Knowledge Distillation},
-    pdfauthor={Husein Zolkepli, Aisyah Razak, Halim Shukor, Ariff Nazhan},
+    pdfauthor={Husein Zolkepli, Aisyah Razak, Halim Shukor},
     pdfsubject={Natural Language Processing, Large Language Models, Machine Learning},
     pdfkeywords={language models, malay natural language processing, deep learning},
     colorlinks=true,
@@ -64,13 +64,13 @@
     citecolor=blue,
     urlcolor=blue
 }
+
+
 \title{Distilled Malaysian Whisper: Enhancing Low-Resource ASR with Knowledge Distillation}
 \author{
   Husein Zolkepli\thanks{husein@mesolitica.com} \and
   Aisyah Razak\thanks{aisyahrazak171@gmail.com} \and
-  Halim Shukor\thanks{mhalimshukor@gmail.com} \and
-  
-  Ariff Nazhan\thanks{ariffnzhn@gmail.com} \and
+  Halim Shukor\thanks{mhalimshukor@gmail.com} 
 }
 
 \begin{document}
@@ -83,6 +83,39 @@
 \end{abstract}
 
 \section{Introduction}
+
+
+
+\section{Data}
+
+Data gathering process is essential for developing a robust speech recognition system tailored to the Malaysian context. The diverse linguistic landscape in Malaysia necessitates the collection of speech data across multiple languages, including Malay, Mandarin, Tamil, and English, with a particular focus on the integration of Singlish—a form of English widely spoken in Singapore. The data sources utilized in this study include YouTube and the IMDA Speech-to-Text (STT) corpus for Singlish.
+
+
+\subsection{Youtube}
+
+YouTube serves as a rich repository of publicly available speech data, providing a wide array of content in multiple languages spoken in Malaysia. The process of gathering data from YouTube involves
+
+\subsection{IMDA-STT}
+
+Singlish, a variant of English that incorporates elements from Malay, Mandarin, Tamil, and various Chinese dialects, is prevalent in Singapore but also understood in some Malaysian contexts. To incorporate Singlish into our speech recognition system, we utilized the IMDA Speech-to-Text (STT) dataset,
+
+\section{Pseudolabeling Untranscribed Data}
+
+
+\section{Postfiltering Pseudolabelled Data}
+
+
+\section{Postprocessing}
+
+
+\section{Knowledge Distillation}
+
+
+\section{Results}
+
+
+
+\section{Acknowledgement}
 
 
 We would like to express our gratitude to NVIDIA Inception for generously providing us with the opportunity to train our model on the Azure cloud. Their support has played a crucial role in the success of our research, enabling us to leverage advanced technologies and computational resources.
